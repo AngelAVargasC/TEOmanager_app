@@ -144,31 +144,47 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Configuración de la base de datos PostgreSQL en Railway
-# Intenta usar DATABASE_URL primero (Railway lo proporciona automáticamente)
-DATABASE_URL = os.getenv('DATABASE_URL')
+# Configuración de base de datos: Local (SQLite) o Railway (PostgreSQL)
+# Para usar base de datos LOCAL: En .env poner USE_LOCAL_DB=True
+# Para usar base de datos RAILWAY: En .env poner USE_LOCAL_DB=False o no poner la variable
+USE_LOCAL_DB = os.getenv('USE_LOCAL_DB', 'False').lower() == 'true'
 
-if DATABASE_URL:
-    # Railway proporciona DATABASE_URL automáticamente cuando conectas PostgreSQL
-    import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
-    }
-else:
-    # Fallback a variables individuales
+if USE_LOCAL_DB:
+    # Base de datos local SQLite (desarrollo)
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('PGDATABASE', 'railway'),
-            'USER': os.getenv('PGUSER', 'postgres'),
-            'PASSWORD': os.getenv('PGPASSWORD', ''),
-            'HOST': os.getenv('PGHOST', 'mainline.proxy.rlwy.net'),
-            'PORT': os.getenv('PGPORT', '54586'),
-            'OPTIONS': {
-                'connect_timeout': 10,
-            },
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+    print("✅ Usando base de datos LOCAL (SQLite)")
+else:
+    # Base de datos PostgreSQL en Railway (producción/staging)
+    DATABASE_URL = os.getenv('DATABASE_URL')
+    
+    if DATABASE_URL:
+        # Railway proporciona DATABASE_URL automáticamente cuando conectas PostgreSQL
+        import dj_database_url
+        DATABASES = {
+            'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+        }
+        print("✅ Usando base de datos RAILWAY (PostgreSQL) - DATABASE_URL")
+    else:
+        # Fallback a variables individuales de PostgreSQL
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.getenv('PGDATABASE', 'railway'),
+                'USER': os.getenv('PGUSER', 'postgres'),
+                'PASSWORD': os.getenv('PGPASSWORD', ''),
+                'HOST': os.getenv('PGHOST', 'mainline.proxy.rlwy.net'),
+                'PORT': os.getenv('PGPORT', '54586'),
+                'OPTIONS': {
+                    'connect_timeout': 10,
+                },
+            }
+        }
+        print("✅ Usando base de datos RAILWAY (PostgreSQL) - Variables individuales")
 
 
 # Password validation
@@ -229,11 +245,26 @@ if IS_STAGING or IS_PRODUCTION:
 
 # Configuración de archivos media (subidos por usuarios)
 MEDIA_URL = '/media/'  # URL base para archivos media
-MEDIA_ROOT = BASE_DIR / 'media'  # Directorio de archivos media
+
+# Configuración de MEDIA_ROOT según el entorno
+# En Railway, usar el volumen persistente si está configurado
+# Railway monta volúmenes en /data por defecto
+RAILWAY_VOLUME_MOUNT = os.getenv('RAILWAY_VOLUME_MOUNT_PATH', '/data')
+USE_RAILWAY_VOLUME = os.getenv('USE_RAILWAY_VOLUME', 'False').lower() == 'true'
+
+if IS_RAILWAY and USE_RAILWAY_VOLUME:
+    # Usar volumen persistente de Railway para media
+    # El volumen debe estar montado en /data/media
+    MEDIA_ROOT = Path(RAILWAY_VOLUME_MOUNT) / 'media'
+    print(f"✅ Usando VOLUMEN PERSISTENTE de Railway para media: {MEDIA_ROOT}")
+else:
+    # Usar directorio local (desarrollo o sin volumen)
+    MEDIA_ROOT = BASE_DIR / 'media'
+    print(f"✅ Usando directorio LOCAL para media: {MEDIA_ROOT}")
 
 # Asegurarse que el directorio media existe
 if not os.path.exists(MEDIA_ROOT):
-    os.makedirs(MEDIA_ROOT)
+    os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 # Configuración del campo primario por defecto
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

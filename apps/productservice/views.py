@@ -100,7 +100,7 @@ def eliminar_imagen_producto(request, imagen_id):
     producto_id = imagen.producto.id
     imagen.delete()
     messages.success(request, '¡Imagen eliminada correctamente!')
-    return redirect('editar_producto', pk=producto_id)
+    return redirect('products:editar_producto', pk=producto_id)
 
 # Vista que muestra la lista de servicios del usuario autenticado.
 @login_required(login_url='login')
@@ -181,7 +181,7 @@ def eliminar_imagen_servicio(request, imagen_id):
     servicio_id = imagen.servicio.id
     imagen.delete()
     messages.success(request, '¡Imagen eliminada correctamente!')
-    return redirect('editar_servicio', pk=servicio_id)
+    return redirect('products:editar_servicio', pk=servicio_id)
 
 # Vista para marcar una imagen de producto como principal.
 @login_required(login_url='login')
@@ -193,7 +193,7 @@ def marcar_principal_imagen_producto(request, imagen_id):
         imagen.principal = True
         imagen.save()
         messages.success(request, '¡Imagen marcada como principal!')
-    return redirect('editar_producto', pk=producto.pk)
+    return redirect('products:editar_producto', pk=producto.pk)
 
 # Vista para marcar una imagen de servicio como principal.
 @login_required(login_url='login')
@@ -205,7 +205,7 @@ def marcar_principal_imagen_servicio(request, imagen_id):
         imagen.principal = True
         imagen.save()
         messages.success(request, '¡Imagen marcada como principal!')
-    return redirect('editar_servicio', pk=servicio.pk)
+    return redirect('products:editar_servicio', pk=servicio.pk)
 
 # Vista de detalle de un producto público
 @login_required(login_url='login')
