@@ -87,25 +87,31 @@ def crear_perfil_automatico(sender, instance, created, **kwargs):
     
     Esto asegura que todos los usuarios tengan un perfil, incluso si se crean
     fuera del flujo normal de registro.
+    
+    IMPORTANTE: Solo crea el perfil si NO existe uno ya. Esto evita conflictos
+    con el flujo normal de registro que también crea el perfil.
     """
     # Solo crear si es un usuario nuevo
     if created:
-        # Verificar si ya tiene perfil (no debería, pero por seguridad)
-        if not hasattr(instance, 'userprofile'):
-            try:
-                # Crear perfil por defecto
-                fecha_vencimiento = timezone.now() + timedelta(days=365)
-                PerfilUsuario.objects.create(
-                    usuario=instance,
-                    tipo_cuenta='usuario',
-                    empresa='',
-                    telefono='0000000000',
-                    direccion='Sin dirección',
-                    permisos='Usuario',
-                    estado_suscripcion='inactiva',
-                    fecha_vencimiento=fecha_vencimiento
-                )
-            except Exception as e:
-                # No fallar si hay un error, solo loguear
-                if os.getenv('DEBUG', 'False').lower() == 'true':
-                    print(f'⚠️  No se pudo crear perfil automático para {instance.username}: {e}') 
+        # Usar get_or_create para evitar duplicados (race condition safe)
+        try:
+            fecha_vencimiento = timezone.now() + timedelta(days=365)
+            perfil, created_perfil = PerfilUsuario.objects.get_or_create(
+                usuario=instance,
+                defaults={
+                    'tipo_cuenta': 'usuario',
+                    'empresa': '',
+                    'telefono': '0000000000',
+                    'direccion': 'Sin dirección',
+                    'permisos': 'Usuario',
+                    'estado_suscripcion': 'inactiva',
+                    'fecha_vencimiento': fecha_vencimiento
+                }
+            )
+            # Solo loguear si realmente se creó (no si ya existía)
+            if created_perfil and os.getenv('DEBUG', 'False').lower() == 'true':
+                print(f'✅ Perfil automático creado para {instance.username}')
+        except Exception as e:
+            # Si falla, solo loguear (no es crítico, el formulario lo creará)
+            if os.getenv('DEBUG', 'False').lower() == 'true':
+                print(f'⚠️  No se pudo crear perfil automático para {instance.username}: {e}') 

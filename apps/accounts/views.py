@@ -512,6 +512,8 @@ def manage_users(request):
             Q(userprofile__empresa__icontains=search_query)
         )
     
+    # Ordenar usuarios para evitar warning de Paginator
+    users = users.order_by('-date_joined', 'username')
     paginator = Paginator(users, 10)
     page = request.GET.get('page')
     users = paginator.get_page(page)

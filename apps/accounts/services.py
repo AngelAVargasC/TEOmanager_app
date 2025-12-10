@@ -74,16 +74,30 @@ class UserService:
         
         # Crear perfil PRIMERO - esto es lo más importante
         # El email es completamente opcional y no debe afectar la creación del perfil
+        # Usar get_or_create para evitar duplicados si la señal ya creó uno
         try:
-            perfil = PerfilUsuario.objects.create(
+            perfil, created = PerfilUsuario.objects.get_or_create(
                 usuario=user,
-                tipo_cuenta=tipo_cuenta,
-                empresa=empresa if tipo_cuenta == 'empresa' else '',
-                telefono=telefono,
-                direccion=direccion,
-                **kwargs
+                defaults={
+                    'tipo_cuenta': tipo_cuenta,
+                    'empresa': empresa if tipo_cuenta == 'empresa' else '',
+                    'telefono': telefono,
+                    'direccion': direccion,
+                    **kwargs
+                }
             )
-            logger.info(f"Perfil creado exitosamente para usuario {user.username}")
+            if created:
+                logger.info(f"Perfil creado exitosamente para usuario {user.username}")
+            else:
+                # Si ya existía, actualizar con los datos del formulario
+                perfil.tipo_cuenta = tipo_cuenta
+                perfil.empresa = empresa if tipo_cuenta == 'empresa' else ''
+                perfil.telefono = telefono
+                perfil.direccion = direccion
+                for key, value in kwargs.items():
+                    setattr(perfil, key, value)
+                perfil.save()
+                logger.info(f"Perfil actualizado para usuario {user.username}")
         except Exception as e:
             logger.error(f"Error creando perfil para usuario {user.username}: {str(e)}")
             raise  # Si falla la creación del perfil, SÍ debe fallar
