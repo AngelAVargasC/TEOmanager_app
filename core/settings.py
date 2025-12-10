@@ -54,6 +54,40 @@ if IS_STAGING or IS_PRODUCTION:
 else:
     ALLOWED_HOSTS = ['*']
 
+# CSRF_TRUSTED_ORIGINS: Orígenes confiables para CSRF
+# Django requiere que los orígenes estén en formato completo (con https://)
+# NOTA: Django NO acepta wildcards, necesita dominios exactos
+if IS_STAGING or IS_PRODUCTION:
+    CSRF_TRUSTED_ORIGINS = []
+    # Agregar dominio de Railway si está disponible
+    railway_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN', '')
+    if railway_domain:
+        # Asegurarse de que tenga https://
+        if not railway_domain.startswith('http'):
+            CSRF_TRUSTED_ORIGINS.append(f'https://{railway_domain}')
+        else:
+            CSRF_TRUSTED_ORIGINS.append(railway_domain)
+    # Agregar dominio desde variable de entorno personalizada si existe
+    # Formato: CSRF_TRUSTED_ORIGINS=https://dominio1.com,https://dominio2.com
+    custom_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+    if custom_origins:
+        CSRF_TRUSTED_ORIGINS.extend([d.strip() for d in custom_origins.split(',') if d.strip()])
+    # Si no hay dominios configurados, usar el dominio actual de Railway
+    # Para testeo: agregar el dominio específico aquí temporalmente
+    # En producción, configurar CSRF_TRUSTED_ORIGINS en Railway Variables
+    if not CSRF_TRUSTED_ORIGINS:
+        # Agregar dominio específico de Railway (actualizar con tu dominio real)
+        # O mejor: agregar en Railway Variables: CSRF_TRUSTED_ORIGINS=https://web-production-8666.up.railway.app
+        CSRF_TRUSTED_ORIGINS = [
+            'https://web-production-8666.up.railway.app',  # Dominio actual - actualizar si cambia
+        ]
+else:
+    # En desarrollo, permitir localhost
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+    ]
+
 
 # Application definition
 
