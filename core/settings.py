@@ -39,16 +39,41 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-@0gnsofvzar8!3#ecs+-_1h9=_
 DEBUG = os.getenv('DEBUG', 'True' if not IS_PRODUCTION else 'False').lower() == 'true'
 
 # ALLOWED_HOSTS: Configuración según entorno
+# NOTA: Django NO acepta wildcards (*.railway.app), necesita dominios exactos
 if IS_STAGING or IS_PRODUCTION:
-    ALLOWED_HOSTS = [
-        os.getenv('RAILWAY_PUBLIC_DOMAIN', ''),
-        os.getenv('RAILWAY_STATIC_URL', ''),
-        '*.railway.app',
-        '*.up.railway.app',
-    ]
-    # Filtrar valores vacíos
-    ALLOWED_HOSTS = [host for host in ALLOWED_HOSTS if host]
-    # Si no hay hosts configurados, permitir todos (para testeo)
+    ALLOWED_HOSTS = []
+    
+    # Agregar dominio de Railway si está disponible
+    railway_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN', '')
+    if railway_domain:
+        # Remover https:// si está presente (ALLOWED_HOSTS no acepta protocolo)
+        railway_domain_clean = railway_domain.replace('https://', '').replace('http://', '')
+        ALLOWED_HOSTS.append(railway_domain_clean)
+    
+    # Agregar dominios personalizados desde variable de entorno
+    # Formato: ALLOWED_HOSTS=dominio1.com,www.dominio1.com,dominio2.com
+    custom_hosts = os.getenv('ALLOWED_HOSTS', '')
+    if custom_hosts:
+        # Remover protocolos si están presentes
+        hosts_list = [h.strip().replace('https://', '').replace('http://', '') 
+                     for h in custom_hosts.split(',') if h.strip()]
+        ALLOWED_HOSTS.extend(hosts_list)
+    
+    # Agregar dominio personalizado teomanager.com si no está en la lista
+    if 'teomanager.com' not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append('teomanager.com')
+        ALLOWED_HOSTS.append('www.teomanager.com')
+    
+    # Agregar dominio de Railway específico si existe (fallback)
+    # Esto asegura que el dominio de Railway funcione incluso si RAILWAY_PUBLIC_DOMAIN no está configurado
+    railway_specific = os.getenv('RAILWAY_DOMAIN', 'web-production-8666.up.railway.app')
+    if railway_specific and railway_specific not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(railway_specific)
+    
+    # Filtrar valores vacíos y duplicados
+    ALLOWED_HOSTS = list(set([host for host in ALLOWED_HOSTS if host]))
+    
+    # Si no hay hosts configurados, permitir todos (solo para testeo)
     if not ALLOWED_HOSTS:
         ALLOWED_HOSTS = ['*']
 else:
