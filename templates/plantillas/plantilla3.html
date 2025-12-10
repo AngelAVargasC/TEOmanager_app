@@ -1,0 +1,853 @@
+{% load webpages_extras %}
+<style>
+/* ⭐ PLANTILLA 3: CORPORATIVA TECH PREMIUM - CSS COMPLETAMENTE AISLADO ⭐ */
+/* Todos los estilos usan prefijo único t3-tech- para evitar conflictos */
+
+.t3-tech-wrapper {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--t3-tech-dark-bg);
+    color: var(--t3-tech-text-primary);
+    line-height: 1.7;
+    overflow-x: hidden;
+    /* Aislar estilos para no interferir con navbar del sistema */
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    isolation: isolate; /* Aislamiento CSS */
+}
+
+/* Variables CSS aisladas */
+.t3-tech-wrapper {
+    --t3-tech-primary: {{ landing.color_primario|default:"#10b981" }};
+    --t3-tech-secondary: {{ landing.color_secundario|default:"#06b6d4" }};
+    --t3-tech-dark-bg: #0f172a;
+    --t3-tech-darker-bg: #020617;
+    --t3-tech-card-bg: #1e293b;
+    --t3-tech-text-primary: #f1f5f9;
+    --t3-tech-text-secondary: #94a3b8;
+    --t3-tech-accent-glow: rgba(16,185,129,0.3);
+}
+
+/* ✨ Header Tech Style - Aislado ✨ */
+.t3-tech-header {
+    position: fixed;
+    top: 58px; /* Debajo del navbar del sistema */
+    left: var(--sidebar-width, 250px); /* Respeta el ancho de la sidebar */
+    right: 0;
+    width: calc(100% - var(--sidebar-width, 250px));
+    background: rgba(15,23,42,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(148,163,184,0.1);
+    padding: 1.5rem 0;
+    z-index: 99; /* Menor que el navbar del sistema (z-index: 1000) */
+    transition: all 0.3s ease, left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0;
+}
+
+/* Ajuste cuando la sidebar está colapsada */
+.main-content.sidebar-collapsed ~ * .t3-tech-header,
+body:has(.sidebar.collapsed) .t3-tech-header {
+    left: 0;
+    width: 100%;
+}
+/* El .main-content se redimensiona automáticamente con la sidebar */
+/* No sobrescribir margin-left para permitir redimensionamiento */
+
+.t3-tech-header.scrolled {
+    background: rgba(15,23,42,0.95);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.t3-tech-nav {
+    max-width: 100%;
+    margin: 0;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.t3-tech-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--t3-tech-text-primary);
+    text-decoration: none;
+}
+
+.t3-tech-logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--t3-tech-primary), var(--t3-tech-secondary));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 800;
+}
+
+.t3-tech-nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.t3-tech-nav-links a {
+    color: var(--t3-tech-text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    position: relative;
+}
+
+.t3-tech-nav-links a:hover,
+.t3-tech-nav-links a.active {
+    color: var(--t3-tech-primary);
+}
+
+.t3-tech-nav-links a.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--t3-tech-primary);
+}
+
+.t3-tech-cta-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--t3-tech-primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.t3-tech-cta-btn:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--t3-tech-accent-glow);
+}
+
+/* ✨ Hero Tech Style - Full Width con Grid ✨ */
+.t3-tech-hero {
+    min-height: calc(100vh - 150px); /* Ajustado para navbar del sistema + navbar de plantilla */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 4rem;
+    padding: 4rem 2rem;
+    padding-top: 8rem; /* Espacio para ambos navbars */
+    max-width: 100%;
+    margin: 0;
+    width: 100%;
+    position: relative;
+}
+
+.t3-tech-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(16,185,129,0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.t3-tech-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.t3-tech-hero h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    color: var(--t3-tech-text-primary);
+    letter-spacing: -2px;
+}
+
+.t3-tech-hero h1 .highlight {
+    color: var(--t3-tech-primary);
+    position: relative;
+    display: inline-block;
+}
+
+.t3-tech-hero h1 .highlight::after {
+    content: '';
+    position: absolute;
+    bottom: 0.2em;
+    left: 0;
+    right: 0;
+    height: 0.15em;
+    background: var(--t3-tech-primary);
+    opacity: 0.3;
+}
+
+.t3-tech-hero .subtitle {
+    font-size: 1.3rem;
+    color: var(--t3-tech-text-secondary);
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+.t3-tech-hero-form {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.t3-tech-hero-input {
+    flex: 1;
+    min-width: 250px;
+    padding: 1rem 1.5rem;
+    background: rgba(30,41,59,0.5);
+    border: 1px solid rgba(148,163,184,0.2);
+    border-radius: 10px;
+    color: var(--t3-tech-text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.t3-tech-hero-input:focus {
+    outline: none;
+    border-color: var(--t3-tech-primary);
+    box-shadow: 0 0 0 3px var(--t3-tech-accent-glow);
+}
+
+.t3-tech-hero-input::placeholder {
+    color: var(--t3-tech-text-secondary);
+}
+
+.t3-tech-hero-btn {
+    padding: 1rem 2.5rem;
+    background: var(--t3-tech-primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.t3-tech-hero-btn:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--t3-tech-accent-glow);
+}
+
+.t3-tech-hero-visual {
+    position: relative;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.t3-tech-illustration {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(6,182,212,0.1) 100%);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.t3-tech-illustration::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%2310b981' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+    opacity: 0.5;
+}
+
+.t3-tech-cube {
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, rgba(16,185,129,0.3), rgba(6,182,212,0.3));
+    border-radius: 20px;
+    position: relative;
+    transform: rotate(45deg);
+    box-shadow: 0 20px 60px rgba(16,185,129,0.3);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: rotate(45deg) translateY(0); }
+    50% { transform: rotate(45deg) translateY(-20px); }
+}
+
+.t3-tech-cube::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,182,212,0.2));
+    border-radius: 20px;
+    z-index: -1;
+    animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+/* ✨ Clients Logos Section ✨ */
+.t3-tech-clients {
+    padding: 4rem 2rem;
+    max-width: 100%;
+    margin: 0;
+    width: 100%;
+    border-top: 1px solid rgba(148,163,184,0.1);
+    border-bottom: 1px solid rgba(148,163,184,0.1);
+}
+
+.t3-tech-clients-title {
+    text-align: center;
+    color: var(--t3-tech-text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 2rem;
+}
+
+.t3-tech-clients-grid {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 3rem;
+}
+
+.t3-tech-client-logo {
+    color: var(--t3-tech-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.t3-tech-client-logo:hover {
+    opacity: 1;
+}
+
+/* ✨ Features Grid Tech Style ✨ */
+.t3-tech-features {
+    padding: 8rem 2rem;
+    max-width: 100%;
+    margin: 0;
+    width: 100%;
+}
+
+.t3-tech-features-header {
+    text-align: center;
+    margin-bottom: 5rem;
+}
+
+.t3-tech-features-header h2 {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: var(--t3-tech-text-primary);
+}
+
+.t3-tech-features-header p {
+    font-size: 1.2rem;
+    color: var(--t3-tech-text-secondary);
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.t3-tech-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.t3-tech-feature-card {
+    background: var(--t3-tech-card-bg);
+    padding: 2.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(148,163,184,0.1);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.t3-tech-feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 0;
+    background: var(--t3-tech-primary);
+    transition: height 0.4s ease;
+}
+
+.t3-tech-feature-card:hover::before {
+    height: 100%;
+}
+
+.t3-tech-feature-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--t3-tech-primary);
+    box-shadow: 0 10px 40px rgba(16,185,129,0.2);
+}
+
+.t3-tech-feature-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--t3-tech-primary), var(--t3-tech-secondary));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.t3-tech-feature-card h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--t3-tech-text-primary);
+}
+
+.t3-tech-feature-card p {
+    color: var(--t3-tech-text-secondary);
+    line-height: 1.7;
+}
+
+/* ✨ Products/Services Showcase Tech Style ✨ */
+.t3-tech-showcase {
+    padding: 8rem 2rem;
+    background: var(--t3-tech-darker-bg);
+    position: relative;
+    width: 100%;
+    margin: 0;
+}
+
+.t3-tech-showcase::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--t3-tech-primary), transparent);
+}
+
+.t3-tech-showcase-container {
+    max-width: 100%;
+    margin: 0;
+    width: 100%;
+}
+
+.t3-tech-showcase-header {
+    text-align: center;
+    margin-bottom: 5rem;
+}
+
+.t3-tech-showcase-header h2 {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: var(--t3-tech-text-primary);
+}
+
+.t3-tech-showcase-header p {
+    font-size: 1.2rem;
+    color: var(--t3-tech-text-secondary);
+}
+
+.t3-tech-products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.t3-tech-product-card {
+    background: var(--t3-tech-card-bg);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(148,163,184,0.1);
+    transition: all 0.4s ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+}
+
+.t3-tech-product-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--t3-tech-primary);
+    box-shadow: 0 15px 50px rgba(16,185,129,0.3);
+}
+
+.t3-tech-product-image {
+    height: 250px;
+    background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.1));
+    position: relative;
+    overflow: hidden;
+}
+
+.t3-tech-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.t3-tech-product-card:hover .t3-tech-product-image img {
+    transform: scale(1.1);
+}
+
+.t3-tech-product-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--t3-tech-primary);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.t3-tech-product-info {
+    padding: 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.t3-tech-product-info h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--t3-tech-text-primary);
+}
+
+.t3-tech-product-info p {
+    color: var(--t3-tech-text-secondary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    flex: 1;
+}
+
+.t3-tech-product-price {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--t3-tech-primary);
+    margin-top: auto;
+}
+
+/* ✨ CTA Tech Style ✨ */
+.t3-tech-cta-section {
+    padding: 8rem 2rem;
+    background: linear-gradient(135deg, var(--t3-tech-primary) 0%, var(--t3-tech-secondary) 100%);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    margin: 0;
+}
+
+.t3-tech-cta-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.t3-tech-cta-content {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.t3-tech-cta-content h2 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: #fff;
+}
+
+.t3-tech-cta-content p {
+    font-size: 1.3rem;
+    margin-bottom: 3rem;
+    color: rgba(255,255,255,0.9);
+}
+
+.t3-tech-cta-button {
+    display: inline-block;
+    padding: 1.2rem 3rem;
+    background: #fff;
+    color: var(--t3-tech-primary);
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.t3-tech-cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .t3-tech-hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .t3-tech-hero-visual {
+        height: 400px;
+    }
+    .t3-tech-nav-links {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .t3-tech-hero {
+        padding: 6rem 1.5rem 3rem;
+    }
+    .t3-tech-features, .t3-tech-showcase, .t3-tech-cta-section {
+        padding: 4rem 1.5rem;
+    }
+    .t3-tech-products-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="t3-tech-wrapper">
+    <!-- ✨ Header Tech Style - Debajo del navbar del sistema ✨ -->
+    <header class="t3-tech-header" id="t3TechHeader">
+        <nav class="t3-tech-nav">
+            <a href="#" class="t3-tech-logo">
+                <div class="t3-tech-logo-icon">O</div>
+                <span>{{ landing.titulo|truncatewords:1 }}</span>
+            </a>
+            <ul class="t3-tech-nav-links">
+                <li><a href="#about" class="active">About</a></li>
+                <li><a href="#solutions">Solutions</a></li>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            {% if landing.texto_boton_hero and landing.url_boton_hero %}
+            <a href="{{ landing.url_boton_hero }}" class="t3-tech-cta-btn">{{ landing.texto_boton_hero }}</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <!-- ✨ Hero Tech Style - Grid Layout ✨ -->
+    <section class="t3-tech-hero">
+        <div class="t3-tech-hero-content">
+            <h1>
+                {{ landing.titulo|truncatewords:3 }}
+                <!-- <span class="highlight">{{ landing.titulo|truncatewords:1|slice:"-1:" }}</span> -->
+            </h1>
+            {% if landing.subtitulo_hero %}
+            <div class="subtitle">{{ landing.subtitulo_hero }}</div>
+            {% elif landing.descripcion %}
+            <div class="subtitle">{{ landing.descripcion }}</div>
+            {% endif %}
+            <form class="t3-tech-hero-form" onsubmit="event.preventDefault();">
+                <input type="email" class="t3-tech-hero-input" placeholder="Enter Your Email" required>
+                {% if landing.texto_boton_hero %}
+                <button type="submit" class="t3-tech-hero-btn">{{ landing.texto_boton_hero }}</button>
+                {% else %}
+                <button type="submit" class="t3-tech-hero-btn">Start Free Trial</button>
+                {% endif %}
+            </form>
+        </div>
+        <div class="t3-tech-hero-visual">
+            <div class="t3-tech-illustration">
+                {% if landing|get_hero_url %}
+                <img src="{{ landing|get_hero_url }}" alt="Hero" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
+                {% else %}
+                <div class="t3-tech-cube"></div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- ✨ Clients Logos ✨ -->
+    <section class="t3-tech-clients">
+        <div class="t3-tech-clients-title">Trusted by leading companies</div>
+        <div class="t3-tech-clients-grid">
+            <div class="t3-tech-client-logo">SquareStone</div>
+            <div class="t3-tech-client-logo">TechCrown</div>
+            <div class="t3-tech-client-logo">NextMove</div>
+            <div class="t3-tech-client-logo">VERTEX</div>
+            <div class="t3-tech-client-logo">GraphicsFuel</div>
+        </div>
+    </section>
+
+    <!-- ✨ Features Section ✨ -->
+    {% if landing.seccion_sobre_nosotros_texto or landing.contenido %}
+    <section class="t3-tech-features" id="about">
+        <div class="t3-tech-features-header">
+            <h2>{{ landing.seccion_sobre_nosotros_titulo|default:"A robust solution built with intelligence" }}</h2>
+            {% if landing.seccion_sobre_nosotros_texto %}
+            <p>{{ landing.seccion_sobre_nosotros_texto|truncatewords:20 }}</p>
+            {% endif %}
+        </div>
+        <div class="t3-tech-features-grid">
+            <div class="t3-tech-feature-card">
+                <div class="t3-tech-feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Secure & Reliable</h3>
+                <p>{{ landing.seccion_sobre_nosotros_texto|default:landing.contenido|truncatewords:15|safe }}</p>
+            </div>
+            <div class="t3-tech-feature-card">
+                <div class="t3-tech-feature-icon"><i class="fas fa-bolt"></i></div>
+                <h3>Lightning Fast</h3>
+                <p>Experience blazing fast performance with our optimized infrastructure and cutting-edge technology.</p>
+            </div>
+            <div class="t3-tech-feature-card">
+                <div class="t3-tech-feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Scalable Growth</h3>
+                <p>Grow your business without limits. Our platform scales seamlessly with your needs.</p>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Products Showcase ✨ -->
+    {% if products %}
+    <section class="t3-tech-showcase" id="products">
+        <div class="t3-tech-showcase-container">
+            <div class="t3-tech-showcase-header">
+                <h2>{{ landing.seccion_productos_titulo|default:"Our Products" }}</h2>
+                {% if landing.seccion_productos_subtitulo %}
+                <p>{{ landing.seccion_productos_subtitulo }}</p>
+                {% endif %}
+            </div>
+            <div class="t3-tech-products-grid">
+                {% for product in products %}
+                <a href="{% url 'products:detalle_producto' product.pk %}" class="t3-tech-product-card">
+                    <div class="t3-tech-product-image">
+                        {% if product.imagen_principal %}
+                        <img src="{{ product.imagen_principal }}" alt="{{ product.nombre }}">
+                        {% endif %}
+                        <div class="t3-tech-product-badge">New</div>
+                    </div>
+                    <div class="t3-tech-product-info">
+                        <h3>{{ product.nombre }}</h3>
+                        <p>{{ product.descripcion|truncatechars:120 }}</p>
+                        <div class="t3-tech-product-price">$ {{ product.precio }}</div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Services Showcase ✨ -->
+    {% if services %}
+    <section class="t3-tech-showcase" style="background: var(--t3-tech-dark-bg);">
+        <div class="t3-tech-showcase-container">
+            <div class="t3-tech-showcase-header">
+                <h2>{{ landing.seccion_servicios_titulo|default:"Our Services" }}</h2>
+                {% if landing.seccion_servicios_subtitulo %}
+                <p>{{ landing.seccion_servicios_subtitulo }}</p>
+                {% endif %}
+            </div>
+            <div class="t3-tech-products-grid">
+                {% for srv in services %}
+                <a href="{% url 'products:detalle_servicio' srv.pk %}" class="t3-tech-product-card">
+                    <div class="t3-tech-product-image">
+                        {% if srv.imagen_principal %}
+                        <img src="{{ srv.imagen_principal }}" alt="{{ srv.nombre }}">
+                        {% endif %}
+                        <div class="t3-tech-product-badge">Featured</div>
+                    </div>
+                    <div class="t3-tech-product-info">
+                        <h3>{{ srv.nombre }}</h3>
+                        <p>{{ srv.descripcion|truncatechars:120 }}</p>
+                        <div class="t3-tech-product-price">$ {{ srv.precio }}</div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Final CTA ✨ -->
+    {% if landing.seccion_contacto_texto %}
+    <section class="t3-tech-cta-section" id="contact">
+        <div class="t3-tech-cta-content">
+            <h2>{{ landing.seccion_contacto_titulo|default:"Ready to get started?" }}</h2>
+            <p>{{ landing.seccion_contacto_texto }}</p>
+            {% if landing.seccion_contacto_boton_texto and landing.seccion_contacto_boton_url %}
+            <a href="{{ landing.seccion_contacto_boton_url }}" class="t3-tech-cta-button">{{ landing.seccion_contacto_boton_texto }}</a>
+            {% endif %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<script>
+// ⭐ JavaScript AISLADO para Plantilla 3 - Tech ⭐
+(function() {
+    'use strict';
+    
+    // Namespace aislado
+    const T3Tech = {
+        init: function() {
+            this.initHeaderScroll();
+        },
+        
+        initHeaderScroll: function() {
+            const header = document.getElementById('t3TechHeader');
+            if (!header) return;
+            
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 100) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+        }
+    };
+    
+    // Inicializar cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => T3Tech.init());
+    } else {
+        T3Tech.init();
+    }
+})();
+</script>
+

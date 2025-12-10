@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Control{% endblock %}
+
+{% block body_attrs %} data-dashboard="true"{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --panel-bg: #fff;
+    --panel-shadow: 0 6px 32px rgba(37,99,235,0.10);
+    --panel-header-bg: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+    --panel-header-border: #e0e7ff;
+    --panel-title-color: #fff;
+    --panel-title-shadow: 0 2px 8px rgba(37,99,235,0.10);
+    --panel-body-bg: #ffffff;
+
+    --btn-main-bg: #2563eb;
+    --btn-main-color: #fff;
+    --btn-main-border: none;
+    --btn-main-hover-bg: #1746a2;
+    --btn-main-hover-shadow: 0 4px 16px rgba(37,99,235,0.18);
+
+    --label-color: #666;
+    --helper-color: #94a3b8;
+    --input-bg: #f6faff;
+    --input-border: #e0e7ff;
+  }
+  body.dark-mode {
+    --panel-bg: #1e293b;
+    --panel-shadow: 0 6px 32px rgba(15,23,42,0.25);
+    --panel-header-bg: #0f172a;
+    --panel-header-border: #334155;
+    --panel-title-color: #60a5fa;
+    --panel-title-shadow: 0 2px 8px rgba(96,165,250,0.10);
+    --panel-body-bg: #1e293b;
+
+    --btn-main-bg: rgba(96,165,250,0.12);
+    --btn-main-color: #f1f5f9;
+    --btn-main-border: 1px solid rgba(96,165,250,0.18);
+    --btn-main-hover-bg: rgba(96,165,250,0.22);
+    --btn-main-hover-shadow: 0 4px 16px rgba(96,165,250,0.18);
+
+    --label-color: #60a5fa;
+    --helper-color: #64748b;
+    --input-bg: #334155;
+    --input-border: #475569;
+  }
+
+  /* Grid principal */
+  .panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 1.5rem;
+    background: var(--panel-body-bg);
+  }
+
+  /* Tarjetas */
+  .panel-card {
+    background: var(--panel-bg);
+    box-shadow: var(--panel-shadow);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-header {
+    background: var(--panel-header-bg);
+    border-bottom: 1px solid var(--panel-header-border);
+    padding: 1rem 1.5rem;
+  }
+  .panel-header h2 {
+    margin: 0;
+    color: var(--panel-title-color);
+    text-shadow: var(--panel-title-shadow);
+    font-size: 1.25rem;
+  }
+  .panel-content {
+    background: var(--panel-body-bg);
+    padding: 1.5rem;
+    flex: 1;
+  }
+
+  /* Formulario */
+  .panel-content .form-group {
+    margin-bottom: 1.25rem;
+  }
+  .panel-content label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--label-color);
+  }
+  .panel-content input,
+  .panel-content select,
+  .panel-content textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    background: var(--input-bg);
+    color: var(--label-color);
+    transition: border-color 0.2s;
+  }
+  .panel-content input:focus,
+  .panel-content textarea:focus,
+  .panel-content select:focus {
+    outline: none;
+    border-color: var(--btn-main-bg);
+  }
+  .panel-content small.form-text {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--helper-color);
+    font-size: 0.875rem;
+  }
+
+  /* Contenedor de subida de imágenes */
+  .image-upload-container {
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background: var(--input-bg);
+  }
+  .upload-option {
+    margin-bottom: 1rem;
+  }
+  .upload-option:last-child {
+    margin-bottom: 0;
+  }
+  .upload-option strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--label-color);
+    font-size: 0.9rem;
+  }
+  .upload-option input[type="file"] {
+    margin-bottom: 0.25rem;
+  }
+  .upload-option .form-text {
+    margin-top: 0.25rem;
+  }
+
+  /* Botones */
+  .btn-panel {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.5rem;
+    background: var(--btn-main-bg);
+    color: var(--btn-main-color);
+    border: var(--btn-main-border);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+  .btn-panel:hover {
+    background: var(--btn-main-hover-bg);
+    box-shadow: var(--btn-main-hover-shadow);
+    transform: translateY(-2px);
+  }
+  .btn-panel + .btn-panel {
+    margin-left: 0.75rem;
+  }
+
+  /* Preview */
+  .preview-container {
+    background: var(--panel-body-bg);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    height: 100%;
+    overflow: auto;
+  }
+
+  /* Responsividad */
+  @media (max-width: 1024px) {
+    .panel-grid {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+      gap: 1.5rem;
+    }
+    .panel-card {
+      margin-bottom: 1rem;
+    }
+  }
+  @media (max-width: 600px) {
+    .panel-header h2 { font-size: 1rem; }
+    .panel-content { padding: 1rem; }
+    .btn-panel {
+      width: 100%;
+      justify-content: center;
+    }
+    .preview-container { padding: 0.75rem; }
+  }
+</style>
+
+<div class="panel-grid">
+
+  <!-- Panel de configuración -->
+  <section class="panel-card">
+    <div class="panel-header">
+      <h2>Configuración de Página</h2>
+    </div>
+    <div class="panel-content">
+      <form id="lpForm" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+          {{ form.titulo.label_tag }}
+          {{ form.titulo }}
+          <small class="form-text">
+            Escribe el título que aparecerá en la cabecera de tu página.
+          </small>
+        </div>
+
+        <div class="form-group">
+          {{ form.descripcion.label_tag }}
+          {{ form.descripcion }}
+          <small class="form-text">
+            Una breve frase o subtítulo descriptivo para tu página.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Imagen Principal (Hero)</label>
+          <div class="image-upload-container">
+            <div class="upload-option">
+              <strong>🖼️ Opción 1: Subir archivo</strong>
+              {{ form.hero_image_file }}
+              <small class="form-text">
+                Sube una imagen desde tu dispositivo (JPG, PNG, WebP, etc.)
+              </small>
+            </div>
+            <div class="upload-option">
+              <strong>🔗 Opción 2: URL externa</strong>
+              {{ form.hero_image }}
+              <small class="form-text">
+                O ingresa la URL de una imagen externa (debe incluir "http://" o "https://")
+              </small>
+            </div>
+            <small class="form-text" style="margin-top: 0.5rem; font-style: italic;">
+              💡 Puedes usar cualquiera de las dos opciones. Si subes un archivo, tendrá prioridad sobre la URL.
+            </small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          {{ form.plantilla.label_tag }}
+          {{ form.plantilla }}
+          <small class="form-text">
+            Selecciona el diseño de plantilla que prefieras.
+          </small>
+        </div>
+
+        <div class="form-group">
+          {{ form.contenido.label_tag }}
+          {{ form.contenido }}
+          <small class="form-text">
+            Contenido HTML o texto enriquecido para el cuerpo de tu página.
+          </small>
+        </div>
+
+        <button type="submit" class="btn-panel">
+          <i class="fas fa-save"></i> Guardar Página
+        </button>
+        <a href="{% url 'landingpage_view' %}" target="_blank" class="btn-panel">
+          <i class="fas fa-eye"></i> Ver Preview Final
+        </a>
+      </form>
+    </div>
+  </section>
+
+  <!-- Panel de vista previa -->
+  <section class="panel-card">
+    <div class="panel-header">
+      <h2>Vista Previa</h2>
+    </div>
+    <div class="panel-content preview-container">
+      {% if landing and landing.plantilla %}
+        {% include 'plantillas/'|add:landing.plantilla|add:'.html' %}
+      {% else %}
+        <p class="text-muted">
+          Guarda la página o selecciona una plantilla para ver la vista previa aquí.
+        </p>
+      {% endif %}
+    </div>
+  </section>
+
+</div>
+{% endblock %}

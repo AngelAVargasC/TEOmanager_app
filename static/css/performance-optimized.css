@@ -1,0 +1,92 @@
+/**
+ * PERFORMANCE-OPTIMIZED CSS
+ * Solo animaciones esenciales para aplicación robusta
+ * Enfoque: Funcionalidad > Efectos visuales
+ */
+
+/* ===== TRANSICIONES OPTIMIZADAS ===== */
+.btn-optimized {
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-optimized:hover {
+    opacity: 0.9;
+}
+
+.btn-optimized:active {
+    opacity: 0.8;
+}
+
+/* ===== CARDS MINIMALISTAS ===== */
+.card-optimized {
+    transition: box-shadow 0.2s ease;
+}
+
+.card-optimized:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* ===== FORMS OPTIMIZADOS ===== */
+.input-optimized {
+    transition: border-color 0.15s ease;
+}
+
+.input-optimized:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+/* ===== LOADER SIMPLE ===== */
+.loader-simple {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== DISABLE HEAVY ANIMATIONS ON MOBILE ===== */
+@media (max-width: 768px) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ===== PREFER REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ===== FOCUS STATES OPTIMIZADOS ===== */
+.focus-optimized:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* ===== TABLE PERFORMANCE ===== */
+.table-optimized {
+    table-layout: fixed; /* Mejora performance en tablas grandes */
+}
+
+/* ===== IMAGE OPTIMIZATION ===== */
+.img-optimized {
+    object-fit: cover;
+    max-width: 100%;
+    height: auto;
+} 

@@ -1,0 +1,1238 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load dict_extras %}
+
+{% block title %}Mi Centro de Compras - TeoManager{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* === VARIABLES CSS PROFESIONALES === */
+    :root {
+        --amazon-orange: #ff9900;
+        --primary-blue: #3b82f6;
+        --primary-blue-dark: #2563eb;
+        --amazon-blue: #232f3e;
+        --amazon-light-blue: #37475a;
+        --amazon-gray: #eaeded;
+        --amazon-text: #0f1111;
+        --amazon-secondary: #565959;
+        --success-green: #007600;
+        --warning-orange: #b12704;
+        --border-color: #d5d9d9;
+        --hover-bg: #f7fafa;
+        --spacing-unit: 1rem;
+    }
+
+    /* === LAYOUT PRINCIPAL === */
+    body {
+        font-family: "Amazon Ember", Arial, sans-serif;
+        background-color: white;
+        color: var(--amazon-text);
+        line-height: 1.4;
+    }
+
+    .consumer-dashboard {
+        background: white;
+        min-height: 100vh;
+        padding: 0;
+    }
+
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    /* === HEADER PROFESIONAL === */
+    .professional-header {
+        background: white;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .breadcrumb {
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--amazon-secondary);
+    }
+
+    .breadcrumb a {
+        color: #007185;
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        color: #c7511f;
+        text-decoration: underline;
+    }
+
+    .breadcrumb i {
+        margin: 0 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 400;
+        margin: 0;
+        color: var(--amazon-text);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn-primary, .btn-secondary {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: white;
+        color: var(--amazon-text);
+        text-decoration: none;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+        background: var(--primary-blue);
+        border-color: var(--primary-blue);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-blue-dark);
+        border-color: var(--primary-blue-dark);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+        background: var(--hover-bg);
+        border-color: #999;
+        color: var(--amazon-text);
+        text-decoration: none;
+    }
+
+    /* === FILTROS PROFESIONALES === */
+    .filters-professional {
+        background: white;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 0;
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1rem;
+    }
+
+    .filter-tab {
+        color: #007185;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 400;
+        padding: 0.5rem 0;
+        border-bottom: 2px solid transparent;
+        transition: all 0.15s ease;
+    }
+
+    .filter-tab:hover {
+        color: #c7511f;
+        text-decoration: none;
+    }
+
+    .filter-tab.active {
+        color: var(--amazon-text);
+        border-bottom-color: var(--primary-blue);
+        font-weight: 500;
+    }
+
+    .search-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .search-form {
+        display: contents;
+    }
+
+    .search-group {
+        display: flex;
+        flex: 1;
+        max-width: 500px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px 0 0 4px;
+        font-size: 0.875rem;
+        outline: none;
+    }
+
+    .search-input:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    .search-btn {
+        background: var(--primary-blue);
+        color: white;
+        border: 1px solid var(--primary-blue);
+        border-radius: 0 4px 4px 0;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+    .search-btn:hover {
+        background: var(--primary-blue-dark);
+    }
+
+    .filter-options {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .sort-select, .period-select {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 0.875rem;
+        background: white;
+        color: var(--amazon-text);
+    }
+
+    .hero-header::before {
+        content: '';
+        position: absolute;
+        top: -30%;
+        right: -15%;
+        width: 250px;
+        height: 250px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .hero-header::after {
+        content: '';
+        position: absolute;
+        bottom: -20%;
+        left: -10%;
+        width: 180px;
+        height: 180px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(90deg); }
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        color: white;
+    }
+
+    .hero-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+        font-weight: 300;
+    }
+
+    .hero-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .metric-card {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 1.5rem;
+        border-radius: 20px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-5px);
+    }
+
+    .metric-number {
+        display: block;
+        font-size: 2.2rem;
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* === CONTROLES Y FILTROS === */
+    .controls-section {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid #e2e8f0;
+    }
+
+    .controls-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control {
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 15px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #ff6b6b;
+        box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .btn-search {
+        background: var(--consumer-gradient);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+    }
+
+    /* === LISTA DE PEDIDOS PROFESIONAL === */
+    .pedidos-list-professional {
+        padding: 1rem 0;
+    }
+
+    .results-header {
+        margin-bottom: 1rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .results-header p {
+        margin: 0;
+        font-size: 0.875rem;
+        color: var(--amazon-secondary);
+    }
+
+    .pedido-item-pro {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        background: white;
+        overflow: hidden;
+    }
+
+    /* Header del pedido */
+    .pedido-header-pro {
+        background: var(--amazon-gray);
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-left {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .order-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .order-label {
+        font-size: 0.75rem;
+        color: var(--amazon-secondary);
+        text-transform: uppercase;
+        font-weight: 500;
+    }
+
+    .order-value {
+        font-size: 0.875rem;
+        color: var(--amazon-text);
+        font-weight: 400;
+    }
+
+    .header-right .order-number {
+        text-align: right;
+    }
+
+    .message-badge-order {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        background: #ef4444;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+        animation: pulse 2s infinite;
+    }
+
+    .message-badge-order i {
+        font-size: 0.7rem;
+    }
+
+    .header-right .order-label {
+        font-size: 0.75rem;
+        color: var(--amazon-secondary);
+    }
+
+    .order-actions {
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .link-action {
+        color: #007185;
+        text-decoration: none;
+        font-size: 0.75rem;
+    }
+
+    .link-action:hover {
+        color: #c7511f;
+        text-decoration: underline;
+    }
+
+    .separator {
+        margin: 0 0.5rem;
+        color: var(--amazon-secondary);
+    }
+
+    /* Status del pedido */
+    .pedido-status-pro {
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f7fafa;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .status-message {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .status-message.delivered {
+        color: var(--success-green);
+    }
+
+    .status-message.in-transit {
+        color: #b12704;
+    }
+
+    .status-message.pending {
+        color: var(--amazon-secondary);
+    }
+
+    .status-message.cancelled {
+        color: #b12704;
+    }
+
+    .vendor-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 0.875rem;
+    }
+
+    .vendor-label {
+        color: var(--amazon-secondary);
+    }
+
+    .contact-vendor {
+        color: #007185;
+        text-decoration: none;
+        font-size: 0.75rem;
+        margin-left: 1rem;
+    }
+
+    .contact-vendor:hover {
+        color: #c7511f;
+        text-decoration: underline;
+    }
+
+    /* Contenido del pedido */
+    .pedido-content-pro {
+        padding: 1rem;
+    }
+
+    .product-row {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e7e7e7;
+    }
+
+    .product-row:last-child {
+        border-bottom: none;
+    }
+
+    .product-image {
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .no-image {
+        width: 100%;
+        height: 100%;
+        background: #f7f7f7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 1.5rem;
+    }
+
+    .product-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .product-title {
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+        font-weight: 400;
+        color: #007185;
+        text-decoration: none;
+        line-height: 1.3;
+    }
+
+    .product-title:hover {
+        color: #c7511f;
+        text-decoration: underline;
+    }
+
+    .product-info {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.875rem;
+        color: var(--amazon-secondary);
+        line-height: 1.3;
+    }
+
+    .order-notes {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background: #fff8dc;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.875rem;
+    }
+
+    .order-notes i {
+        color: var(--primary-blue);
+        margin-top: 0.1rem;
+    }
+
+    .product-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 1rem;
+        min-width: 200px;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .btn-action {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 400;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        border: 1px solid var(--border-color);
+        background: white;
+        color: var(--amazon-text);
+        width: 100%;
+    }
+
+    .btn-action.primary {
+        background: var(--primary-blue);
+        border-color: var(--primary-blue);
+        color: white;
+    }
+
+    .btn-action.primary:hover {
+        background: var(--primary-blue-dark);
+        border-color: var(--primary-blue-dark);
+    }
+
+    .btn-action.secondary:hover {
+        background: var(--hover-bg);
+        border-color: #999;
+    }
+
+    .btn-action.danger {
+        background: #fff;
+        border-color: #d13212;
+        color: #d13212;
+    }
+
+    .btn-action.danger:hover {
+        background: #d13212;
+        color: white;
+    }
+
+    .product-price {
+        text-align: right;
+        margin-top: auto;
+    }
+
+    .price-label {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--amazon-secondary);
+        margin-bottom: 0.25rem;
+    }
+
+    .price-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--amazon-text);
+    }
+
+    /* Total del pedido */
+    .order-total-row {
+        border-top: 1px solid var(--border-color);
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+
+    .total-breakdown {
+        max-width: 300px;
+        margin-left: auto;
+    }
+
+    .breakdown-line {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+    }
+
+    .breakdown-line.total {
+        border-top: 1px solid var(--border-color);
+        padding-top: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 1rem;
+    }
+
+    /* Estado vacío */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+    }
+
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1rem;
+        background: var(--amazon-gray);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--amazon-secondary);
+        font-size: 2rem;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        font-weight: 400;
+        color: var(--amazon-text);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-subtitle {
+        color: var(--amazon-secondary);
+        font-size: 1rem;
+        margin-bottom: 2rem;
+        line-height: 1.4;
+    }
+
+    /* Paginación */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        align-items: center;
+    }
+
+    .page-item {
+        list-style: none;
+    }
+
+    .page-link {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        color: var(--amazon-text);
+        text-decoration: none;
+        font-size: 0.875rem;
+        background: white;
+        transition: all 0.15s ease;
+    }
+
+    .page-link:hover {
+        background: var(--hover-bg);
+        border-color: #999;
+        color: var(--amazon-text);
+        text-decoration: none;
+    }
+
+    .page-item.active .page-link {
+        background: var(--primary-blue);
+        border-color: var(--primary-blue);
+        color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 0 0.5rem;
+        }
+
+        .pedido-header-pro {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .header-left {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .header-right {
+            text-align: left;
+        }
+
+        .pedido-status-pro {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .product-row {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .product-actions {
+            align-items: stretch;
+            min-width: auto;
+        }
+
+        .action-buttons {
+            flex-direction: row;
+            gap: 0.5rem;
+        }
+
+        .filter-tabs {
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-controls {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-group {
+            max-width: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="consumer-dashboard">
+    <div class="dashboard-container">
+        <!-- Header Profesional -->
+        <div class="professional-header">
+            <div class="breadcrumb">
+                <a href="{% url 'home' %}">Mi cuenta</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Mis pedidos</span>
+            </div>
+            
+            <div class="page-header">
+                <h1>Mis pedidos</h1>
+                <div class="header-actions">
+                    <a href="{% url 'home' %}" class="btn-secondary">
+                        <i class="fas fa-store"></i> Comprar de nuevo
+                    </a>
+                    <button class="btn-primary" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimir página
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros Avanzados Estilo Amazon -->
+        <div class="filters-professional">
+            <div class="filter-tabs">
+                <a href="?estado=" class="filter-tab {% if not estado_filter %}active{% endif %}">
+                    Pedidos ({{ stats.total_pedidos }})
+                </a>
+                <a href="?estado=pendiente" class="filter-tab {% if estado_filter == 'pendiente' %}active{% endif %}">
+                    Pendiente de envío ({{ stats.pedidos_pendientes }})
+                </a>
+                <a href="?estado=en_proceso" class="filter-tab {% if estado_filter == 'en_proceso' %}active{% endif %}">
+                    En proceso ({{ stats.pedidos_en_proceso }})
+                </a>
+                <a href="?estado=completado" class="filter-tab {% if estado_filter == 'completado' %}active{% endif %}">
+                    Pedidos completados ({{ stats.pedidos_completados }})
+                </a>
+                <a href="?estado=cancelado" class="filter-tab {% if estado_filter == 'cancelado' %}active{% endif %}">
+                    Cancelados ({{ stats.pedidos_cancelados }})
+                </a>
+            </div>
+            
+            <div class="search-controls">
+                <form method="GET" class="search-form">
+                    <div class="search-group">
+                        <input type="text" name="q" placeholder="Buscar todos los pedidos" 
+                               value="{{ search_query }}" class="search-input">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i> Buscar pedidos
+                        </button>
+                    </div>
+                    <div class="filter-options">
+                        <select name="sort" class="sort-select">
+                            <option value="-fecha_pedido">Más recientes</option>
+                            <option value="fecha_pedido">Más antiguos</option>
+                            <option value="-total">Mayor precio</option>
+                            <option value="total">Menor precio</option>
+                        </select>
+                        <select name="periodo" class="period-select">
+                            <option value="">Todos los periodos</option>
+                            <option value="30">Últimos 30 días</option>
+                            <option value="90">Últimos 3 meses</option>
+                            <option value="365">Último año</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de Pedidos Estilo Amazon -->
+        {% if pedidos %}
+            <div class="pedidos-list-professional">
+                <div class="results-header">
+                    <p>{{ pedidos.start_index }}-{{ pedidos.end_index }} de {{ pedidos.paginator.count }} resultados para 
+                        {% if estado_filter %}"{{ estado_filter|capfirst }}"{% else %}"Todos los pedidos"{% endif %}
+                    </p>
+                </div>
+                
+                {% for pedido in pedidos %}
+                <div class="pedido-item-pro">
+                    <!-- Header del pedido -->
+                    <div class="pedido-header-pro">
+                        <div class="header-left">
+                            <div class="order-meta">
+                                <span class="order-label">PEDIDO REALIZADO</span>
+                                <span class="order-value">{{ pedido.fecha_pedido|date:"d M Y" }}</span>
+                            </div>
+                            <div class="order-meta">
+                                <span class="order-label">TOTAL</span>
+                                <span class="order-value">${{ pedido.total|floatformat:2 }}</span>
+                            </div>
+                            <div class="order-meta">
+                                <span class="order-label">ENVIAR A</span>
+                                <span class="order-value">{{ pedido.usuario.userprofile.empresa|default:pedido.usuario.username }}</span>
+                            </div>
+                        </div>
+                        <div class="header-right">
+                            <div class="order-number">
+                                <span class="order-label">PEDIDO N.º {{ pedido.id }}-{{ pedido.fecha_pedido|date:"ymd" }}-{{ pedido.id|stringformat:"07d" }}</span>
+                                {% with mensajes_count=mensajes_no_leidos|get_item:pedido.id %}
+                                    {% if mensajes_count %}
+                                        <span class="message-badge-order" title="{{ mensajes_count }} mensaje{{ mensajes_count|pluralize }} no leído{{ mensajes_count|pluralize }}">
+                                            <i class="fas fa-envelope"></i>
+                                            {{ mensajes_count }}
+                                        </span>
+                                    {% endif %}
+                                {% endwith %}
+                                <div class="order-actions">
+                                    <a href="{% url 'pedido_detail' pedido.id %}" class="link-action">Ver detalles del pedido</a>
+                                    <span class="separator">|</span>
+                                    <a href="#" class="link-action">Factura</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status del pedido -->
+                    <div class="pedido-status-pro">
+                        {% if pedido.estado == 'completado' %}
+                        <div class="status-message delivered">
+                            <i class="fas fa-check-circle"></i>
+                            <span><strong>Entregado el {{ pedido.fecha_pedido|date:"d M" }}</strong></span>
+                        </div>
+                        {% elif pedido.estado == 'en_proceso' %}
+                        <div class="status-message in-transit">
+                            <i class="fas fa-truck"></i>
+                            <span><strong>En proceso</strong> - Tu paquete está siendo preparado</span>
+                        </div>
+                        {% elif pedido.estado == 'pendiente' %}
+                        <div class="status-message pending">
+                            <i class="fas fa-clock"></i>
+                            <span><strong>Pendiente</strong> - Esperando confirmación del vendedor</span>
+                        </div>
+                        {% elif pedido.estado == 'cancelado' %}
+                        <div class="status-message cancelled">
+                            <i class="fas fa-times-circle"></i>
+                            <span><strong>Cancelado</strong></span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="vendor-info">
+                            <span class="vendor-label">Vendido por:</span>
+                            <strong>{{ pedido.empresa_info }}</strong>
+                            {% if pedido.empresa.userprofile.telefono %}
+                            <a href="tel:{{ pedido.empresa.userprofile.telefono }}" class="contact-vendor">
+                                <i class="fas fa-phone"></i> Contactar vendedor
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Productos del pedido -->
+                    <div class="pedido-content-pro">
+                        {% for detalle in pedido.detalles.all %}
+                        <div class="product-row">
+                            <div class="product-image">
+                                {% if detalle.producto %}
+                                    {% if detalle.producto.imagen_principal %}
+                                        <img src="{{ detalle.producto.imagen_principal }}" alt="{{ detalle.producto.nombre }}">
+                                    {% else %}
+                                        <div class="no-image">
+                                            <i class="fas fa-box"></i>
+                                        </div>
+                                    {% endif %}
+                                {% elif detalle.servicio %}
+                                    {% if detalle.servicio.imagen %}
+                                        <img src="{{ detalle.servicio.imagen.url }}" alt="{{ detalle.servicio.nombre }}">
+                                    {% else %}
+                                        <div class="no-image">
+                                            <i class="fas fa-concierge-bell"></i>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="product-details">
+                                <h3 class="product-title">{{ detalle.item_name }}</h3>
+                                {% if detalle.producto %}
+                                <p class="product-info">
+                                    Categoría: {{ detalle.producto.categoria|default:"General" }} | 
+                                    Cantidad: {{ detalle.cantidad }} | 
+                                    Precio unitario: ${{ detalle.precio_unitario|floatformat:2 }}
+                                </p>
+                                {% elif detalle.servicio %}
+                                <p class="product-info">
+                                    Servicio: {{ detalle.servicio.categoria|default:"General" }} | 
+                                    Cantidad: {{ detalle.cantidad }} | 
+                                    Precio: ${{ detalle.precio_unitario|floatformat:2 }}
+                                </p>
+                                {% endif %}
+                                
+                                <!-- Notas específicas del pedido -->
+                                {% if pedido.notas %}
+                                <div class="order-notes">
+                                    <i class="fas fa-sticky-note"></i>
+                                    <span><strong>Tus notas:</strong> {{ pedido.notas|truncatechars:100 }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="product-actions">
+                                <div class="action-buttons">
+                                    {% if pedido.estado == 'completado' %}
+                                    <button class="btn-action primary">
+                                        <i class="fas fa-redo"></i> Comprar de nuevo
+                                    </button>
+                                    <button class="btn-action secondary">
+                                        <i class="fas fa-star"></i> Escribir opinión
+                                    </button>
+                                    {% elif pedido.estado == 'en_proceso' %}
+                                    <button class="btn-action primary">
+                                        <i class="fas fa-map-marker-alt"></i> Rastrear paquete
+                                    </button>
+                                    <button class="btn-action secondary">
+                                        <i class="fas fa-comment"></i> Contactar vendedor
+                                    </button>
+                                    {% else %}
+                                    <button class="btn-action primary">
+                                        <i class="fas fa-eye"></i> Ver detalles
+                                    </button>
+                                    {% if pedido.estado == 'pendiente' %}
+                                    <button class="btn-action danger">
+                                        <i class="fas fa-times"></i> Cancelar pedido
+                                    </button>
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="product-price">
+                                    <span class="price-label">Subtotal:</span>
+                                    <span class="price-value">${{ detalle.subtotal|floatformat:2 }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <!-- Total del pedido -->
+                        <div class="order-total-row">
+                            <div class="total-breakdown">
+                                <div class="breakdown-line">
+                                    <span>Subtotal de artículos:</span>
+                                    <span>${{ pedido.total|floatformat:2 }}</span>
+                                </div>
+                                <div class="breakdown-line">
+                                    <span>Envío y manipulación:</span>
+                                    <span>$0.00</span>
+                                </div>
+                                <div class="breakdown-line total">
+                                    <span><strong>Total del pedido:</strong></span>
+                                    <span><strong>${{ pedido.total|floatformat:2 }}</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginación Premium -->
+            {% if pedidos.has_other_pages %}
+            <div class="pagination-container">
+                <ul class="pagination">
+                    {% if pedidos.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if estado_filter %}&estado={{ estado_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ pedidos.previous_page_number }}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            {{ pedidos.number }} de {{ pedidos.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if pedidos.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ pedidos.next_page_number }}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ pedidos.paginator.num_pages }}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+
+        {% else %}
+            <!-- Estado Vacío Profesional -->
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h2 class="empty-title">No hay pedidos que mostrar</h2>
+                <p class="empty-subtitle">
+                    Cuando realices pedidos, aparecerán aquí para que puedas realizar un seguimiento del estado de la entrega.
+                </p>
+                <a href="{% url 'home' %}" class="btn-primary">
+                    <i class="fas fa-store"></i>
+                    Comprar de nuevo
+                </a>
+            </div>
+        {% endif %}
+        
+        <!-- Botón de regreso fijo -->
+        <div style="position: fixed; bottom: 2rem; right: 2rem; z-index: 1000;">
+            <a href="{% url 'home' %}" class="btn-primary" style="border-radius: 50%; width: 60px; height: 60px; padding: 0; justify-content: center; box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);">
+                <i class="fas fa-home" style="font-size: 1.2rem;"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Funcionalidad profesional para la página de pedidos
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mantener el foco en el campo de búsqueda si hay una búsqueda activa
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput && searchInput.value) {
+            searchInput.focus();
+        }
+        
+        // Mejorar la experiencia de navegación con teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+        });
+        
+        // Agregar indicadores de carga para botones de acción
+        const actionButtons = document.querySelectorAll('.btn-action');
+        actionButtons.forEach(button => {
+            if (button.tagName === 'BUTTON') {
+                button.addEventListener('click', function() {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+                    this.disabled = true;
+                    
+                    // Simular procesamiento (en una implementación real, esto sería manejado por el backend)
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    }, 2000);
+                });
+            }
+        });
+    });
+    
+    // Función para imprimir la página con estilos optimizados
+    function printPage() {
+        const printStyles = `
+            <style>
+                @media print {
+                    .header-actions, .search-controls, .pagination-container { display: none; }
+                    .pedido-item-pro { break-inside: avoid; margin-bottom: 2rem; }
+                    .product-row { break-inside: avoid; }
+                    body { font-size: 12px; }
+                }
+            </style>
+        `;
+        document.head.insertAdjacentHTML('beforeend', printStyles);
+        window.print();
+    }
+</script>
+{% endblock %} 

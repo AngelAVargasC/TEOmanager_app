@@ -1,0 +1,1450 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Productos - ERP{% endblock %}
+
+{% block content %}
+<style>
+    .erp-products-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+    
+    /* Header ejecutivo */
+    .erp-header {
+        background: var(--panel-header-bg);
+        color: var(--panel-title-color);
+        padding: 2rem;
+        border-radius: var(--erp-radius);
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--panel-header-border);
+    }
+    
+    .erp-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    
+    .erp-header-content h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .erp-header-content p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 1.5rem;
+    }
+    
+    .erp-metrics {
+        display: flex;
+        gap: 2rem;
+    }
+    
+    .metric {
+        text-align: center;
+    }
+    
+    .metric-value {
+        display: block;
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .metric-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+    
+    .erp-actions {
+        display: flex;
+        gap: 1rem;
+        z-index: 2;
+    }
+    
+    .erp-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+    
+    .erp-btn-primary {
+        background: var(--btn-main-bg);
+        color: var(--btn-main-color);
+        border: 1px solid var(--btn-main-bg);
+    }
+    
+    .erp-btn-primary:hover {
+        background: var(--btn-main-hover-bg);
+        border-color: var(--btn-main-hover-bg);
+        transform: translateY(-2px);
+    }
+    
+    .erp-btn-secondary {
+        background: transparent;
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    .erp-btn-secondary:hover {
+        background: rgba(255,255,255,0.1);
+    }
+    
+    /* Toolbar avanzado */
+    .erp-toolbar {
+        background: var(--erp-surface);
+        border: 1px solid var(--erp-border);
+        border-radius: var(--erp-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--erp-shadow);
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        grid-template-areas: "search filters view";
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .toolbar-search-section {
+        grid-area: search;
+    }
+    
+    .toolbar-filters-section {
+        grid-area: filters;
+    }
+    
+    .toolbar-view-section {
+        grid-area: view;
+    }
+    
+    .mobile-filter-toggle {
+        display: none;
+        background: var(--erp-primary);
+        color: white;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background 0.2s;
+    }
+    
+    .mobile-filter-toggle:hover {
+        background: var(--erp-primary-dark);
+    }
+    
+    .mobile-filter-toggle i {
+        font-size: 0.8rem;
+    }
+    
+    .filters-row {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .search-advanced {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+    }
+    
+    .search-advanced input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 1px solid var(--erp-border);
+        border-radius: 6px;
+        font-size: 0.95rem;
+        background: var(--erp-surface);
+        color: var(--erp-text);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    .search-advanced input:focus {
+        border-color: var(--erp-primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+    
+    .search-advanced i {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--erp-gray-500);
+    }
+    
+    .erp-select {
+        padding: 0.6rem 1rem;
+        border: 1px solid var(--erp-border);
+        border-radius: 6px;
+        background: var(--erp-surface);
+        color: var(--erp-text);
+        font-size: 0.9rem;
+        min-width: 150px;
+    }
+    
+    .view-switcher {
+        display: flex;
+        border: 1px solid var(--erp-border);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    
+    .view-btn {
+        background: transparent;
+        border: none;
+        padding: 0.6rem 1rem;
+        cursor: pointer;
+        color: var(--erp-text);
+        transition: background 0.2s;
+    }
+    
+    .view-btn:hover,
+    .view-btn.active {
+        background: var(--erp-primary);
+        color: white;
+    }
+    
+    /* Grid de productos */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .product-card {
+        background: var(--erp-surface);
+        border: 1px solid var(--erp-border);
+        border-radius: var(--erp-radius);
+        box-shadow: var(--erp-shadow);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .product-image-container {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+    }
+    
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+    
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+    
+    .product-image-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--erp-gray-100);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--erp-gray-400);
+        font-size: 3rem;
+    }
+    
+    .product-status {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+    }
+    
+    .status-active {
+        background: rgba(34, 197, 94, 0.9);
+        color: white;
+    }
+    
+    .status-inactive {
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+    }
+    
+    .product-info {
+        padding: 1.5rem;
+    }
+    
+    .product-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--erp-text);
+    }
+    
+    .product-category {
+        color: var(--erp-gray-500);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .product-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat {
+        text-align: center;
+    }
+    
+    .stat-label {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--erp-gray-500);
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-value {
+        display: block;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .stat-value.price {
+        color: var(--erp-primary);
+    }
+    
+    .stat-value.stock {
+        color: var(--erp-success);
+    }
+    
+    .stock-low {
+        color: var(--erp-danger) !important;
+    }
+    
+    .stock-medium {
+        color: #f59e0b !important;
+    }
+    
+    .stock-high {
+        color: var(--erp-success) !important;
+    }
+    
+    .product-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .action-btn {
+        flex: 1;
+        padding: 0.6rem;
+        text-align: center;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+    
+    .action-view {
+        background: var(--erp-gray-100);
+        color: var(--erp-text);
+    }
+    
+    .action-edit {
+        background: var(--erp-primary);
+        color: white;
+    }
+    
+    .action-delete {
+        background: var(--erp-danger);
+        color: white;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    /* Tabla moderna */
+    .erp-table-container {
+        background: var(--erp-surface);
+        border: 1px solid var(--erp-border);
+        border-radius: var(--erp-radius);
+        box-shadow: var(--erp-shadow);
+        overflow: hidden;
+    }
+    
+    .table-wrapper {
+        overflow-x: auto;
+    }
+    
+    .erp-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .erp-table th {
+        background: var(--erp-gray-50);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--erp-text);
+        border-bottom: 1px solid var(--erp-border);
+        position: relative;
+    }
+    
+    .th-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+    
+    .sort-icon {
+        opacity: 0.5;
+        transition: opacity 0.2s;
+    }
+    
+    .sortable:hover .sort-icon {
+        opacity: 1;
+    }
+    
+    .erp-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--erp-border);
+        vertical-align: middle;
+    }
+    
+    .table-row:hover {
+        background: var(--erp-gray-50);
+    }
+    
+    .table-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 6px;
+        object-fit: cover;
+    }
+    
+    .table-image-placeholder {
+        width: 50px;
+        height: 50px;
+        background: var(--erp-gray-100);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--erp-gray-400);
+    }
+    
+    .product-cell {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .product-name {
+        color: var(--erp-text);
+        margin-bottom: 0.25rem;
+    }
+    
+    .product-code {
+        color: var(--erp-gray-500);
+    }
+    
+    .price-cell {
+        font-weight: 600;
+        color: var(--erp-primary);
+    }
+    
+    .stock-cell {
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        background: var(--erp-gray-100);
+    }
+    
+    .category-tag {
+        background: var(--erp-gray-100);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+    
+    .table-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .table-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+    
+    .table-btn-view {
+        background: var(--erp-gray-100);
+        color: var(--erp-text);
+    }
+    
+    .table-btn-edit {
+        background: var(--erp-primary);
+        color: white;
+    }
+    
+    .table-btn-delete {
+        background: var(--erp-danger);
+        color: white;
+    }
+    
+    .table-btn:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Estado vacío */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--erp-surface);
+        border: 1px solid var(--erp-border);
+        border-radius: var(--erp-radius);
+        box-shadow: var(--erp-shadow);
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--erp-gray-300);
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--erp-text);
+    }
+    
+    .empty-state p {
+        color: var(--erp-gray-500);
+        margin-bottom: 2rem;
+    }
+    
+    .empty-table-msg {
+        text-align: center;
+        padding: 3rem;
+    }
+    
+    .empty-table-content {
+        color: var(--erp-gray-500);
+    }
+    
+    .empty-table-content i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .erp-products-container {
+            padding: 1rem;
+        }
+        
+        .erp-header {
+            flex-direction: column;
+            gap: 1.5rem;
+            text-align: center;
+        }
+        
+        .erp-metrics {
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .erp-toolbar {
+            grid-template-columns: 1fr auto;
+            grid-template-areas: 
+                "search toggle"
+                "filters filters"
+                "view view";
+            padding: 1rem;
+        }
+        
+        .mobile-filter-toggle {
+            display: flex;
+            grid-area: toggle;
+        }
+        
+        .toolbar-filters-section {
+            grid-area: filters;
+            grid-column: 1 / -1;
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--erp-border);
+        }
+        
+        .toolbar-filters-section.show {
+            display: block;
+        }
+        
+        .toolbar-view-section {
+            grid-area: view;
+            grid-column: 1 / -1;
+            justify-self: center;
+            margin-top: 1rem;
+        }
+        
+        .filters-row {
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: stretch;
+        }
+        
+        .erp-select {
+            width: 100%;
+            min-width: auto;
+        }
+        
+        .search-advanced {
+            max-width: none;
+        }
+        
+        .search-advanced input {
+            font-size: 16px; /* Evita zoom en iOS */
+        }
+        
+        .products-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .table-wrapper {
+            font-size: 0.85rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .erp-header-content h1 {
+            font-size: 1.5rem;
+        }
+        
+        .erp-header-content p {
+            font-size: 1rem;
+        }
+        
+        .erp-metrics {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+        }
+        
+        .erp-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .erp-btn {
+            justify-content: center;
+        }
+    }
+    
+    /* Dark Mode */
+    body.dark-mode .erp-header {
+        background: var(--panel-header-bg);
+        color: var(--panel-title-color);
+        border-color: var(--panel-header-border);
+    }
+    
+    body.dark-mode .erp-toolbar,
+    body.dark-mode .erp-table-container,
+    body.dark-mode .product-card,
+    body.dark-mode .empty-state {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    
+    body.dark-mode .erp-table th {
+        background: #334155;
+        color: #f1f5f9;
+    }
+    
+    body.dark-mode .table-row:hover {
+        background: #334155;
+    }
+    
+    body.dark-mode .product-image-placeholder,
+    body.dark-mode .table-image-placeholder {
+        background: #334155;
+    }
+    
+    body.dark-mode .category-tag,
+    body.dark-mode .stock-cell {
+        background: #334155;
+    }
+    
+    body.dark-mode .action-view,
+    body.dark-mode .table-btn-view {
+        background: #334155;
+        color: #f1f5f9;
+    }
+    /* Estilos del panel con iconos flotantes */
+    .panel {
+        margin-bottom: 2rem;
+        background: var(--panel-bg);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--panel-shadow);
+    }
+    
+    .panel-header {
+        background: var(--panel-header-bg);
+        color: var(--panel-header-color);
+        padding: 1.5rem;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .panel-header .panel-title {
+        position: relative;
+        z-index: 2;
+        font-size: 1.2rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: none;
+    }
+    
+    .panel-header .icono-titulo {
+        font-size: 1.1em;
+    }
+    
+    /* Iconos flotantes en el panel header */
+    .panel-header .header-floating-icons {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        z-index: 1;
+    }
+    
+    /* ELIMINADO: Animaciones de iconos flotantes innecesarias */
+    .panel-header .header-floating-icons i {
+        display: none; /* Ocultar iconos flotantes para mejor performance */
+    }
+    
+    .panel-content {
+        padding: 1.5rem;
+    }
+    
+    /* Botón en el panel header */
+    .panel-header .btn-main {
+        position: relative;
+        z-index: 2;
+        background: var(--btn-main-bg);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        /* Eliminado: transition innecesario */
+    }
+    
+    .panel-header .btn-main:hover {
+        background: var(--btn-main-hover-bg);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .panel-header .btn-main i {
+        font-size: 0.9em;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        color: var(--btn-main-bg);
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+    .section-desc {
+        color: var(--section-desc-color);
+        margin-bottom: 2rem;
+    }
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        margin-bottom: 2rem;
+    }
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .custom-table th, .custom-table td {
+        padding: 0.7em 0.6em;
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 1rem;
+    }
+    .custom-table th {
+        color: var(--custom-table-th-color);
+        font-weight: 600;
+        background: var(--custom-table-th-bg);
+    }
+    .producto-thumbnail {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    .no-image {
+        width: 50px;
+        height: 50px;
+        background: #f0f0f0;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        color: #666;
+    }
+    .badge {
+        display: inline-block;
+        padding: 0.2em 0.8em;
+        border-radius: 12px;
+        font-size: 0.95em;
+        font-weight: 600;
+    }
+    .badge.active {
+        background: #d1fae5;
+        color: #059669;
+    }
+    .badge.inactive {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+    .btn-panel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.3em 0.2em;
+        font-size: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-right: 0.5rem;
+        margin-bottom: 10px;
+    }
+    .btn-panel:hover {
+        background: #1746a2;
+    }
+    .btn-panel.btn-danger {
+        background: #b91c1c;
+    }
+    .btn-panel.btn-danger:hover {
+        background: #7f1d1d;
+    }
+    .empty-msg {
+        color: var(--empty-msg-color);
+        font-size: 1rem;
+        text-align: center;
+        padding: 1.5em 0;
+    }
+    .btn-main {
+        display: inline-block;
+        padding: 0.7em 1.5em;
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1vmax;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-main:hover {
+        background: #1746a2;
+    }
+    .search-input, .filter-input, .custom-table select.filter-input {
+        border: 1.5px solid #d1d5db;
+        border-radius: 7px;
+        padding: 0.45em 0.9em;
+        font-size: 1rem;
+        background: #f8fafc;
+        color: #1e293b;
+        outline: none;
+        margin-top: 0.3em;
+        margin-bottom: 0.1em;
+        transition: border 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 4px rgba(37,99,235,0.04);
+        width: 100%;
+        max-width: 100%;
+    }
+    .search-input:focus, .filter-input:focus, .custom-table select.filter-input:focus {
+        border: 1.5px solid #2563eb;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(37,99,235,0.10);
+    }
+    .custom-table th {
+        vertical-align: bottom;
+    }
+    .sortable {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+    }
+    .sort-icon {
+        font-size: 1.1em;
+        color: #2563eb;
+        margin-left: 0.2em;
+        vertical-align: middle;
+    }
+    .btn-panel .btn-text {
+        display: inline;
+    }
+    .filter-placeholder {
+        height: 38px;
+        display: block;
+    }
+    @media (max-width: 600px) {
+        .section-title {
+            font-size: 1.1rem;
+        }
+        .section-desc {
+            font-size: 0.97rem;
+        }
+        .custom-table th, .custom-table td {
+            padding: 0.4em 0.3em;
+            font-size: 0.93rem;
+        }
+        .producto-thumbnail, .no-image {
+            width: 36px;
+            height: 36px;
+            font-size: 0.7rem;
+        }
+        .btn-panel .btn-text {
+            display: none;
+        }
+        .btn-panel {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            min-height: 36px;
+            max-width: 36px;
+            max-height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 0.4rem;
+        }
+        .custom-table td:last-child {
+            min-width: 36px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            align-items: center;
+        }
+        .btn-main {
+            font-size: 0.8rem;
+            width: auto;
+            margin-top: 0rem;
+        }
+    }
+    </style>
+<div class="erp-products-container">
+    <!-- Header ejecutivo -->
+    <div class="erp-header">
+        <div class="erp-header-content">
+            <h1><i class="fas fa-cube"></i> Gestión de Productos</h1>
+            <p>Control integral del inventario y catálogo empresarial</p>
+            <div class="erp-metrics">
+                <div class="metric">
+                    <span class="metric-value">{{ productos.count }}</span>
+                    <span class="metric-label">Total Productos</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">{{ productos|length|add:"0" }}</span>
+                    <span class="metric-label">En Stock</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">${{ productos.0.precio|default:"0" }}</span>
+                    <span class="metric-label">Precio Promedio</span>
+                </div>
+            </div>
+        </div>
+        <div class="erp-actions">
+            <a href="{% url 'products:crear_producto' %}" class="erp-btn erp-btn-primary">
+                <i class="fas fa-plus"></i> Nuevo Producto
+            </a>
+            <button class="erp-btn erp-btn-secondary" onclick="exportData()">
+                <i class="fas fa-download"></i> Exportar
+            </button>
+        </div>
+    </div>
+
+    <!-- Barra de herramientas avanzada -->
+    <div class="erp-toolbar">
+        <!-- Sección de búsqueda -->
+        <div class="toolbar-search-section">
+            <div class="search-advanced">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Buscar productos...">
+            </div>
+        </div>
+        
+        <!-- Botón de filtros móvil -->
+        <button class="mobile-filter-toggle" id="mobileFilterToggle">
+            <i class="fas fa-filter"></i>
+            <span>Filtros</span>
+        </button>
+        
+        <!-- Sección de filtros -->
+        <div class="toolbar-filters-section" id="filtersSection">
+            <div class="filters-row">
+                <select id="categoryFilter" class="erp-select">
+                    <option value="">📦 Todas las categorías</option>
+                    {% for categoria in productos.values_list.categoria.distinct %}
+                        {% if categoria %}
+                            <option value="{{ categoria }}">{{ categoria }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <select id="stockFilter" class="erp-select">
+                    <option value="">📊 Todos los stocks</option>
+                    <option value="low">Stock bajo (&lt;10)</option>
+                    <option value="medium">Stock medio (10-50)</option>
+                    <option value="high">Stock alto (&gt;50)</option>
+                </select>
+                <select id="statusFilter" class="erp-select">
+                    <option value="">🏷️ Todos los estados</option>
+                    <option value="active">Activos</option>
+                    <option value="inactive">Inactivos</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Sección de vista -->
+        <div class="toolbar-view-section">
+            <div class="view-switcher">
+                <button id="gridView" class="view-btn active" title="Vista cuadrícula">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button id="tableView" class="view-btn" title="Vista tabla">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vista en cuadrícula (por defecto) -->
+    <div id="gridContainer" class="products-grid">
+        {% for producto in productos %}
+            <div class="product-card" data-category="{{ producto.categoria|default:'Sin categoría' }}" data-stock="{{ producto.stock }}" data-status="{% if producto.activo %}active{% else %}inactive{% endif %}">
+                <div class="product-image-container">
+                    {% if producto.imagen_principal %}
+                        <img src="{{ producto.imagen_principal }}" alt="{{ producto.nombre }}" class="product-image">
+                    {% else %}
+                        <div class="product-image-placeholder">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    {% endif %}
+                    <div class="product-status">
+                        <span class="status-badge {% if producto.activo %}status-active{% else %}status-inactive{% endif %}">
+                            {% if producto.activo %}✓ Activo{% else %}⏸ Inactivo{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">{{ producto.nombre }}</h3>
+                    <p class="product-category">{{ producto.categoria|default:"Sin categoría" }}</p>
+                    <div class="product-stats">
+                        <div class="stat">
+                            <span class="stat-label">Precio</span>
+                            <span class="stat-value price">${{ producto.precio }}</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Stock</span>
+                            <span class="stat-value stock {% if producto.stock < 10 %}stock-low{% elif producto.stock < 50 %}stock-medium{% else %}stock-high{% endif %}">
+                                {{ producto.stock }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <a href="{% url 'products:detalle_producto' producto.pk %}" class="action-btn action-view">
+                            <i class="fas fa-eye"></i> Ver
+                        </a>
+                        <a href="{% url 'products:editar_producto' producto.pk %}" class="action-btn action-edit">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a href="{% url 'products:eliminar_producto' producto.pk %}" class="action-btn action-delete" onclick="return confirm('¿Eliminar este producto?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <h3>No hay productos registrados</h3>
+                <p>Comienza agregando tu primer producto al inventario</p>
+                <a href="{% url 'products:crear_producto' %}" class="erp-btn erp-btn-primary">
+                    <i class="fas fa-plus"></i> Crear Primer Producto
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Vista de tabla moderna -->
+    <div id="tableContainer" class="erp-table-container" style="display: none;">
+        <div class="table-wrapper">
+            <table class="erp-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="imagen">
+                            <div class="th-content">
+                                <span>Imagen</span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="nombre">
+                            <div class="th-content">
+                                <span>Producto</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="precio">
+                            <div class="th-content">
+                                <span>Precio</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="stock">
+                            <div class="th-content">
+                                <span>Stock</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="categoria">
+                            <div class="th-content">
+                                <span>Categoría</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </div>
+                        </th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                        <tr class="table-row" data-category="{{ producto.categoria|default:'Sin categoría' }}" data-stock="{{ producto.stock }}" data-status="{% if producto.activo %}active{% else %}inactive{% endif %}">
+                            <td>
+                                {% if producto.imagen_principal %}
+                                    <img src="{{ producto.imagen_principal }}" alt="{{ producto.nombre }}" class="table-image">
+                                {% else %}
+                                    <div class="table-image-placeholder">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="product-cell">
+                                    <strong class="product-name">{{ producto.nombre }}</strong>
+                                    <small class="product-code">#{{ producto.pk }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="price-cell">${{ producto.precio }}</span>
+                            </td>
+                            <td>
+                                <span class="stock-cell {% if producto.stock < 10 %}stock-low{% elif producto.stock < 50 %}stock-medium{% else %}stock-high{% endif %}">
+                                    {{ producto.stock }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="category-tag">{{ producto.categoria|default:"Sin categoría" }}</span>
+                            </td>
+                            <td>
+                                <span class="status-badge {% if producto.activo %}status-active{% else %}status-inactive{% endif %}">
+                                    {% if producto.activo %}✓ Activo{% else %}⏸ Inactivo{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <a href="{% url 'products:detalle_producto' producto.pk %}" class="table-btn table-btn-view" title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'products:editar_producto' producto.pk %}" class="table-btn table-btn-edit" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'products:eliminar_producto' producto.pk %}" class="table-btn table-btn-delete" title="Eliminar" onclick="return confirm('¿Eliminar este producto?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="empty-table-msg">
+                                <div class="empty-table-content">
+                                    <i class="fas fa-cube"></i>
+                                    <p>No hay productos registrados</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+// Toggle de filtros móvil
+document.getElementById('mobileFilterToggle').addEventListener('click', function() {
+    const filtersSection = document.getElementById('filtersSection');
+    const isVisible = filtersSection.classList.contains('show');
+    
+    if (isVisible) {
+        filtersSection.classList.remove('show');
+        this.innerHTML = '<i class="fas fa-filter"></i><span>Filtros</span>';
+    } else {
+        filtersSection.classList.add('show');
+        this.innerHTML = '<i class="fas fa-times"></i><span>Cerrar</span>';
+    }
+});
+
+// Alternador de vistas
+document.getElementById('gridView').addEventListener('click', function() {
+    document.getElementById('gridContainer').style.display = 'grid';
+    document.getElementById('tableContainer').style.display = 'none';
+    this.classList.add('active');
+    document.getElementById('tableView').classList.remove('active');
+});
+
+document.getElementById('tableView').addEventListener('click', function() {
+    document.getElementById('gridContainer').style.display = 'none';
+    document.getElementById('tableContainer').style.display = 'block';
+    this.classList.add('active');
+    document.getElementById('gridView').classList.remove('active');
+});
+
+// Sistema de filtrado avanzado
+function filterProducts() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const categoryFilter = document.getElementById('categoryFilter').value.toLowerCase();
+    const stockFilter = document.getElementById('stockFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    // Filtrar cards
+    const cards = document.querySelectorAll('.product-card');
+    cards.forEach(card => {
+        const title = card.querySelector('.product-title').textContent.toLowerCase();
+        const category = card.getAttribute('data-category').toLowerCase();
+        const stock = parseInt(card.getAttribute('data-stock'));
+        const status = card.getAttribute('data-status');
+        
+        let showCard = true;
+        
+        // Filtro de búsqueda
+        if (searchTerm && !title.includes(searchTerm) && !category.includes(searchTerm)) {
+            showCard = false;
+        }
+        
+        // Filtro de categoría
+        if (categoryFilter && category !== categoryFilter) {
+            showCard = false;
+        }
+        
+        // Filtro de stock
+        if (stockFilter) {
+            if (stockFilter === 'low' && stock >= 10) showCard = false;
+            if (stockFilter === 'medium' && (stock < 10 || stock > 50)) showCard = false;
+            if (stockFilter === 'high' && stock <= 50) showCard = false;
+        }
+        
+        // Filtro de estado
+        if (statusFilter && status !== statusFilter) {
+            showCard = false;
+        }
+        
+        card.style.display = showCard ? 'block' : 'none';
+    });
+    
+    // Filtrar filas de tabla
+    const rows = document.querySelectorAll('.table-row');
+    rows.forEach(row => {
+        const title = row.querySelector('.product-name').textContent.toLowerCase();
+        const category = row.getAttribute('data-category').toLowerCase();
+        const stock = parseInt(row.getAttribute('data-stock'));
+        const status = row.getAttribute('data-status');
+        
+        let showRow = true;
+        
+        // Filtro de búsqueda
+        if (searchTerm && !title.includes(searchTerm) && !category.includes(searchTerm)) {
+            showRow = false;
+        }
+        
+        // Filtro de categoría
+        if (categoryFilter && category !== categoryFilter) {
+            showRow = false;
+        }
+        
+        // Filtro de stock
+        if (stockFilter) {
+            if (stockFilter === 'low' && stock >= 10) showRow = false;
+            if (stockFilter === 'medium' && (stock < 10 || stock > 50)) showRow = false;
+            if (stockFilter === 'high' && stock <= 50) showRow = false;
+        }
+        
+        // Filtro de estado
+        if (statusFilter && status !== statusFilter) {
+            showRow = false;
+        }
+        
+        row.style.display = showRow ? '' : 'none';
+    });
+}
+
+// Event listeners para filtros
+document.getElementById('searchInput').addEventListener('input', filterProducts);
+document.getElementById('categoryFilter').addEventListener('change', filterProducts);
+document.getElementById('stockFilter').addEventListener('change', filterProducts);
+document.getElementById('statusFilter').addEventListener('change', filterProducts);
+
+// Ordenamiento de tabla
+let sortOrder = {};
+
+document.querySelectorAll('.sortable').forEach(header => {
+    header.addEventListener('click', function() {
+        const sortBy = this.getAttribute('data-sort');
+        if (!sortBy) return;
+        
+        sortOrder[sortBy] = sortOrder[sortBy] === 'asc' ? 'desc' : 'asc';
+        
+        // Actualizar iconos
+        document.querySelectorAll('.sort-icon').forEach(icon => {
+            icon.className = 'fas fa-sort sort-icon';
+        });
+        this.querySelector('.sort-icon').className = `fas fa-sort-${sortOrder[sortBy] === 'asc' ? 'up' : 'down'} sort-icon`;
+        
+        // Ordenar filas
+        const tbody = document.querySelector('.erp-table tbody');
+        const rows = Array.from(tbody.querySelectorAll('.table-row'));
+        
+        rows.sort((a, b) => {
+            let aVal, bVal;
+            
+            switch(sortBy) {
+                case 'nombre':
+                    aVal = a.querySelector('.product-name').textContent.toLowerCase();
+                    bVal = b.querySelector('.product-name').textContent.toLowerCase();
+                    break;
+                case 'precio':
+                    aVal = parseFloat(a.querySelector('.price-cell').textContent.replace('$', ''));
+                    bVal = parseFloat(b.querySelector('.price-cell').textContent.replace('$', ''));
+                    break;
+                case 'stock':
+                    aVal = parseInt(a.getAttribute('data-stock'));
+                    bVal = parseInt(b.getAttribute('data-stock'));
+                    break;
+                case 'categoria':
+                    aVal = a.getAttribute('data-category').toLowerCase();
+                    bVal = b.getAttribute('data-category').toLowerCase();
+                    break;
+            }
+            
+            if (aVal < bVal) return sortOrder[sortBy] === 'asc' ? -1 : 1;
+            if (aVal > bVal) return sortOrder[sortBy] === 'asc' ? 1 : -1;
+            return 0;
+        });
+        
+        rows.forEach(row => tbody.appendChild(row));
+    });
+});
+
+// Función de exportación (placeholder)
+function exportData() {
+    alert('Función de exportación en desarrollo');
+}
+
+// Animaciones de entrada
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.product-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 50);
+    });
+});
+</script>
+{% endblock %} 

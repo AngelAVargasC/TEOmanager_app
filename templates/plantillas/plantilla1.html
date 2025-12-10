@@ -1,0 +1,385 @@
+{% load webpages_extras %}
+<style>
+/* ⭐ PLANTILLA 1: CLÁSICA FREE - CSS COMPLETAMENTE AISLADO ⭐ */
+/* Todos los estilos usan prefijo único t1-blog- para evitar conflictos */
+
+.t1-blog-wrapper {
+    font-family: Georgia, 'Times New Roman', serif;
+    color: #333;
+    line-height: 1.8;
+    background: #fafafa;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    /* Aislar estilos para no interferir con navbar del sistema */
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    isolation: isolate; /* Aislamiento CSS */
+}
+
+/* ✨ Header Blog Style - Aislado ✨ */
+.t1-blog-header {
+    position: fixed;
+    top: 58px; /* Debajo del navbar del sistema */
+    left: var(--sidebar-width, 250px); /* Respeta el ancho de la sidebar */
+    right: 0;
+    width: calc(100% - var(--sidebar-width, 250px));
+    background: #fff;
+    border-bottom: 3px solid #2563eb;
+    padding: 2rem 2rem;
+    text-align: center;
+    z-index: 99; /* Menor que el navbar del sistema (z-index: 1000) */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin: 0;
+    transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ajuste cuando la sidebar está colapsada */
+.main-content.sidebar-collapsed ~ * .t1-blog-header,
+body:has(.sidebar.collapsed) .t1-blog-header {
+    left: 0;
+    width: 100%;
+}
+
+.t1-blog-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #1e293b;
+    font-family: 'Arial', sans-serif;
+}
+
+.t1-blog-header p {
+    margin: 0.5rem 0 0;
+    color: #64748b;
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+/* ✨ Hero Blog Style - Article Layout ✨ */
+.t1-blog-hero {
+    background: #fff;
+    padding: 3rem 2rem;
+    padding-top: 12rem; /* Espacio para navbar del sistema + header de plantilla */
+    border-bottom: 1px solid #e5e7eb;
+    width: 100%;
+    margin: 0;
+}
+
+.t1-blog-hero-image {
+    width: 100%;
+    height: 400px;
+    background: #e5e7eb;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.t1-blog-hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.t1-blog-hero-content h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    line-height: 1.3;
+}
+
+.t1-blog-hero-content p {
+    font-size: 1.1rem;
+    color: #475569;
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+}
+
+/* ✨ Main Content - Two Column Layout ✨ */
+.t1-blog-main {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+    padding: 3rem;
+    background: #fff;
+}
+
+.t1-blog-content {
+    min-width: 0;
+}
+
+.t1-blog-sidebar {
+    border-left: 1px solid #e5e7eb;
+    padding-left: 3rem;
+}
+
+.t1-blog-section {
+    margin-bottom: 3rem;
+}
+
+.t1-blog-section h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #1e293b;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #2563eb;
+    font-family: 'Arial', sans-serif;
+}
+
+/* ✨ Products Grid - Blog Card Style ✨ */
+.t1-blog-products-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+.t1-blog-product-card {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.3s ease;
+}
+
+.t1-blog-product-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.t1-blog-product-image {
+    width: 100%;
+    height: 200px;
+    background: #e5e7eb;
+    overflow: hidden;
+}
+
+.t1-blog-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.t1-blog-product-info {
+    padding: 1.5rem;
+}
+
+.t1-blog-product-info h4 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #1e293b;
+    font-family: 'Arial', sans-serif;
+}
+
+.t1-blog-product-info p {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.t1-blog-product-price {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+/* ✨ Services List - Blog Style ✨ */
+.t1-blog-services-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.t1-blog-service-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.3s ease;
+}
+
+.t1-blog-service-item:hover {
+    background: #f8fafc;
+}
+
+.t1-blog-service-item:last-child {
+    border-bottom: none;
+}
+
+.t1-blog-service-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.t1-blog-service-price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+/* ✨ Sidebar Widgets ✨ */
+.t1-blog-widget {
+    background: #f8fafc;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+.t1-blog-widget h4 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    font-family: 'Arial', sans-serif;
+}
+
+.t1-blog-widget p {
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.7;
+}
+
+/* ✨ Footer Blog Style ✨ */
+.t1-blog-footer {
+    background: #1e293b;
+    color: #fff;
+    padding: 3rem;
+    text-align: center;
+}
+
+.t1-blog-footer p {
+    margin: 0;
+    font-size: 1rem;
+    color: #94a3b8;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .t1-blog-main {
+        grid-template-columns: 1fr;
+    }
+    .t1-blog-sidebar {
+        border-left: none;
+        border-top: 1px solid #e5e7eb;
+        padding-left: 0;
+        padding-top: 3rem;
+    }
+    .t1-blog-products-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="t1-blog-wrapper">
+    <!-- ✨ Header Blog Style - Debajo del navbar del sistema ✨ -->
+    <header class="t1-blog-header">
+        <h1>{{ landing.titulo }}</h1>
+        {% if landing.descripcion %}
+        <p>{{ landing.descripcion }}</p>
+        {% endif %}
+    </header>
+
+    <!-- ✨ Hero Article Style ✨ -->
+    <section class="t1-blog-hero">
+        {% if landing|get_hero_url %}
+        <div class="t1-blog-hero-image">
+            <img src="{{ landing|get_hero_url }}" alt="Hero">
+        </div>
+        {% endif %}
+        {% if landing.contenido or landing.seccion_sobre_nosotros_texto %}
+        <div class="t1-blog-hero-content">
+            <h2>{{ landing.seccion_sobre_nosotros_titulo|default:"Sobre Nosotros" }}</h2>
+            <p>{{ landing.seccion_sobre_nosotros_texto|default:landing.contenido|safe }}</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- ✨ Main Content - Two Column ✨ -->
+    <div class="t1-blog-main">
+        <div class="t1-blog-content">
+            <!-- Products Section -->
+            {% if products %}
+            <section class="t1-blog-section">
+                <h3>{{ landing.seccion_productos_titulo|default:"Nuestros Productos" }}</h3>
+                {% if landing.seccion_productos_subtitulo %}
+                <p style="color: #64748b; margin-bottom: 2rem;">{{ landing.seccion_productos_subtitulo }}</p>
+                {% endif %}
+                <div class="t1-blog-products-grid">
+                    {% for product in products %}
+                    <a href="{% url 'products:detalle_producto' product.pk %}" class="t1-blog-product-card">
+                        <div class="t1-blog-product-image">
+                            {% if product.imagen_principal %}
+                            <img src="{{ product.imagen_principal }}" alt="{{ product.nombre }}">
+                            {% endif %}
+                        </div>
+                        <div class="t1-blog-product-info">
+                            <h4>{{ product.nombre }}</h4>
+                            <p>{{ product.descripcion|truncatechars:100 }}</p>
+                            <div class="t1-blog-product-price">$ {{ product.precio }}</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- Services Section -->
+            {% if services %}
+            <section class="t1-blog-section">
+                <h3>{{ landing.seccion_servicios_titulo|default:"Nuestros Servicios" }}</h3>
+                {% if landing.seccion_servicios_subtitulo %}
+                <p style="color: #64748b; margin-bottom: 2rem;">{{ landing.seccion_servicios_subtitulo }}</p>
+                {% endif %}
+                <ul class="t1-blog-services-list">
+                    {% for srv in services %}
+                    <a href="{% url 'products:detalle_servicio' srv.pk %}" class="t1-blog-service-item">
+                        <span class="t1-blog-service-name">{{ srv.nombre }}</span>
+                        <span class="t1-blog-service-price">$ {{ srv.precio }}</span>
+                    </a>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endif %}
+        </div>
+
+        <!-- ✨ Sidebar ✨ -->
+        <aside class="t1-blog-sidebar">
+            <div class="t1-blog-widget">
+                <h4>Información</h4>
+                <p>Bienvenido a nuestro catálogo. Aquí encontrarás nuestros productos y servicios disponibles.</p>
+            </div>
+            
+            {% if landing.seccion_testimonios_texto %}
+            <div class="t1-blog-widget">
+                <h4>Testimonios</h4>
+                <p>{{ landing.seccion_testimonios_texto|truncatewords:30|safe }}</p>
+            </div>
+            {% endif %}
+
+            {% if landing.seccion_contacto_texto %}
+            <div class="t1-blog-widget">
+                <h4>{{ landing.seccion_contacto_titulo|default:"Contacto" }}</h4>
+                <p>{{ landing.seccion_contacto_texto }}</p>
+                {% if landing.seccion_contacto_boton_texto and landing.seccion_contacto_boton_url %}
+                <a href="{{ landing.seccion_contacto_boton_url }}" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: #2563eb; color: #fff; text-decoration: none; border-radius: 4px; font-weight: 600;">{{ landing.seccion_contacto_boton_texto }}</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </aside>
+    </div>
+
+    <!-- ✨ Footer ✨ -->
+    <footer class="t1-blog-footer">
+        <p>&copy; 2024 {{ landing.titulo }}. Todos los derechos reservados.</p>
+    </footer>
+</div>

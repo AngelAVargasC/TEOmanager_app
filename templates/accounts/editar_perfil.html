@@ -1,0 +1,654 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Perfil - ERP{% endblock %}
+
+{% block content %}
+<div class="erp-form-container">
+    <!-- Header ejecutivo -->
+    <div class="erp-form-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fas fa-user-edit"></i>
+            </div>
+            <div class="header-text">
+                <h1>Editar Mi Perfil</h1>
+                <p>Actualiza tu información {% if perfil.tipo_cuenta == 'empresa' %}de empresa{% else %}personal{% endif %}</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'perfil' %}" class="erp-btn erp-btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al perfil
+            </a>
+        </div>
+    </div>
+
+    <!-- Formulario principal -->
+    <div class="erp-form-content">
+        <form method="post" class="erp-form">
+            {% csrf_token %}
+            
+            <!-- Alertas de error -->
+            {% if form.errors %}
+                <div class="erp-alert erp-alert-error">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <h4>Errores en el formulario</h4>
+                        <p>Por favor, revisa y corrige los campos marcados en rojo.</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Grid de campos -->
+            <div class="form-grid">
+                <!-- Información de cuenta -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-user-cog"></i> Información de Cuenta</h3>
+                        <p>Datos básicos de tu cuenta</p>
+                    </div>
+                    
+                    <!-- Username -->
+                    <div class="erp-field-group {% if form.username.errors %}has-error{% endif %}">
+                        <label class="erp-label" for="{{ form.username.id_for_label }}">
+                            {{ form.username.label }}
+                            <span class="required">*</span>
+                        </label>
+                        <div class="erp-input-wrapper">
+                            {{ form.username }}
+                            <div class="input-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+                        {% for error in form.username.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Email -->
+                    <div class="erp-field-group {% if form.email.errors %}has-error{% endif %}">
+                        <label class="erp-label" for="{{ form.email.id_for_label }}">
+                            {{ form.email.label }}
+                            <span class="required">*</span>
+                        </label>
+                        <div class="erp-input-wrapper">
+                            {{ form.email }}
+                            <div class="input-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                        </div>
+                        {% for error in form.email.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Campos solo para usuarios consumidores -->
+                    {% if perfil.tipo_cuenta == 'usuario' %}
+                        <!-- Nombre -->
+                        <div class="erp-field-group {% if form.first_name.errors %}has-error{% endif %}">
+                            <label class="erp-label" for="{{ form.first_name.id_for_label }}">
+                                {{ form.first_name.label }}
+                                <span class="required">*</span>
+                            </label>
+                            <div class="erp-input-wrapper">
+                                {{ form.first_name }}
+                                <div class="input-icon">
+                                    <i class="fas fa-id-card"></i>
+                                </div>
+                            </div>
+                            {% for error in form.first_name.errors %}
+                                <div class="field-error">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Apellido -->
+                        <div class="erp-field-group {% if form.last_name.errors %}has-error{% endif %}">
+                            <label class="erp-label" for="{{ form.last_name.id_for_label }}">
+                                {{ form.last_name.label }}
+                                <span class="required">*</span>
+                            </label>
+                            <div class="erp-input-wrapper">
+                                {{ form.last_name }}
+                                <div class="input-icon">
+                                    <i class="fas fa-id-card"></i>
+                                </div>
+                            </div>
+                            {% for error in form.last_name.errors %}
+                                <div class="field-error">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Información adicional -->
+                    <div class="info-box">
+                        <div class="info-item">
+                            <label>Tipo de Cuenta:</label>
+                            <span class="badge badge-info">{{ perfil.get_tipo_cuenta_display }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Miembro desde:</label>
+                            <span>{{ perfil.fecha_registro|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de empresa/contacto -->
+                <div class="form-section">
+                    <div class="section-header">
+                        {% if perfil.tipo_cuenta == 'empresa' %}
+                            <h3><i class="fas fa-building"></i> Información de Empresa</h3>
+                            <p>Datos de tu empresa o negocio</p>
+                        {% else %}
+                            <h3><i class="fas fa-address-card"></i> Información de Contacto</h3>
+                            <p>Datos de contacto adicionales</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Campo empresa solo para empresas -->
+                    {% if form.empresa %}
+                        <div class="erp-field-group {% if form.empresa.errors %}has-error{% endif %}">
+                            <label class="erp-label" for="{{ form.empresa.id_for_label }}">
+                                {{ form.empresa.label }}
+                                <span class="required">*</span>
+                            </label>
+                            <div class="erp-input-wrapper">
+                                {{ form.empresa }}
+                                <div class="input-icon">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                            </div>
+                            {% for error in form.empresa.errors %}
+                                <div class="field-error">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Teléfono -->
+                    <div class="erp-field-group {% if form.telefono.errors %}has-error{% endif %}">
+                        <label class="erp-label" for="{{ form.telefono.id_for_label }}">
+                            {{ form.telefono.label }}
+                            {% if form.telefono.field.required %}<span class="required">*</span>{% endif %}
+                        </label>
+                        <div class="erp-input-wrapper">
+                            {{ form.telefono }}
+                            <div class="input-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                        </div>
+                        {% for error in form.telefono.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Dirección -->
+                    <div class="erp-field-group {% if form.direccion.errors %}has-error{% endif %}">
+                        <label class="erp-label" for="{{ form.direccion.id_for_label }}">
+                            {{ form.direccion.label }}
+                            {% if form.direccion.field.required %}<span class="required">*</span>{% endif %}
+                        </label>
+                        <div class="erp-input-wrapper">
+                            {{ form.direccion }}
+                            <div class="input-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                        </div>
+                        {% for error in form.direccion.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Estado de cuenta (solo lectura) -->
+                    {% if perfil.tipo_cuenta == 'empresa' %}
+                    <div class="info-box">
+                        <div class="info-item">
+                            <label>Estado de Suscripción:</label>
+                            <span class="badge {% if perfil.estado_suscripcion == 'activa' %}badge-active{% else %}badge-inactive{% endif %}">
+                                {{ perfil.estado_suscripcion|title }}
+                            </span>
+                        </div>
+                        {% if perfil.fecha_vencimiento %}
+                        <div class="info-item">
+                            <label>Fecha de Vencimiento:</label>
+                            <span>{{ perfil.fecha_vencimiento|date:"d/m/Y" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="form-actions">
+                <button type="submit" class="erp-btn erp-btn-primary erp-btn-large">
+                    <i class="fas fa-save"></i>
+                    Guardar Cambios
+                </button>
+                <a href="{% url 'perfil' %}" class="erp-btn erp-btn-secondary erp-btn-large">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.erp-form-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+/* Header ejecutivo */
+.erp-form-header {
+    background: var(--panel-header-bg);
+    color: var(--panel-title-color);
+    padding: 2rem;
+    border-radius: var(--erp-radius);
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--panel-header-border);
+}
+
+.erp-form-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    z-index: 2;
+}
+
+.header-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--btn-main-bg);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--btn-main-color);
+}
+
+.header-text h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.header-text p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.header-actions {
+    z-index: 2;
+}
+
+.erp-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.erp-btn-primary {
+    background: var(--btn-main-bg);
+    color: var(--btn-main-color);
+}
+
+.erp-btn-primary:hover {
+    background: var(--btn-main-hover-bg);
+    transform: translateY(-2px);
+}
+
+.erp-btn-secondary {
+    background: var(--btn-main-bg);
+    color: var(--btn-main-color);
+    border: 1px solid var(--btn-main-bg);
+}
+
+.erp-btn-secondary:hover {
+    background: var(--btn-main-hover-bg);
+    border-color: var(--btn-main-hover-bg);
+}
+
+.erp-btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+/* Contenido del formulario */
+.erp-form-content {
+    background: var(--erp-surface);
+    border: 1px solid var(--erp-border);
+    border-radius: var(--erp-radius);
+    box-shadow: var(--erp-shadow);
+    overflow: hidden;
+}
+
+.erp-form {
+    padding: 2rem;
+}
+
+/* Alertas */
+.erp-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.erp-alert-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.alert-icon {
+    font-size: 1.2rem;
+    margin-top: 0.1rem;
+}
+
+.alert-content h4 {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+/* Grid de formulario */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.form-section {
+    background: var(--erp-gray-50);
+    border: 1px solid var(--erp-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--erp-border);
+}
+
+.section-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--erp-text);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-header p {
+    color: var(--erp-gray-500);
+    font-size: 0.9rem;
+}
+
+/* Campos del formulario */
+.erp-field-group {
+    margin-bottom: 1.5rem;
+}
+
+.erp-field-group.has-error .erp-input-wrapper input,
+.erp-field-group.has-error .erp-input-wrapper textarea,
+.erp-field-group.has-error .erp-input-wrapper select {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.erp-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--erp-text);
+    font-size: 0.95rem;
+}
+
+.required {
+    color: #ef4444;
+    margin-left: 0.25rem;
+}
+
+.erp-input-wrapper {
+    position: relative;
+}
+
+.erp-input-wrapper input,
+.erp-input-wrapper textarea,
+.erp-input-wrapper select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    padding-right: 2.5rem;
+    border: 1px solid var(--erp-border);
+    border-radius: 6px;
+    font-size: 1rem;
+    background: var(--erp-surface);
+    color: var(--erp-text);
+    transition: all 0.2s;
+}
+
+.erp-input-wrapper input:focus,
+.erp-input-wrapper textarea:focus,
+.erp-input-wrapper select:focus {
+    outline: none;
+    border-color: var(--btn-main-bg);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.input-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--erp-gray-400);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.field-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+/* Información adicional */
+.info-box {
+    background: var(--erp-surface);
+    border: 1px solid var(--erp-border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.info-item:last-child {
+    margin-bottom: 0;
+}
+
+.info-item label {
+    font-weight: 500;
+    color: var(--erp-gray-500);
+    font-size: 0.9rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.3em 0.8em;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.badge-active {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.badge-inactive {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.badge-info {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+/* Botones de acción */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 2rem;
+    border-top: 1px solid var(--erp-border);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .erp-form-container {
+        padding: 1rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .erp-btn-large {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Dark mode */
+body.dark-mode .erp-form-content {
+    background: var(--panel-bg);
+    border-color: var(--panel-header-border);
+}
+
+body.dark-mode .form-section {
+    background: var(--panel-bg);
+    border-color: var(--panel-header-border);
+}
+
+body.dark-mode .section-header {
+    border-color: var(--panel-header-border);
+}
+
+body.dark-mode .erp-input-wrapper input,
+body.dark-mode .erp-input-wrapper textarea,
+body.dark-mode .erp-input-wrapper select {
+    background: var(--panel-bg);
+    border-color: var(--panel-header-border);
+    color: var(--panel-title-color);
+}
+
+body.dark-mode .info-box {
+    background: var(--panel-bg);
+    border-color: var(--panel-header-border);
+}
+
+body.dark-mode .erp-alert-error {
+    background: #7f1d1d;
+    border-color: #991b1b;
+    color: #fca5a5;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Indicador de carga en el botón
+    const form = document.querySelector('.erp-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn && !submitBtn.disabled) {
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+                
+                // Re-habilitar después de un tiempo por si hay errores
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }, 8000);
+            }
+        });
+    }
+    
+    // Auto-resize para textareas
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    });
+});
+</script>
+{% endblock %} 

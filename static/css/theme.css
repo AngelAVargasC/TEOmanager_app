@@ -1,0 +1,140 @@
+:root {
+    /* Variables del layout global */
+    --primary-color: #2563eb;
+    --logo-color: #ffffff;
+    --secondary-color: #1e293b;
+    --background-color: #f8fafc;
+    --text-color: #1e293b;
+    --border-color: #e2e8f0;
+    --sidebar-width: 250px;
+    --navbar-bg: #fff;
+    --navbar-text: #1e293b;
+    --navbar-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --sidebar-bg: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+    --sidebar-link: #fff;
+    --sidebar-link-hover: #fbbf24;
+    --sidebar-link-bg-hover: rgba(255,255,255,0.08);
+    --main-bg: #fff;
+
+    /* Variables de dashboard */
+    --panel-bg: #fff;
+    --panel-shadow: 0 6px 32px rgba(37,99,235,0.10);
+    --panel-header-bg: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+    --panel-header-border: #e0e7ff;
+    --panel-title-color: #fff;
+    --panel-title-bg: linear-gradient(90deg, #2563eb 60%, #1e40af 100%);
+    --panel-title-shadow: 0 2px 8px rgba(37,99,235,0.10);
+    --btn-main-bg: #2563eb;
+    --btn-main-color: #fff;
+    --btn-main-border: none;
+    --btn-main-hover-bg: #1746a2;
+    --btn-main-hover-shadow: 0 4px 16px rgba(37,99,235,0.18);
+    --profile-card-bg: #fff;
+    --profile-card-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    --profile-row-border: #f0f0f0;
+    --label-color: #666;
+    --badge-active-bg: #d1fae5;
+    --badge-active-color: #059669;
+    --badge-inactive-bg: #fee2e2;
+    --badge-inactive-color: #b91c1c;
+    --list-item-bg: #f6faff;
+    --list-item-border: #e0e7ff;
+    --list-item-shadow: 0 2px 8px rgba(37,99,235,0.04);
+    --list-item-hover-bg: #e0e7ff;
+    --list-item-hover-shadow: 0 4px 16px rgba(37,99,235,0.10);
+    --list-item-h4-color: #2563eb;
+    --list-item-p-color: #64748b;
+    --producto-thumbnail-bg: #fff;
+    --producto-thumbnail-border: #2563eb22;
+    --producto-thumbnail-shadow: 0 2px 8px rgba(37,99,235,0.10);
+    --icono-dato-color: #2563eb;
+    --custom-table-th-color: #1e293b;
+    --custom-table-th-bg: #f8fafc;
+    --custom-table-td-color: inherit;
+    --custom-table-td-bg: inherit;
+    --empty-msg-color: #94a3b8;
+    --panel-body-bg: #ffffff;
+
+    /* Variables de login/register */
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --secondary: #64748b;
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --error: #ef4444;
+    --success: #22c55e;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --input-bg: #ffffff;
+    --input-border: #e2e8f0;
+    --hero-gradient-start: #2563eb;
+    --hero-gradient-end: #1e40af;
+    --hero-feature-bg: rgba(255,255,255,0.1);
+    --hero-feature-hover: rgba(255,255,255,0.15);
+
+    /* Variables de landing */
+    --primary-blue: #2563eb;
+    --secondary-blue: #60a5fa;
+}
+
+body.dark-mode {
+    /* Layout global dark */
+    --primary-color: #60a5fa;
+    --logo-color: #60a5fa;
+    --secondary-color: #f1f5f9;
+    --background-color: #0f172a;
+    --text-color: #f1f5f9;
+    --border-color: #334155;
+    --navbar-bg: #1e293b;
+    --navbar-text: #f1f5f9;
+    --navbar-shadow: 0 2px 8px rgba(15,23,42,0.25);
+    --sidebar-bg: #0f172a;
+    --sidebar-link: #f1f5f9;
+    --sidebar-link-hover: #60a5fa;
+    --sidebar-link-bg-hover: rgba(96,165,250,0.08);
+    --main-bg: #1a2435;
+
+    /* Dashboard dark */
+    --panel-bg: #1e293b;
+    --panel-shadow: 0 6px 32px rgba(15,23,42,0.25);
+    --panel-header-bg: #0f172a;
+    --panel-header-border: #334155;
+    --panel-title-color: #60a5fa;
+    --panel-title-bg: none;
+    --panel-title-shadow: 0 2px 8px rgba(96,165,250,0.10);
+    --btn-main-bg: rgba(96,165,250,0.12);
+    --btn-main-color: #f1f5f9;
+    --btn-main-border: 1px solid rgba(96,165,250,0.18);
+    --btn-main-hover-bg: rgba(96,165,250,0.22);
+    --btn-main-hover-shadow: 0 4px 16px rgba(96,165,250,0.18);
+    --profile-card-bg: #1e293b;
+    --profile-card-shadow: 0 4px 24px rgba(15,23,42,0.18);
+    --profile-row-border: #33415579;
+    --label-color: #60a5fa;
+    --badge-active-bg: #134e4a;
+    --badge-active-color: #22d3ee;
+    --badge-inactive-bg: #7f1d1d;
+    --badge-inactive-color: #fca5a5;
+    --list-item-bg: #33415500;
+    --list-item-border: #0f172a;
+    --list-item-shadow: 0 2px 8px rgba(15,23,42,0);
+    --list-item-hover-bg: #0f172a;
+    --list-item-hover-shadow: 0 4px 16px rgba(15,23,42,0);
+    --list-item-h4-color: #60a5fa;
+    --list-item-p-color: #cbd5e1;
+    --producto-thumbnail-bg: #334155;
+    --producto-thumbnail-border: #2563eb44;
+    --producto-thumbnail-shadow: 0 2px 8px rgba(15,23,42,0.18);
+    --icono-dato-color: #60a5fa;
+    --custom-table-th-color: #60a5fa;
+    --custom-table-th-bg: #1e293b;
+    --custom-table-td-color: #f1f5f9;
+    --custom-table-td-bg: #334155;
+    --empty-msg-color: #64748b;
+    --panel-body-bg: #1e293b;
+}
+
+/* Agrego color para h3 en dark mode */
+body.dark-mode h3 {
+    color: var(--text-color) !important;
+} 

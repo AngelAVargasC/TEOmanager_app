@@ -1,0 +1,774 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Centro de Mensajería - TEOmanager{% endblock %}
+
+{% block content %}
+<div class="messaging-center">
+    <!-- Header -->
+    <div class="messaging-header">
+        <div class="header-content">
+            <div class="header-title">
+                <i class="fas fa-comments"></i>
+                <h1>Centro de Mensajería</h1>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-value">{{ total_no_leidos }}</span>
+                    <span class="stat-label">No leídos</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="messaging-tabs">
+        <button class="tab-btn active" data-tab="activos" onclick="switchTab('activos')">
+            <i class="fas fa-comment-dots"></i>
+            <span>Chats Activos</span>
+            {% if chats_activos %}
+                <span class="tab-badge">{{ chats_activos|length }}</span>
+            {% endif %}
+        </button>
+        <button class="tab-btn" data-tab="pasados" onclick="switchTab('pasados')">
+            <i class="fas fa-history"></i>
+            <span>Chats Pasados</span>
+            {% if chats_pasados %}
+                <span class="tab-badge">{{ chats_pasados|length }}</span>
+            {% endif %}
+        </button>
+    </div>
+
+    <!-- Chats Activos -->
+    <div id="tab-activos" class="tab-content active">
+        {% if chats_activos %}
+            <div class="chats-list">
+                {% for item in chats_activos %}
+                    <div class="chat-card {% if item.conteo_no_leidos > 0 %}unread{% endif %}" data-pedido-id="{{ item.pedido.id }}" onclick="openChat({{ item.pedido.id }})">
+                        <div class="chat-avatar">
+                            {% if perfil.tipo_cuenta == 'empresa' %}
+                                <div class="avatar-circle">
+                                    {{ item.pedido.usuario.username|first|upper }}
+                                </div>
+                            {% else %}
+                                <div class="avatar-circle company">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                            {% endif %}
+                            {% if item.conteo_no_leidos > 0 %}
+                                <span class="unread-indicator">{{ item.conteo_no_leidos }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="chat-info">
+                            <div class="chat-header-info">
+                                <div class="chat-title">
+                                    <h3>
+                                        Pedido #{{ item.pedido.id }}
+                                        <span class="order-status status-{{ item.pedido.estado }}">
+                                            {{ item.pedido.get_estado_display }}
+                                        </span>
+                                    </h3>
+                                </div>
+                                <div class="chat-time">
+                                    {% if item.fecha_ultimo %}
+                                        {% now "Y-m-d" as today_str %}
+                                        {% if item.fecha_ultimo|date:"Y-m-d" == today_str %}
+                                            {{ item.fecha_ultimo|date:"H:i" }}
+                                        {% else %}
+                                            {{ item.fecha_ultimo|date:"d/m/Y" }}
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="chat-meta">
+                                <span class="chat-participant">
+                                    {% if perfil.tipo_cuenta == 'empresa' %}
+                                        <i class="fas fa-user"></i> {{ item.pedido.usuario.username }}
+                                    {% else %}
+                                        <i class="fas fa-store"></i> {{ item.pedido.empresa.username }}
+                                    {% endif %}
+                                </span>
+                                <span class="chat-total">
+                                    <i class="fas fa-comments"></i> {{ item.total_mensajes }} mensaje{{ item.total_mensajes|pluralize }}
+                                </span>
+                            </div>
+                            
+                            {% if item.ultimo_mensaje %}
+                                <div class="chat-preview">
+                                    <div class="preview-content">
+                                        {% if item.es_del_usuario %}
+                                            <span class="preview-sender">Tú:</span>
+                                        {% else %}
+                                            <span class="preview-sender">{{ item.ultimo_mensaje.remitente.username }}:</span>
+                                        {% endif %}
+                                        <span class="preview-text">
+                                            {% if item.ultimo_mensaje.mensaje %}
+                                                {{ item.ultimo_mensaje.mensaje|truncatewords:20 }}
+                                            {% else %}
+                                                <i class="fas fa-paperclip"></i> Archivo adjunto
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% if item.ultimo_mensaje.archivo_adjunto %}
+                                        <i class="fas fa-paperclip attachment-icon"></i>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="chat-actions">
+                            <button class="action-btn" onclick="event.stopPropagation(); openChat({{ item.pedido.id }})" title="Abrir chat">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-comment-slash"></i>
+                </div>
+                <h2>No hay chats activos</h2>
+                <p>No tienes conversaciones recientes en los últimos 30 días.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Chats Pasados -->
+    <div id="tab-pasados" class="tab-content">
+        {% if chats_pasados %}
+            <div class="chats-list">
+                {% for item in chats_pasados %}
+                    <div class="chat-card" data-pedido-id="{{ item.pedido.id }}" onclick="openChat({{ item.pedido.id }})">
+                        <div class="chat-avatar">
+                            {% if perfil.tipo_cuenta == 'empresa' %}
+                                <div class="avatar-circle">
+                                    {{ item.pedido.usuario.username|first|upper }}
+                                </div>
+                            {% else %}
+                                <div class="avatar-circle company">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="chat-info">
+                            <div class="chat-header-info">
+                                <div class="chat-title">
+                                    <h3>
+                                        Pedido #{{ item.pedido.id }}
+                                        <span class="order-status status-{{ item.pedido.estado }}">
+                                            {{ item.pedido.get_estado_display }}
+                                        </span>
+                                    </h3>
+                                </div>
+                                <div class="chat-time">
+                                    {% if item.fecha_ultimo %}
+                                        {{ item.fecha_ultimo|date:"d/m/Y" }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="chat-meta">
+                                <span class="chat-participant">
+                                    {% if perfil.tipo_cuenta == 'empresa' %}
+                                        <i class="fas fa-user"></i> {{ item.pedido.usuario.username }}
+                                    {% else %}
+                                        <i class="fas fa-store"></i> {{ item.pedido.empresa.username }}
+                                    {% endif %}
+                                </span>
+                                <span class="chat-total">
+                                    <i class="fas fa-comments"></i> {{ item.total_mensajes }} mensaje{{ item.total_mensajes|pluralize }}
+                                </span>
+                            </div>
+                            
+                            {% if item.ultimo_mensaje %}
+                                <div class="chat-preview">
+                                    <div class="preview-content">
+                                        {% if item.es_del_usuario %}
+                                            <span class="preview-sender">Tú:</span>
+                                        {% else %}
+                                            <span class="preview-sender">{{ item.ultimo_mensaje.remitente.username }}:</span>
+                                        {% endif %}
+                                        <span class="preview-text">
+                                            {% if item.ultimo_mensaje.mensaje %}
+                                                {{ item.ultimo_mensaje.mensaje|truncatewords:20 }}
+                                            {% else %}
+                                                <i class="fas fa-paperclip"></i> Archivo adjunto
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% if item.ultimo_mensaje.archivo_adjunto %}
+                                        <i class="fas fa-paperclip attachment-icon"></i>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="chat-actions">
+                            <button class="action-btn" onclick="event.stopPropagation(); openChat({{ item.pedido.id }})" title="Abrir chat">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-archive"></i>
+                </div>
+                <h2>No hay chats pasados</h2>
+                <p>No tienes conversaciones anteriores.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .messaging-center {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Header */
+    .messaging-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .header-title i {
+        font-size: 2.5rem;
+    }
+
+    .header-title h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .header-stats {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .stat-label {
+        display: block;
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+
+    /* Tabs */
+    .messaging-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .tab-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 1.5rem;
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--text-muted);
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        margin-bottom: -2px;
+    }
+
+    .tab-btn:hover {
+        color: var(--primary-color);
+        background: var(--hover-bg);
+    }
+
+    .tab-btn.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+
+    .tab-badge {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.125rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .tab-btn.active .tab-badge {
+        background: var(--primary-color);
+    }
+
+    /* Tab Content */
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* Chats List */
+    .chats-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    /* Chat Card */
+    .chat-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .chat-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        border-color: var(--primary-color);
+    }
+
+    .chat-card.unread {
+        border-left: 4px solid var(--primary-color);
+        background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, var(--card-bg) 4%);
+    }
+
+    /* Avatar */
+    .chat-avatar {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .avatar-circle {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .avatar-circle.company {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .unread-indicator {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background: #ef4444;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border: 2px solid var(--card-bg);
+    }
+
+    /* Chat Info */
+    .chat-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .chat-header-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+        gap: 1rem;
+    }
+
+    .chat-title h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .order-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: capitalize;
+    }
+
+    .status-pendiente {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-en_proceso {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-completado {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-cancelado {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .chat-time {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    .chat-meta {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        flex-wrap: wrap;
+    }
+
+    .chat-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .chat-preview {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--hover-bg);
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+    }
+
+    .preview-content {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .preview-sender {
+        font-weight: 600;
+        color: var(--text-color);
+        flex-shrink: 0;
+    }
+
+    .preview-text {
+        color: var(--text-muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .attachment-icon {
+        color: var(--primary-color);
+        flex-shrink: 0;
+    }
+
+    /* Chat Actions */
+    .chat-actions {
+        flex-shrink: 0;
+    }
+
+    .action-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+        background: var(--primary-hover);
+        transform: scale(1.1);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-state-icon {
+        font-size: 5rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h2 {
+        font-size: 1.5rem;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .messaging-center {
+            padding: 1rem;
+        }
+
+        .messaging-header {
+            padding: 1.5rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+        }
+
+        .header-title i {
+            font-size: 2rem;
+        }
+
+        .chat-card {
+            padding: 1rem;
+        }
+
+        .chat-header-info {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .chat-time {
+            align-self: flex-end;
+        }
+
+        .chat-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+
+<script>
+    function switchTab(tabName) {
+        // Ocultar todos los tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Remover active de todos los botones
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Mostrar el tab seleccionado
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+        
+        // Activar el botón correspondiente
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    }
+
+    function openChat(pedidoId) {
+        {% if perfil.tipo_cuenta == 'empresa' %}
+            window.location.href = `/pedido-empresa/${pedidoId}/`;
+        {% else %}
+            window.location.href = `/pedido/${pedidoId}/`;
+        {% endif %}
+    }
+
+    // Sistema de actualización en tiempo real
+    let pollingInterval = null;
+    let ultimaActualizacion = null;
+
+    function actualizarChats() {
+        fetch('/products/mensajes/chats-actualizados/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Actualizar contador en el header
+                    const statValue = document.querySelector('.stat-value');
+                    if (statValue) {
+                        statValue.textContent = data.total_no_leidos;
+                    }
+
+                    // Actualizar cada chat en la lista
+                    actualizarListaChats(data.chats_activos, 'activos');
+                    actualizarListaChats(data.chats_pasados, 'pasados');
+
+                    // Actualizar badges en las pestañas
+                    const badgeActivos = document.querySelector('[data-tab="activos"] .tab-badge');
+                    const badgePasados = document.querySelector('[data-tab="pasados"] .tab-badge');
+                    
+                    if (badgeActivos) {
+                        badgeActivos.textContent = data.chats_activos.length;
+                    }
+                    if (badgePasados) {
+                        badgePasados.textContent = data.chats_pasados.length;
+                    }
+
+                    ultimaActualizacion = new Date();
+                }
+            })
+            .catch(error => {
+                console.error('Error al actualizar chats:', error);
+            });
+    }
+
+    function actualizarListaChats(chatsData, tipo) {
+        const tabContent = document.getElementById(`tab-${tipo}`);
+        if (!tabContent) return;
+
+        chatsData.forEach(chatData => {
+            const chatCard = tabContent.querySelector(`[data-pedido-id="${chatData.pedido_id}"]`);
+            if (!chatCard) return;
+
+            // Actualizar badge de no leídos
+            const unreadIndicator = chatCard.querySelector('.unread-indicator');
+            if (chatData.conteo_no_leidos > 0) {
+                if (unreadIndicator) {
+                    unreadIndicator.textContent = chatData.conteo_no_leidos;
+                    unreadIndicator.style.display = 'flex';
+                } else {
+                    // Crear indicador si no existe
+                    const avatar = chatCard.querySelector('.chat-avatar');
+                    if (avatar) {
+                        const indicator = document.createElement('span');
+                        indicator.className = 'unread-indicator';
+                        indicator.textContent = chatData.conteo_no_leidos;
+                        avatar.appendChild(indicator);
+                    }
+                }
+                chatCard.classList.add('unread');
+            } else {
+                if (unreadIndicator) {
+                    unreadIndicator.style.display = 'none';
+                }
+                chatCard.classList.remove('unread');
+            }
+
+            // Actualizar tiempo
+            const chatTime = chatCard.querySelector('.chat-time');
+            if (chatTime && chatData.fecha_ultimo) {
+                const fecha = new Date(chatData.fecha_ultimo);
+                const ahora = new Date();
+                const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+                const fechaChat = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+                
+                if (fechaChat.getTime() === hoy.getTime()) {
+                    chatTime.textContent = fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                } else {
+                    chatTime.textContent = fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                }
+            }
+
+            // Actualizar preview del mensaje
+            const previewText = chatCard.querySelector('.preview-text');
+            if (previewText && chatData.ultimo_mensaje_texto) {
+                const sender = chatCard.querySelector('.preview-sender');
+                if (sender) {
+                    sender.textContent = chatData.es_del_usuario ? 'Tú:' : `${chatData.ultimo_mensaje_remitente}:`;
+                }
+                previewText.textContent = chatData.ultimo_mensaje_texto;
+            }
+
+            // Actualizar icono de adjunto
+            const attachmentIcon = chatCard.querySelector('.attachment-icon');
+            if (attachmentIcon) {
+                attachmentIcon.style.display = chatData.tiene_adjunto ? 'inline' : 'none';
+            }
+        });
+    }
+
+    // Hacer la función accesible globalmente
+    window.actualizarChats = actualizarChats;
+    
+    // Iniciar polling cuando la página esté lista
+    document.addEventListener('DOMContentLoaded', function() {
+        // Agregar data-pedido-id a cada chat card para facilitar la actualización
+        document.querySelectorAll('.chat-card').forEach(card => {
+            const pedidoId = card.getAttribute('onclick')?.match(/\d+/)?.[0];
+            if (pedidoId) {
+                card.setAttribute('data-pedido-id', pedidoId);
+            }
+        });
+
+        // Actualizar inmediatamente
+        actualizarChats();
+        
+        // Actualizar cada 3 segundos para mejor tiempo real
+        pollingInterval = setInterval(actualizarChats, 3000);
+    });
+
+    // Detener polling cuando se sale de la página
+    window.addEventListener('beforeunload', function() {
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+        }
+    });
+</script>
+{% endblock %}

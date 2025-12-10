@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+{% block title %}{{ company_perfil.empresa }} – Catálogo Completo{% endblock %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cards.css' %}">
+<style>
+  :root {
+    --primary-color:   #2563eb;
+    --primary-dark:    var(--btn-main-hover-bg);
+    --accent-color:    #22c55e;
+    --accent-dark:     #1ba34b;
+    --main-bg:         #ffffff;
+    --background-color:#f8fafc;
+    --border-color:    #e2e8f0;
+    --text-color:      #1e293b;
+    --text-muted:      #64748b;
+    --panel-shadow:    0 4px 12px rgba(0,0,0,0.05);
+    --transition:      0.2s ease;
+  }
+  body.dark-mode {
+    --main-bg:          #1e293b;
+    --background-color: #334155;
+    --text-color:       #f1f5f9;
+    --text-muted:       #94a3b8;
+    --panel-shadow:     0 4px 12px rgba(0,0,0,0.25);
+  }
+
+  /* Contenedor principal */
+  .company-catalog-full {
+    max-width: 100%;
+    margin: 0px;
+    padding: 0 1rem;
+    background: var(--main-bg);
+  }
+
+  /* Hero */
+  .company-hero {
+    background: var(--panel-header-bg);
+    color: var(--panel-title-color);
+    padding: 2rem;
+    border-radius: .75rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--panel-header-border);
+  }
+  .company-hero h1 { font-size: 2.5rem; margin:0; }
+  .company-hero p  { font-size: 1rem; opacity:.9; }
+
+  /* Barra de búsqueda */
+  .catalog-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin: 1.5rem 0;
+  }
+  .catalog-controls input,
+  .catalog-controls select {
+    flex: 1 1 200px;
+    padding: .75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: .5rem;
+    background: var(--main-bg);
+    color: var(--text-color);
+    transition: border-color var(--transition);
+  }
+  .catalog-controls input:focus,
+  .catalog-controls select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+  .btn-search {
+    padding: .75rem 1.2rem;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: .5rem;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+  .btn-search:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+
+  /* Pestañas */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .tabs button {
+    padding: .5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: .5rem;
+    background: var(--main-bg);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+  }
+  .tabs button.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+  }
+
+  /* Contenido de pestañas */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Grilla de tarjetas idéntica para productos y servicios */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .card {
+    background: var(--main-bg);
+    border-radius: .75rem;
+    overflow: hidden;
+    box-shadow: var(--panel-shadow);
+    transition: transform var(--transition), box-shadow var(--transition);
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  }
+  .card-image {
+    height: 180px;
+    background: var(--background-color);
+    overflow: hidden;
+  }
+  .card-image img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform var(--transition);
+  }
+  .card:hover .card-image img {
+    transform: scale(1.05);
+  }
+  .card-body {
+    padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /*  Asegura que el bloque de acciones se quede abajo  */
+
+  }
+  .card-body h3 {
+    margin: 0 0 .5rem;
+    font-size: 1.1rem;
+    color: var(--text-color);
+  }
+  .card-body p {
+    flex: 1;
+    margin: 0 0 .75rem;
+    font-size: .9rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .card-body .price {
+    font-weight: bold;
+    color: var(--accent-color);
+    margin-bottom: .5rem;
+  }
+  .card-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: auto; /* empuja siempre al fondo */
+  }
+  .card-actions .btn-success {
+    background: var(--primary-color);
+    border: none;
+    color: #fff;
+    padding: .5rem;
+    border-radius: .5rem;
+    transition: background var(--transition);
+  }
+  .card-actions .btn-success:hover {
+    background: var(--primary-dark);
+  }
+
+  /* Sin resultados */
+  #no-results {
+    text-align: center;
+    color: var(--text-muted);
+    margin: 2rem 0;
+    display: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .catalog-controls { flex-direction: column; }
+    .tabs { flex-wrap: wrap; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="company-catalog-full">
+    {% if user_profile.tipo_cuenta == 'empresa' %}
+    <a href="{% url 'webpages:landingpage_view' %}" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Volver a vista previa
+    </a>
+    {% endif %}
+
+  <div class="company-hero">
+    <h1>{{ company_perfil.empresa }}</h1>
+    <p>Catálogo completo de productos y servicios</p>
+  </div>
+
+  <div class="catalog-controls">
+    <input id="searchCatalog" type="text" placeholder="Buscar..." />
+    <select id="categoryCatalog">
+      <option value="">Todas las categorías</option>
+      {% for prod in products %}
+        <option value="{{ prod.categoria }}">{{ prod.categoria }}</option>
+      {% endfor %}
+    </select>
+    <button id="searchCatalogBtn" class="btn-search">
+      <i class="fas fa-search"></i> Buscar
+    </button>
+  </div>
+
+  <div class="tabs">
+    <button class="active" data-tab="tab-products">Productos</button>
+    <button data-tab="tab-services">Servicios</button>
+  </div>
+
+  <!-- Productos -->
+  <div id="tab-products" class="tab-content active">
+    <div class="cards-grid">
+      {% for product in products %}
+      <div class="product-card" data-category="{{ product.categoria }}">
+        <div class="product-image">
+          {% if product.imagen_principal %}
+            <img src="{{ product.imagen_principal }}" alt="{{ product.nombre }}">
+          {% else %}
+            <i class="fas fa-box"></i>
+          {% endif %}
+        </div>
+        <div class="product-info">
+          <h4>{{ product.nombre }}</h4>
+          <div class="product-category"><i class="fas fa-tag"></i>{{ product.categoria }}</div>
+          <div class="product-details">
+            <span class="price">${{ product.precio }}</span>
+            <span class="stock {% if product.stock < 10 %}low-stock{% endif %}"><i class="fas fa-cubes"></i> {{ product.stock }}</span>
+          </div>
+          <div class="product-actions">
+            <a href="{% url 'products:detalle_producto' product.pk %}" class="btn-panel">Ver producto</a>
+            <button class="btn-success" data-add-to-cart="{{ product.pk }}" data-product-id="{{ product.pk }}" title="Agregar al carrito">
+              <i class="fas fa-cart-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      <p id="no-results">No se encontraron resultados.</p>
+    </div>
+  </div>
+
+  <!-- Servicios -->
+  <div id="tab-services" class="tab-content">
+    <div class="cards-grid">
+      {% for srv in services %}
+      <div class="service-card" data-category="{{ srv.categoria }}">
+        <div class="service-image">
+          {% if srv.imagen_principal %}
+            <img src="{{ srv.imagen_principal }}" alt="{{ srv.nombre }}">
+          {% else %}
+            <i class="fas fa-cogs"></i>
+          {% endif %}
+        </div>
+        <div class="service-info">
+          <h4>{{ srv.nombre }}</h4>
+          <div class="service-category">{{ srv.categoria }}</div>
+          <div class="service-details">
+            <span class="price">${{ srv.precio }}</span>
+          </div>
+          <div class="service-actions">
+            <a href="{% url 'products:detalle_servicio' srv.pk %}" class="btn-panel">Ver servicio</a>
+            <button class="btn-success" data-add-to-cart="{{ srv.pk }}" data-product-id="{{ srv.pk }}" title="Agregar al carrito">
+              <i class="fas fa-shopping-cart"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      <p id="no-results">No se encontraron resultados.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const tabs     = document.querySelectorAll('.tabs button');
+  const contents = document.querySelectorAll('.tab-content');
+  const input    = document.getElementById('searchCatalog');
+  const select   = document.getElementById('categoryCatalog');
+  const btn      = document.getElementById('searchCatalogBtn');
+  const noResEls = document.querySelectorAll('#no-results');
+
+  function filterCatalog(){
+    const term = input.value.toLowerCase();
+    const cat  = select.value;
+    const activeTab = document.querySelector('.tab-content.active');
+    let shown = 0;
+    activeTab.querySelectorAll('.catalog-card').forEach(card => {
+      const txt = (card.querySelector('h3').textContent + ' ' +
+                   card.querySelector('p').textContent).toLowerCase();
+      const ok = txt.includes(term) && (!cat || card.dataset.category === cat);
+      card.style.display = ok ? '' : 'none';
+      if (ok) shown++;
+    });
+    // solo mostrar mensaje en el tab activo
+    noResEls.forEach(el => {
+      if (el.closest('.tab-content') === activeTab) {
+        el.style.display = shown ? 'none' : 'block';
+      }
+    });
+  }
+
+  // manejo de pestañas
+  tabs.forEach(tab => tab.addEventListener('click', () => {
+    tabs.forEach(b => b.classList.remove('active'));
+    contents.forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    filterCatalog();
+  }));
+
+  // búsqueda y filtro
+  btn.addEventListener('click', filterCatalog);
+  input.addEventListener('keyup', e => { if (e.key === 'Enter') filterCatalog(); });
+  select.addEventListener('change', filterCatalog);
+
+  // filtrado inicial
+  filterCatalog();
+});
+</script>
+{% endblock %}

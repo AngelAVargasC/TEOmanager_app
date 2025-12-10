@@ -1,0 +1,863 @@
+{% load static %}
+{% load webpages_extras %}
+<style>
+/* ⭐ PLANTILLA 5: TECH/MAC STORE PREMIUM - CSS COMPLETAMENTE AISLADO ⭐ */
+/* Todos los estilos usan prefijo único t5-mac- para evitar conflictos */
+
+.t5-mac-wrapper {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    background: #ffffff;
+    color: #1d1d1f;
+    line-height: 1.47059;
+    overflow-x: hidden;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    font-weight: 400;
+    letter-spacing: -0.022em;
+    isolation: isolate; /* Aislamiento CSS */
+}
+
+/* Variables CSS aisladas */
+.t5-mac-wrapper {
+    --t5-mac-bg: #ffffff;
+    --t5-mac-text: #1d1d1f;
+    --t5-mac-text-sec: #86868b;
+    --t5-mac-border: #d2d2d7;
+    --t5-mac-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --t5-mac-shadow-hover: 0 4px 16px rgba(0,0,0,0.12);
+    --t5-mac-accent: {{ landing.color_primario|default:"#0071e3" }};
+    --t5-mac-accent-hover: {{ landing.color_secundario|default:"#0077ed" }};
+    --t5-mac-gray: #f5f5f7;
+}
+
+/* ✨ Header MacStore - Aislado ✨ */
+.t5-mac-header {
+    position: fixed;
+    top: 57px;
+    left: var(--sidebar-width, 250px); /* Respeta el ancho de la sidebar */
+    right: 0;
+    width: calc(100% - var(--sidebar-width, 250px));
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 0.5px solid var(--t5-mac-border);
+    padding: 0;
+    z-index: 99;
+    transition: all 0.3s ease, left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0;
+}
+
+.t5-mac-nav {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    background-color: #ffffff;
+}
+
+.t5-mac-logo {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--t5-mac-text);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+}
+
+.t5-mac-nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    flex: 1;
+    justify-content: center;
+}
+
+.t5-mac-nav-links a {
+    color: var(--t5-mac-text);
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 400;
+    transition: opacity 0.2s ease;
+}
+
+.t5-mac-nav-links a:hover {
+    opacity: 0.65;
+}
+
+.t5-mac-nav-icons {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.t5-mac-icon-link {
+    color: var(--t5-mac-text);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.t5-mac-icon-link:hover {
+    opacity: 0.65;
+}
+
+.t5-mac-cta-btn {
+    padding: 0.4rem 1rem;
+    background: var(--t5-mac-accent);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.t5-mac-cta-btn:hover {
+    background: var(--t5-mac-accent-hover);
+}
+
+/* ✨ Hero Producto Destacado - Aislado ✨ */
+.t5-mac-hero {
+    min-height: calc(100vh - 650px);
+    /* padding: 8rem 2rem 4rem; */
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 0px;
+    padding: 0 0px;
+   
+}
+
+.t5-mac-hero-product {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    background-color: #000000;
+    padding: 2rem 2rem;
+    margin-top: 80px
+}
+    
+.t5-mac-hero-content {
+    padding: 2rem 4rem;
+}
+
+.t5-mac-badge {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--t5-mac-text-sec);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+}
+
+.t5-mac-hero-badge {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--t5-mac-text-sec);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.t5-mac-hero-title {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.t5-mac-hero-slogan {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    font-weight: 400;
+    color: #b2b2b2;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+}
+
+.t5-mac-hero-price {
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+    font-weight: 400;
+    color: #ffffff;
+    margin-bottom: 2rem;
+}
+
+.t5-mac-hero-price strong {
+    font-weight: 600;
+}
+
+.t5-mac-hero-actions {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.t5-mac-link-btn {
+    font-size: 1.1rem;
+    color: var(--t5-mac-accent);
+    text-decoration: none;
+    font-weight: 400;
+    transition: opacity 0.2s ease;
+}
+
+.t5-mac-link-btn:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+}
+
+.t5-mac-primary-btn {
+    padding: 0.6rem 1.5rem;
+    background: var(--t5-mac-accent);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.t5-mac-primary-btn:hover {
+    background: var(--t5-mac-accent-hover);
+    opacity: 0.9;
+}
+
+.t5-mac-hero-image {
+    text-align: center;
+   
+}
+
+.t5-mac-hero-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 16px;
+}
+
+/* ✨ Pasarela de Productos - Carousel Horizontal ✨ */
+.t5-mac-carousel {
+    padding: 4rem 2rem;
+    width: 100%;
+    margin: 0;
+    background: var(--t5-mac-bg);
+    overflow: hidden;
+}
+
+.t5-mac-carousel-title {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 600;
+    margin-bottom: 2rem;
+    letter-spacing: -0.02em;
+    color: var(--t5-mac-text);
+    text-align: center;
+}
+
+.t5-mac-carousel-container {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    padding: 1rem 0 2rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--t5-mac-border) transparent;
+}
+
+.t5-mac-carousel-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.t5-mac-carousel-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.t5-mac-carousel-container::-webkit-scrollbar-thumb {
+    background: var(--t5-mac-border);
+    border-radius: 4px;
+}
+
+.t5-mac-carousel-item {
+    min-width: 280px;
+    scroll-snap-align: start;
+    background: var(--t5-mac-bg);
+    border: 0.5px solid var(--t5-mac-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: var(--t5-mac-text);
+    display: block;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.t5-mac-carousel-item:hover {
+    box-shadow: var(--t5-mac-shadow-hover);
+    transform: translateY(-4px);
+    border-color: var(--t5-mac-accent);
+}
+
+.t5-mac-carousel-image {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    margin: 1rem 0;
+    /* background: var(--t5-mac-gray); */
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.t5-mac-carousel-item-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+    color: var(--t5-mac-text);
+}
+
+.t5-mac-carousel-item-price {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--t5-mac-text);
+}
+
+.t5-mac-carousel-item-price strong {
+    font-weight: 600;
+}
+
+/* ✨ Sección Categorías de Productos - Grid MacStore ✨ */
+.t5-mac-categories {
+    padding: 6rem 2rem;
+    width: 100%;
+    margin: 0;
+    background: var(--t5-mac-bg);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.t5-mac-categories-title {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 3rem;
+    letter-spacing: -0.02em;
+    color: var(--t5-mac-text);
+}
+
+.t5-mac-categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.t5-mac-category-card {
+    background: var(--t5-mac-bg);
+    border: 0.5px solid var(--t5-mac-border);
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--t5-mac-text);
+    transition: all 0.3s ease;
+    display: block;
+}
+
+.t5-mac-category-card:hover {
+    box-shadow: var(--t5-mac-shadow-hover);
+    transform: translateY(-4px);
+    border-color: var(--t5-mac-accent);
+}
+
+.t5-mac-category-image {
+    width: 100%;
+    height: 150px;
+    object-fit: contain;
+    margin-bottom: 1rem;
+    background: var(--t5-mac-gray);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.t5-mac-category-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--t5-mac-text);
+}
+
+.t5-mac-category-price {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--t5-mac-text-sec);
+}
+
+.t5-mac-category-price strong {
+    font-weight: 600;
+    color: var(--t5-mac-text);
+}
+
+/* ✨ Secciones Generales - Aisladas ✨ */
+.t5-mac-section {
+    padding: 6rem 2rem;
+    width: 100%;
+    margin: 0;
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.t5-mac-section-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+    color: var(--t5-mac-text);
+}
+
+.t5-mac-section-subtitle {
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    font-weight: 400;
+    text-align: center;
+    color: var(--t5-mac-text-sec);
+    margin-bottom: 4rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ✨ Cards Grid - Aisladas ✨ */
+.t5-mac-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.t5-mac-card {
+    background: var(--t5-mac-bg);
+    border: 0.5px solid var(--t5-mac-border);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--t5-mac-shadow);
+    text-decoration: none;
+    color: var(--t5-mac-text);
+    display: block;
+}
+
+.t5-mac-card:hover {
+    box-shadow: var(--t5-mac-shadow-hover);
+    transform: translateY(-4px);
+    border-color: var(--t5-mac-accent);
+}
+
+.t5-mac-card-image {
+    width: 100%;
+    height: 250px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    background: var(--t5-mac-gray);
+    padding: 1rem;
+}
+
+.t5-mac-card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+    color: var(--t5-mac-text);
+}
+
+.t5-mac-card-description {
+    font-size: 0.95rem;
+    color: var(--t5-mac-text-sec);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.t5-mac-card-price {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--t5-mac-text);
+    margin-top: auto;
+}
+
+.t5-mac-card-price strong {
+    font-weight: 600;
+}
+
+/* ✨ About Section - Aislada ✨ */
+.t5-mac-about {
+    background: var(--t5-mac-gray);
+    border-top: 0.5px solid var(--t5-mac-border);
+    border-bottom: 0.5px solid var(--t5-mac-border);
+}
+
+.t5-mac-about-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.t5-mac-about-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--t5-mac-text-sec);
+}
+
+/* ✨ CTA Section - Aislada ✨ */
+.t5-mac-cta-section {
+    background: var(--t5-mac-bg);
+    text-align: center;
+}
+
+.t5-mac-cta-section .t5-mac-section-title {
+    margin-bottom: 1rem;
+}
+
+.t5-mac-cta-section .t5-mac-section-subtitle {
+    margin-bottom: 2rem;
+}
+
+/* Responsive - Aislado */
+@media (max-width: 1024px) {
+    .t5-mac-hero-product {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+    .t5-mac-hero-image {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .t5-mac-nav-links {
+        display: none;
+    }
+    .t5-mac-hero {
+        padding: 6rem 1.5rem 3rem;
+    }
+    .t5-mac-section {
+        padding: 4rem 1.5rem;
+    }
+    .t5-mac-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .t5-mac-carousel-container {
+        gap: 1rem;
+    }
+    .t5-mac-carousel-item {
+        min-width: 240px;
+    }
+    .t5-mac-categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Ajuste cuando la sidebar está colapsada */
+.main-content.sidebar-collapsed ~ * .t5-mac-header,
+body:has(.sidebar.collapsed) .t5-mac-header {
+    left: 0;
+    width: 100%;
+    padding: 0 0px;
+    margin: 0 0px;
+}
+/* El .main-content se redimensiona automáticamente con la sidebar */
+/* No sobrescribir margin-left para permitir redimensionamiento */
+</style>
+
+<div class="t5-mac-wrapper">
+    <!-- ✨ Header MacStore Style ✨ -->
+    <header class="t5-mac-header">
+        <nav class="t5-mac-nav">
+            <a href="#" class="t5-mac-logo">{{ landing.titulo|truncatewords:2 }}</a>
+            <ul class="t5-mac-nav-links">
+                <li><a href="#products">Productos</a></li>
+                <li><a href="#services">Servicios</a></li>
+                <li><a href="#about">Sobre Nosotros</a></li>
+                <li><a href="#contact">Contacto</a></li>
+            </ul>
+            <div class="t5-mac-nav-icons">
+                <a href="#" class="t5-mac-icon-link" title="Buscar"><i class="fas fa-search"></i></a>
+                <a href="#" class="t5-mac-icon-link" title="Mi cuenta"><i class="fas fa-user"></i></a>
+                <a href="#" class="t5-mac-icon-link" title="Carrito"><i class="fas fa-shopping-bag"></i></a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ✨ Hero Producto Destacado ✨ -->
+    <section class="t5-mac-hero">
+        {% if products|length > 0 %}
+        {% with product=products|first %}
+        <div class="t5-mac-hero-product">
+            <div class="t5-mac-hero-content">
+                <span class="t5-mac-badge">NUEVO EXCLUSIVO eSIM</span>
+                <h1 class="t5-mac-hero-title">{{ product.nombre }}</h1>
+                {% if landing.subtitulo_hero %}
+                <p class="t5-mac-hero-slogan">{{ landing.subtitulo_hero }}</p>
+                {% elif landing.descripcion %}
+                <p class="t5-mac-hero-slogan">{{ landing.descripcion }}</p>
+                {% endif %}
+                <p class="t5-mac-hero-price">Desde <strong style="color: #d8f8ff;">${{ product.precio|floatformat:2 }}</strong></p>
+                <div class="t5-mac-hero-actions">
+                    <a href="{% url 'products:detalle_producto' product.pk %}" class="t5-mac-link-btn">Saber más ></a>
+                    <a href="{% url 'products:detalle_producto' product.pk %}" class="t5-mac-primary-btn">Comprar</a>
+                </div>
+            </div>
+            <div class="t5-mac-hero-image">
+                {% if product.imagen_principal %}
+                <img src="{{ product.imagen_principal }}" alt="{{ product.nombre }}">
+                {% elif landing|get_hero_url %}
+                <img src="{{ landing|get_hero_url }}" alt="{{ landing.titulo }}">
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% else %}
+        <div class="t5-mac-hero-product">
+            <div class="t5-mac-hero-content">
+                <span class="t5-mac-badge">NUEVO EXCLUSIVO eSIM</span>
+                <h1 class="t5-mac-hero-title">{{ landing.titulo }}</h1>
+                {% if landing.subtitulo_hero %}
+                <p class="t5-mac-hero-slogan">{{ landing.subtitulo_hero }}</p>
+                {% elif landing.descripcion %}
+                <p class="t5-mac-hero-slogan">{{ landing.descripcion }}</p>
+                {% endif %}
+                <p class="t5-mac-hero-price">Desde $28,499.00</p>
+                {% if landing.texto_boton_hero and landing.url_boton_hero %}
+                <div class="t5-mac-hero-actions">
+                    <a href="{{ landing.url_boton_hero }}" class="t5-mac-link-btn">Saber más ></a>
+                    <a href="{{ landing.url_boton_hero }}" class="t5-mac-primary-btn">{{ landing.texto_boton_hero }}</a>
+                </div>
+                {% endif %}
+            </div>
+            {% if landing|get_hero_url %}
+            <div class="t5-mac-hero-image">
+                <img src="{{ landing|get_hero_url }}" alt="{{ landing.titulo }}">
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- ✨ Pasarela de Productos - Carousel Horizontal ✨ -->
+    {% if products|length > 1 %}
+    <section class="t5-mac-carousel" id="products">
+        <h2 class="t5-mac-carousel-title">{{ landing.seccion_productos_titulo|default:"Nuestros Productos" }}</h2>
+        <div class="t5-mac-carousel-container">
+            {% for product in products %}
+            <a href="{% url 'products:detalle_producto' product.pk %}" class="t5-mac-carousel-item">
+                <span class="t5-mac-badge">{{ landing.seccion_productos_subtitulo|default:"NUEVO" }}</span>
+                {% if product.imagen_principal %}
+                <img src="{{ product.imagen_principal }}" alt="{{ product.nombre }}" class="t5-mac-carousel-image">
+                {% else %}
+                <div class="t5-mac-carousel-image" style="display: flex; align-items: center; justify-content: center; color: var(--t5-mac-text-sec);">Sin imagen</div>
+                {% endif %}
+                <h3 class="t5-mac-carousel-item-title">{{ product.nombre }}</h3>
+                <div class="t5-mac-carousel-item-price">Desde ${{ product.precio|floatformat:2 }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Sección Categorías de Productos ✨ -->
+    {% if products %}
+    <section class="t5-mac-categories">
+        <h2 class="t5-mac-categories-title">Ver todos los productos</h2>
+        <div class="t5-mac-categories-grid">
+            {% for product in products|slice:":8" %}
+            <a href="{% url 'products:detalle_producto' product.pk %}" class="t5-mac-category-card">
+                {% if product.imagen_principal %}
+                <img src="{{ product.imagen_principal }}" alt="{{ product.nombre }}" class="t5-mac-category-image">
+                {% else %}
+                <div class="t5-mac-category-image" style="display: flex; align-items: center; justify-content: center; color: var(--t5-mac-text-sec);">Sin imagen</div>
+                {% endif %}
+                <div class="t5-mac-category-name">{{ product.nombre|truncatewords:2 }}</div>
+                <div class="t5-mac-category-price">Desde ${{ product.precio|floatformat:2 }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ About Section ✨ -->
+    {% if landing.seccion_sobre_nosotros_texto or landing.contenido %}
+    <section class="t5-mac-section t5-mac-about" id="about">
+        <h2 class="t5-mac-section-title">{{ landing.seccion_sobre_nosotros_titulo|default:"Sobre Nosotros" }}</h2>
+        <div class="t5-mac-about-content">
+            <p class="t5-mac-about-text">{{ landing.seccion_sobre_nosotros_texto|default:landing.contenido|safe }}</p>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Products Grid Section ✨ -->
+    {% if products %}
+    <section class="t5-mac-section" id="products">
+        <h2 class="t5-mac-section-title">{{ landing.seccion_productos_titulo|default:"Nuestros Productos" }}</h2>
+        {% if landing.seccion_productos_subtitulo %}
+        <p class="t5-mac-section-subtitle">{{ landing.seccion_productos_subtitulo }}</p>
+        {% endif %}
+        <div class="t5-mac-cards-grid">
+            {% for product in products %}
+            <a href="{% url 'products:detalle_producto' product.pk %}" class="t5-mac-card">
+                {% if product.imagen_principal %}
+                <img src="{{ product.imagen_principal }}" alt="{{ product.nombre }}" class="t5-mac-card-image">
+                {% else %}
+                <div class="t5-mac-card-image" style="display: flex; align-items: center; justify-content: center; color: var(--t5-mac-text-sec);">Sin imagen</div>
+                {% endif %}
+                <h3 class="t5-mac-card-title">{{ product.nombre }}</h3>
+                <p class="t5-mac-card-description">{{ product.descripcion|truncatechars:120 }}</p>
+                <div class="t5-mac-card-price">Desde ${{ product.precio|floatformat:2 }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Services Section ✨ -->
+    {% if services %}
+    <section class="t5-mac-section" id="services" style="background: var(--t5-mac-gray); border-top: 0.5px solid var(--t5-mac-border);">
+        <h2 class="t5-mac-section-title">{{ landing.seccion_servicios_titulo|default:"Nuestros Servicios" }}</h2>
+        {% if landing.seccion_servicios_subtitulo %}
+        <p class="t5-mac-section-subtitle">{{ landing.seccion_servicios_subtitulo }}</p>
+        {% endif %}
+        <div class="t5-mac-cards-grid">
+            {% for srv in services %}
+            <a href="{% url 'products:detalle_servicio' srv.pk %}" class="t5-mac-card">
+                {% if srv.imagen_principal %}
+                <img src="{{ srv.imagen_principal }}" alt="{{ srv.nombre }}" class="t5-mac-card-image">
+                {% else %}
+                <div class="t5-mac-card-image" style="display: flex; align-items: center; justify-content: center; color: var(--t5-mac-text-sec);">Sin imagen</div>
+                {% endif %}
+                <h3 class="t5-mac-card-title">{{ srv.nombre }}</h3>
+                <p class="t5-mac-card-description">{{ srv.descripcion|truncatechars:120 }}</p>
+                <div class="t5-mac-card-price">Desde ${{ srv.precio|floatformat:2 }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Testimonials Section ✨ -->
+    {% if landing.seccion_testimonios_texto %}
+    <section class="t5-mac-section" style="background: var(--t5-mac-bg);">
+        <h2 class="t5-mac-section-title">{{ landing.seccion_testimonios_titulo|default:"Lo que dicen nuestros clientes" }}</h2>
+        <div class="t5-mac-about-content">
+            <div class="t5-mac-about-text">{{ landing.seccion_testimonios_texto|safe }}</div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ CTA Final Section ✨ -->
+    {% if landing.seccion_contacto_texto %}
+    <section class="t5-mac-section t5-mac-cta-section" id="contact">
+        <h2 class="t5-mac-section-title">{{ landing.seccion_contacto_titulo|default:"¿Listo para comenzar?" }}</h2>
+        <p class="t5-mac-section-subtitle">{{ landing.seccion_contacto_texto }}</p>
+        {% if landing.seccion_contacto_boton_texto and landing.seccion_contacto_boton_url %}
+        <a href="{{ landing.seccion_contacto_boton_url }}" class="t5-mac-cta-btn">{{ landing.seccion_contacto_boton_texto }}</a>
+        {% endif %}
+    </section>
+    {% endif %}
+</div>
+
+<script>
+// ⭐ JavaScript AISLADO para Plantilla 5 - MacStore ⭐
+(function() {
+    'use strict';
+    
+    // Namespace aislado
+    const T5MacStore = {
+        init: function() {
+            this.initCarousel();
+            this.initHeaderScroll();
+        },
+        
+        initCarousel: function() {
+            const carousel = document.querySelector('.t5-mac-carousel-container');
+            if (!carousel) return;
+            
+            // Smooth scroll con botones (opcional)
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+            
+            carousel.addEventListener('mousedown', (e) => {
+                isDown = true;
+                carousel.style.cursor = 'grabbing';
+                startX = e.pageX - carousel.offsetLeft;
+                scrollLeft = carousel.scrollLeft;
+            });
+            
+            carousel.addEventListener('mouseleave', () => {
+                isDown = false;
+                carousel.style.cursor = 'grab';
+            });
+            
+            carousel.addEventListener('mouseup', () => {
+                isDown = false;
+                carousel.style.cursor = 'grab';
+            });
+            
+            carousel.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - carousel.offsetLeft;
+                const walk = (x - startX) * 2;
+                carousel.scrollLeft = scrollLeft - walk;
+            });
+        },
+        
+        initHeaderScroll: function() {
+            const header = document.querySelector('.t5-mac-header');
+            if (!header) return;
+            
+            let lastScroll = 0;
+            window.addEventListener('scroll', () => {
+                const currentScroll = window.pageYOffset;
+                if (currentScroll > 100) {
+                    header.style.background = 'rgba(255,255,255,0.95)';
+                } else {
+                    header.style.background = 'rgba(255,255,255,0.72)';
+                }
+                lastScroll = currentScroll;
+            });
+        }
+    };
+    
+    // Inicializar cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => T5MacStore.init());
+    } else {
+        T5MacStore.init();
+    }
+})();
+</script>

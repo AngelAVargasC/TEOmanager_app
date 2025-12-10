@@ -1,0 +1,599 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Perfil - ERP{% endblock %}
+
+{% block content %}
+<div class="erp-profile-container">
+    <!-- Header ejecutivo -->
+    <div class="erp-profile-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="header-text">
+                <h1>Mi Perfil</h1>
+                <p>{% if perfil.tipo_cuenta == 'empresa' %}Información personal y de empresa{% else %}Información personal{% endif %}</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'editar_perfil' %}" class="erp-btn erp-btn-primary">
+                <i class="fas fa-edit"></i> Editar Perfil
+            </a>
+        </div>
+    </div>
+
+    <!-- Contenido del perfil -->
+    <div class="erp-profile-content">
+        <div class="profile-grid">
+            <!-- Información Personal/Cuenta -->
+            <div class="profile-section">
+                <div class="section-header">
+                    {% if perfil.tipo_cuenta == 'empresa' %}
+                        <h3><i class="fas fa-user-tie"></i> Información de Cuenta</h3>
+                        <p>Datos de tu cuenta empresarial</p>
+                    {% else %}
+                        <h3><i class="fas fa-user"></i> Información Personal</h3>
+                        <p>Datos de tu cuenta de usuario</p>
+                    {% endif %}
+                </div>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="info-content">
+                            <label>Usuario</label>
+                            <span>{{ user.username }}</span>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="info-content">
+                            <label>Email</label>
+                            <span>{{ user.email }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Solo mostrar nombre y apellido para usuarios consumidores -->
+                    {% if perfil.tipo_cuenta == 'usuario' %}
+                        {% if user.first_name %}
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                            <div class="info-content">
+                                <label>Nombre</label>
+                                <span>{{ user.first_name }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if user.last_name %}
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                            <div class="info-content">
+                                <label>Apellido</label>
+                                <span>{{ user.last_name }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Información de Empresa/Contacto -->
+            <div class="profile-section">
+                <div class="section-header">
+                    {% if perfil.tipo_cuenta == 'empresa' %}
+                        <h3><i class="fas fa-building"></i> Información de Empresa</h3>
+                        <p>Datos de tu empresa o negocio</p>
+                    {% else %}
+                        <h3><i class="fas fa-address-card"></i> Información de Contacto</h3>
+                        <p>Datos de contacto adicionales</p>
+                    {% endif %}
+                </div>
+                
+                <div class="info-grid">
+                    {% if perfil.tipo_cuenta == 'empresa' %}
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="info-content">
+                            <label>Nombre de la Empresa</label>
+                            <span>{{ perfil.empresa|default:"No especificada" }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="info-content">
+                            <label>Teléfono</label>
+                            <span>{{ perfil.telefono|default:"No especificado" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="info-item full-width">
+                        <div class="info-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="info-content">
+                            <label>Dirección</label>
+                            <span>{{ perfil.direccion|default:"No especificada" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado de Cuenta -->
+            <div class="profile-section full-width">
+                <div class="section-header">
+                    <h3><i class="fas fa-crown"></i> Estado de Cuenta</h3>
+                    <p>Información de tu {% if perfil.tipo_cuenta == 'empresa' %}suscripción y {% endif %}cuenta</p>
+                </div>
+                
+                <div class="status-grid">
+                    <div class="status-card">
+                        <div class="status-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="status-content">
+                            <label>Tipo de Cuenta</label>
+                            <span class="badge badge-info">{{ perfil.get_tipo_cuenta_display }}</span>
+                        </div>
+                    </div>
+
+                    <div class="status-card">
+                        <div class="status-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="status-content">
+                            <label>Permisos</label>
+                            <span class="badge {% if perfil.permisos == 'Administrador' %}badge-admin{% else %}badge-user{% endif %}">
+                                {{ perfil.permisos }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Solo mostrar información de suscripción para empresas -->
+                    {% if perfil.tipo_cuenta == 'empresa' %}
+                    <div class="status-card">
+                        <div class="status-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="status-content">
+                            <label>Estado de Suscripción</label>
+                            <span class="badge {% if perfil.estado_suscripcion == 'activa' %}badge-active{% else %}badge-inactive{% endif %}">
+                                {{ perfil.estado_suscripcion|title }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {% if perfil.fecha_vencimiento %}
+                    <div class="status-card">
+                        <div class="status-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="status-content">
+                            <label>Fecha de Vencimiento</label>
+                            <span>{{ perfil.fecha_vencimiento|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+
+                    <div class="status-card">
+                        <div class="status-icon">
+                            <i class="fas fa-calendar-plus"></i>
+                        </div>
+                        <div class="status-content">
+                            <label>Miembro desde</label>
+                            <span>{{ perfil.fecha_registro|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.erp-profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+/* Header ejecutivo */
+.erp-profile-header {
+    background: var(--panel-header-bg);
+    color: var(--panel-title-color);
+    padding: 2rem;
+    border-radius: var(--erp-radius);
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--panel-header-border);
+}
+
+.erp-profile-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    z-index: 2;
+}
+
+.header-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--btn-main-bg);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--btn-main-color);
+}
+
+.header-text h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.header-text p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.header-actions {
+    z-index: 2;
+}
+
+.erp-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.erp-btn-primary {
+    background: var(--btn-main-bg);
+    color: var(--btn-main-color);
+}
+
+.erp-btn-primary:hover {
+    background: var(--btn-main-hover-bg);
+    transform: translateY(-2px);
+}
+
+/* Contenido del perfil */
+.erp-profile-content {
+    background: var(--erp-surface);
+    border: 1px solid var(--erp-border);
+    border-radius: var(--erp-radius);
+    box-shadow: var(--erp-shadow);
+    overflow: hidden;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+.profile-section {
+    padding: 2rem;
+    border-right: 1px solid var(--erp-border);
+    border-bottom: 1px solid var(--erp-border);
+}
+
+.profile-section:nth-child(2n) {
+    border-right: none;
+}
+
+.profile-section.full-width {
+    grid-column: 1 / -1;
+    border-right: none;
+    border-bottom: none;
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--erp-border);
+}
+
+.section-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--erp-text);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-header p {
+    color: var(--erp-gray-500);
+    font-size: 0.9rem;
+}
+
+/* Grid de información */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.info-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--btn-main-bg);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--btn-main-color);
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-content label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--erp-gray-500);
+    margin-bottom: 0.25rem;
+}
+
+.info-content span {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--erp-text);
+    word-break: break-word;
+}
+
+/* Grid de estado */
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.status-card {
+    background: var(--erp-gray-50);
+    border: 1px solid var(--erp-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+}
+
+.status-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.status-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--btn-main-bg);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--btn-main-color);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.status-content {
+    flex: 1;
+}
+
+.status-content label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--erp-gray-500);
+    margin-bottom: 0.5rem;
+}
+
+.status-content span {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--erp-text);
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 0.4em 0.8em;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.badge-active {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.badge-inactive {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.badge-info {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.badge-admin {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-user {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .erp-profile-container {
+        padding: 1rem;
+    }
+    
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-section {
+        border-right: none;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .status-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .erp-profile-header {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .erp-profile-container {
+        padding: 0.5rem;
+    }
+    
+    .profile-section {
+        padding: 1.5rem;
+    }
+    
+    .header-text h1 {
+        font-size: 1.5rem;
+    }
+    
+    .header-text p {
+        font-size: 1rem;
+    }
+    
+    .info-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .status-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+}
+
+/* Dark mode */
+body.dark-mode .erp-profile-content {
+    background: var(--panel-bg);
+    border-color: var(--panel-header-border);
+}
+
+body.dark-mode .profile-section {
+    border-color: var(--panel-header-border);
+}
+
+body.dark-mode .section-header {
+    border-color: var(--panel-header-border);
+}
+
+body.dark-mode .status-card {
+    background: var(--panel-bg);
+    border-color: var(--panel-header-border);
+}
+
+body.dark-mode .info-content label,
+body.dark-mode .status-content label {
+    color: var(--label-color);
+}
+
+body.dark-mode .info-content span,
+body.dark-mode .status-content span {
+    color: var(--panel-title-color);
+}
+
+body.dark-mode .badge-active {
+    background: var(--badge-active-bg);
+    color: var(--badge-active-color);
+}
+
+body.dark-mode .badge-inactive {
+    background: var(--badge-inactive-bg);
+    color: var(--badge-inactive-color);
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,1062 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión | TEOmanager</title>
+    <link rel="stylesheet" href="{% static 'fontawesome-free-6.7.2-web/css/all.min.css' %}">
+    <style>
+        :root {
+            /* Variables modo claro */
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --error: #ef4444;
+            --success: #22c55e;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --input-bg: #ffffff;
+            --input-border: #e2e8f0;
+            --hero-gradient-start: #2563eb;
+            --hero-gradient-end: #1e40af;
+            --hero-feature-bg: rgba(255, 255, 255, 0.1);
+            --hero-feature-hover: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Modo Oscuro */
+        [data-theme="dark"] {
+            --primary: #60a5fa;
+            --primary-dark: #3b82f6;
+            --secondary: #94a3b8;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #334155;
+            --input-border: #475569;
+            --hero-gradient-start: #1e293b;
+            --hero-gradient-end: #334155;
+            --hero-feature-bg: rgba(96, 165, 250, 0.1);
+            --hero-feature-hover: rgba(96, 165, 250, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: var(--surface);
+            overflow: hidden;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .login-hero {
+            background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            color: white;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .hero-logo {
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 4rem;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #ffffff, #93c5fd);
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .hero-feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--hero-feature-bg);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .hero-feature:hover {
+            transform: translateY(-5px);
+            background: var(--hero-feature-hover);
+        }
+
+        .hero-feature i {
+            font-size: 1.5rem;
+            color: #93c5fd;
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 25s infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            right: -150px;
+            animation-delay: 0s;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .shape:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            bottom: -100px;
+            left: 10%;
+            animation-delay: -8s;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .shape:nth-child(3) {
+            width: 400px;
+            height: 400px;
+            bottom: 20%;
+            right: -200px;
+            animation-delay: -16s;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(15%, 15%) rotate(120deg);
+            }
+            50% {
+                transform: translate(-10%, -10%) rotate(240deg);
+            }
+            75% {
+                transform: translate(-15%, 10%) rotate(360deg);
+            }
+        }
+
+        .login-section {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: var(--surface);
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .mobile-header {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .mobile-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.3rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .mobile-logo i {
+            font-size: 1.3rem;
+        }
+
+        .mobile-header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .to-landing {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .to-landing:hover {
+            background: var(--background);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .to-landing i {
+            font-size: 0.9rem;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .login-header h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .password-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            width: 90%;
+            position: relative;
+        }
+
+        .password-header label {
+            display: inline-block;
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .forgot-password {
+            display: inline-block;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            white-space: nowrap;
+            margin-left: 1rem;
+        }
+
+        .forgot-password:hover {
+            color: var(--primary);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(96,165,250,0.2);
+            outline: none;
+        }
+
+        .form-input.input-error {
+            border-color: var(--error);
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+
+        .form-input.input-error:focus {
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+        }
+
+        .form-group .alert {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            padding: 0.75rem 1rem;
+        }
+
+        .form-group .alert i {
+            font-size: 1rem;
+        }
+
+        .login-container > .alert {
+            margin-bottom: 1.5rem;
+        }
+
+        .messages {
+            position: relative;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+        }
+
+        .login-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 2rem 0;
+            color: var(--text-secondary);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .divider span {
+            padding: 0 1rem;
+            font-size: 0.9rem;
+        }
+
+        .social-login {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-button {
+            padding: 0.8rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--surface);
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .social-button:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .login-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                grid-template-columns: 1fr;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
+
+            .login-hero {
+                display: none;
+            }
+
+            .login-section {
+                padding: 2rem;
+                min-height: 100vh;
+                justify-content: center;
+            }
+
+            .login-container {
+                width: 100%;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                background: var(--surface);
+            }
+
+            .login-section {
+                padding: 1rem;
+            }
+
+            .login-container {
+                width: 90%;
+                max-width: 90%;
+                padding: 0;
+            }
+
+            .mobile-header {
+                margin-bottom: 2rem;
+            }
+
+            .mobile-header-right {
+                gap: 0.5rem;
+            }
+
+            .to-landing {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .login-header {
+                margin-bottom: 2rem;
+            }
+
+            .login-header h2 {
+                font-size: 1.8rem;
+            }
+
+            .login-header p {
+                font-size: 1rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.25rem;
+            }
+
+            .form-input {
+                padding: 0.875rem 1rem 0.875rem 2.75rem;
+            }
+
+            .input-group i {
+                font-size: 1.1rem;
+                left: 0.875rem;
+            }
+
+            .login-button {
+                margin-top: 1.5rem;
+                padding: 0.875rem;
+            }
+
+            .social-login {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .social-button {
+                padding: 0.75rem;
+            }
+
+            .divider {
+                margin: 1.5rem 0;
+            }
+
+            .password-header {
+                flex-wrap: nowrap;
+                gap: 0.5rem;
+            }
+
+            .forgot-password {
+                font-size: 0.85rem;
+            }
+
+            .form-group label {
+                margin-right: 8rem; /* Espacio para el enlace de olvidé contraseña */
+            }
+        }
+
+        /* Estilos para mensajes de alerta */
+        .messages {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-width: 380px;
+            width: calc(100% - 2rem);
+        }
+
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            border-color: var(--success);
+        }
+
+        .alert-success i {
+            color: var(--success);
+        }
+
+        .alert-error {
+            border-color: var(--error);
+        }
+
+        .alert-error i {
+            color: var(--error);
+        }
+
+        .alert i {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .alert-content {
+            flex: 1;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .alert-close {
+            padding: 0.25rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            opacity: 0.5;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .alert-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .alert.hiding {
+            animation: slideOut 0.3s ease-out forwards;
+        }
+
+        @media (max-width: 640px) {
+            .messages {
+                top: 1rem;
+                right: 1rem;
+                left: 1rem;
+                width: auto;
+            }
+
+            .alert {
+                padding: 0.875rem 1rem;
+                font-size: 0.9rem;
+            }
+            .password-header a {
+
+                font-size: 0.6rem;
+
+            }
+            .password-header label {
+                font-size: 0.9rem;
+                padding-right: 0;
+                margin-right: 0;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .login-header h2 {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .login-header p {
+            animation: fadeInUp 0.6s ease-out 0.1s backwards;
+        }
+
+        .form-group {
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: backwards;
+        }
+
+        .form-group:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .form-group:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .login-button {
+            animation: fadeInUp 0.6s ease-out 0.4s backwards;
+        }
+
+        .divider {
+            animation: fadeIn 0.6s ease-out 0.5s backwards;
+        }
+
+        .social-login {
+            animation: fadeInUp 0.6s ease-out 0.6s backwards;
+        }
+
+        .login-footer {
+            animation: fadeInUp 0.6s ease-out 0.7s backwards;
+        }
+
+        .hero-content > * {
+            animation: fadeInUp 0.8s ease-out;
+            animation-fill-mode: backwards;
+        }
+
+        .hero-logo {
+            animation-delay: 0.2s;
+        }
+
+        .hero-title {
+            animation-delay: 0.3s;
+        }
+
+        .hero-subtitle {
+            animation-delay: 0.4s;
+        }
+
+        .hero-features {
+            animation-delay: 0.5s;
+        }
+
+        .hero-feature {
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: backwards;
+        }
+
+        .hero-feature:nth-child(1) {
+            animation-delay: 0.6s;
+        }
+
+        .hero-feature:nth-child(2) {
+            animation-delay: 0.7s;
+        }
+
+        .hero-feature:nth-child(3) {
+            animation-delay: 0.8s;
+        }
+
+        .hero-feature:nth-child(4) {
+            animation-delay: 0.9s;
+        }
+
+        .shape {
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        .shape:nth-child(1) {
+            animation-delay: 1s;
+        }
+
+        .shape:nth-child(2) {
+            animation-delay: 1.2s;
+        }
+
+        .shape:nth-child(3) {
+            animation-delay: 1.4s;
+        }
+
+        /* Mejora de la transición del hover en los botones */
+        .login-button,
+        .social-button,
+        .hero-feature {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .login-button:hover,
+        .social-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(37,99,235,0.15);
+        }
+
+        /* Efecto de hover más suave para los inputs */
+        .form-input {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .form-input:focus {
+            transform: translateY(-1px);
+        }
+
+        /* Botón de tema */
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            margin-left: 1rem;
+        }
+
+        .theme-toggle:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        [data-theme="dark"] .alert {
+            background: #1e293b;
+            color: #f1f5f9;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.5);
+            border-left-color: #60a5fa;
+        }
+        [data-theme="dark"] .alert-success {
+            border-color: #22d3ee;
+        }
+        [data-theme="dark"] .alert-success i {
+            color: #22d3ee;
+        }
+        [data-theme="dark"] .alert-error {
+            border-color: #ef4444;
+        }
+        [data-theme="dark"] .alert-error i {
+            color: #ef4444;
+        }
+        [data-theme="dark"] .alert-content {
+            color: #cbd5e1;
+        }
+        [data-theme="dark"] .alert-close {
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+    <section class="login-hero">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-logo">
+                <i class="fas fa-cubes"></i>
+                TEOmanager
+            </div>
+            <h1 class="hero-title">Gestiona tu negocio de manera inteligente</h1>
+            <p class="hero-subtitle">Optimiza tus operaciones, aumenta tus ventas y toma mejores decisiones con nuestra plataforma integral.</p>
+            
+            <div class="hero-features">
+                <div class="hero-feature">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Análisis en tiempo real</span>
+                </div>
+                <div class="hero-feature">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Acceso desde cualquier dispositivo</span>
+                </div>
+                <div class="hero-feature">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Seguridad avanzada</span>
+                </div>
+                <div class="hero-feature">
+                    <i class="fas fa-sync"></i>
+                    <span>Actualizaciones continuas</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="login-section">
+        <div class="login-container">
+            <div class="mobile-header">
+                <div class="mobile-logo">
+                    <i class="fas fa-cubes"></i>
+                    <span>TEOmanager</span>
+                </div>
+                <div class="mobile-header-right">
+                    <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <a href="{% url 'landing' %}" class="to-landing">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver
+                    </a>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% endif %}">
+                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% endif %}"></i>
+                    <div class="alert-content">{{ message }}</div>
+                    <button class="alert-close" onclick="closeAlert(this.parentElement)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="login-header">
+                <h2>¡Bienvenido de nuevo!</h2>
+                <p>Ingresa tus credenciales para continuar</p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div class="alert-content">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="id_username">Usuario</label>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="username" id="id_username" class="form-input {% if form.username.errors %}input-error{% endif %}" required autofocus>
+                    </div>
+                    {% if form.username.errors %}
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div class="alert-content">
+                            {% for error in form.username.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <div class="password-header">
+                        <label for="id_password">Contraseña</label>
+                        <a href="{% url 'password_reset' %}" class="forgot-password">¿Olvidaste tu contraseña?</a>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" id="id_password" class="form-input {% if form.password.errors %}input-error{% endif %}" required>
+                    </div>
+                    {% if form.password.errors %}
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div class="alert-content">
+                            {% for error in form.password.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="login-button">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Iniciar Sesión
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>O continúa con</span>
+            </div>
+
+            <div class="social-login">
+                <button class="social-button">
+                    <i class="fab fa-google"></i>
+                </button>
+                <button class="social-button">
+                    <i class="fab fa-microsoft"></i>
+                </button>
+            </div>
+
+            <div class="login-footer">
+                ¿No tienes una cuenta?<a href="{% url 'register' %}">Regístrate aquí</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function closeAlert(alert) {
+            alert.classList.add('hiding');
+            setTimeout(() => alert.remove(), 300);
+        }
+
+        // Auto-ocultar mensajes después de 5 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.alert');
+            messages.forEach(function(message) {
+                setTimeout(() => {
+                    if (message) {
+                        closeAlert(message);
+                    }
+                }, 5000);
+            });
+        });
+
+        // Manejo del tema oscuro/claro
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = themeToggle.querySelector('i');
+            const html = document.documentElement;
+            
+            // Verificar tema guardado
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                html.setAttribute('data-theme', 'dark');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('darkMode', newTheme === 'dark');
+                
+                // Cambiar el icono
+                const newIcon = newTheme === 'dark' ? 'fa-sun' : 'fa-moon';
+                const oldIcon = newTheme === 'dark' ? 'fa-moon' : 'fa-sun';
+                themeIcon.classList.replace(oldIcon, newIcon);
+            });
+        });
+    </script>
+</body>
+</html>

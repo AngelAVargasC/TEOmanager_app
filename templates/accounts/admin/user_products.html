@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Productos de {{ user_detail.username }} | TEOmanager{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin-buttons.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin-functions.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="panel">
+    <div class="panel-header">
+        <h2>Productos de {{ user_detail.username }}</h2>
+        <div class="floating-icons">
+            <i class="fas fa-box"></i>
+            <i class="fas fa-tags"></i>
+            <i class="fas fa-barcode"></i>
+            <i class="fas fa-boxes"></i>
+            <i class="fas fa-warehouse"></i>
+        </div>
+    </div>
+    <div class="panel-content">
+        <!-- Información del usuario -->
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-details">
+                <h3>{{ user_detail.userprofile.empresa }}</h3>
+                <p><i class="fas fa-envelope"></i> {{ user_detail.email }}</p>
+                <p><i class="fas fa-phone"></i> {{ user_detail.userprofile.telefono }}</p>
+            </div>
+        </div>
+
+        <!-- Lista de productos -->
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <div class="product-image">
+                    {% if product.imagen_principal %}
+                        <img src="{{ product.imagen_principal }}" alt="{{ product.nombre }}" class="product-img">
+                    {% else %}
+                        <i class="fas fa-box"></i>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <h4>{{ product.nombre }}</h4>
+                    <p class="product-category">
+                        <i class="fas fa-tag"></i> {{ product.categoria }}
+                    </p>
+                    <div class="product-details">
+                        <span class="price">
+                            <i class="fas fa-dollar-sign"></i> {{ product.precio }}
+                        </span>
+                        <span class="stock {% if product.stock < 10 %}low-stock{% endif %}">
+                            <i class="fas fa-cubes"></i> {{ product.stock }} unidades
+                        </span>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn-edit" onclick="editProduct('{{ product.id }}')">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn-delete" onclick="deleteProduct('{{ product.id }}')">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <p>Este usuario no tiene productos registrados</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="action-buttons">
+            <a href="{% url 'user_detail' user_detail.id %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Volver a Detalles
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .user-avatar {
+        font-size: 3rem;
+        color: #2563eb;
+    }
+
+    .user-details h3 {
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-details p {
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .product-image {
+        height: 200px;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-image img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+    }
+
+    .product-image i {
+        font-size: 3rem;
+        color: #94a3b8;
+    }
+
+    .product-info {
+        padding: 1.5rem;
+    }
+
+    .product-info h4 {
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .product-category {
+        color: #64748b;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .product-details {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .price, .stock {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .price {
+        color: #2563eb;
+        font-weight: 600;
+    }
+
+    .stock {
+        color: #64748b;
+    }
+
+    .stock.low-stock {
+        color: #dc2626;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-edit,
+    .btn-delete {
+        flex: 1;
+        padding: 0.6rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .btn-edit {
+        background: #2563eb;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-delete {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .btn-delete:hover {
+        background: #fecaca;
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        color: #64748b;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: flex-start;
+        gap: 1rem;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        color: #475569;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-back:hover {
+        background: #e2e8f0;
+    }
+
+    @media (max-width: 768px) {
+        .user-info {
+            flex-direction: column;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .products-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .product-card {
+            max-width: 100%;
+        }
+    }
+
+    .product-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+</style>
+
+<!-- Dark-mode overrides para productos de usuario -->
+<style>
+body.dark-mode .user-info {
+    background: #1e293b;
+    color: #f1f5f9;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.25);
+}
+body.dark-mode .product-card {
+    background: #1e293b;
+    color: #f1f5f9;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.25);
+}
+body.dark-mode .product-image {
+    background: #334155;
+}
+body.dark-mode .product-info h4,
+body.dark-mode .product-category,
+body.dark-mode .price {
+    color: #60a5fa;
+}
+body.dark-mode .stock.low-stock {
+    color: #f87171;
+}
+body.dark-mode .btn-edit {
+    background: rgba(96,165,250,0.12);
+    color: #f1f5f9;
+    border: 1px solid rgba(96,165,250,0.18);
+}
+body.dark-mode .btn-delete {
+    background: #7f1d1d;
+    color: #fca5a5;
+}
+body.dark-mode .empty-state {
+    background: #334155;
+    color: #cbd5e1;
+}
+body.dark-mode .btn-back {
+    background: rgba(96,165,250,0.12);
+    color: #f1f5f9;
+    border: 1px solid rgba(96,165,250,0.18);
+}
+</style>
+
+<!-- Dark-mode overrides para panel en productos de usuario -->
+<style>
+body.dark-mode .panel { background: #1e293b; color: #f1f5f9; }
+body.dark-mode .panel-header { 
+    background: var(--panel-header-bg); 
+    color: var(--panel-header-color); 
+}
+body.dark-mode .panel-content { background: var(--panel-body-bg); }
+body.dark-mode .floating-icons i { color: var(--primary-color); }
+</style>
+<!-- Dark-mode override para h3 en dashboard -->
+<style>
+    body.dark-mode h3 {
+        color: var(--text-color) !important;
+    }
+    </style>
+<script>
+function editProduct(productId) {
+    // Implementar lógica de edición
+    console.log('Editar producto:', productId);
+}
+
+function deleteProduct(productId) {
+    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+        // Implementar lógica de eliminación
+        console.log('Eliminar producto:', productId);
+    }
+}
+</script>
+{% endblock %} 

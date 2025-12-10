@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Bienvenido a TEOmanager</title>
+    <!--[if mso]>
+    <style type="text/css">
+        body, table, td {font-family: Arial, sans-serif !important;}
+    </style>
+    <![endif]-->
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f7fa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+    <!-- Preheader Text -->
+    <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+        Tu cuenta en TEOmanager ha sido creada exitosamente. ¡Comienza a gestionar tu negocio ahora!
+    </div>
+    
+    <!-- Main Container -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f5f7fa; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <!-- Email Container -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); overflow: hidden;">
+                    
+                    <!-- Header with Gradient -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%); padding: 40px 40px 30px 40px; text-align: center;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center" style="padding-bottom: 20px;">
+                                        <div style="width: 80px; height: 80px; background-color: rgba(255, 255, 255, 0.2); border-radius: 50%; display: inline-block; padding: 20px; box-sizing: border-box;">
+                                            <div style="width: 100%; height: 100%; background-color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #2563eb; font-weight: bold;">
+                                                T
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                                            TEOmanager
+                                        </h1>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Main Content -->
+                    <tr>
+                        <td style="padding: 40px 40px 30px 40px;">
+                            <!-- Welcome Message -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <h2 style="margin: 0 0 20px 0; color: #1e293b; font-size: 24px; font-weight: 700; line-height: 1.3;">
+                                            ¡Hola{% if user_first_name %} {{ user_first_name }}{% endif %}! 👋
+                                        </h2>
+                                        <p style="margin: 0 0 20px 0; color: #64748b; font-size: 16px; line-height: 1.6;">
+                                            {% if is_empresa %}
+                                            Tu cuenta empresarial ha sido creada exitosamente. Estamos emocionados de tenerte como parte de nuestra comunidad.
+                                            {% else %}
+                                            Tu cuenta ha sido creada exitosamente. Estamos emocionados de tenerte como parte de nuestra comunidad.
+                                            {% endif %}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- User Credentials Info -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 30px;">
+                                <tr>
+                                    <td style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 4px solid #2563eb; border-radius: 8px; padding: 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding-bottom: 12px;">
+                                                    <p style="margin: 0; color: #0c4a6e; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="#0c4a6e"/>
+                                                        </svg>
+                                                        Información de Acceso
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-bottom: 8px;">
+                                                    <p style="margin: 0; color: #475569; font-size: 14px; font-weight: 500;">
+                                                        Tu nombre de usuario para iniciar sesión es:
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div style="background-color: #ffffff; border: 2px solid #2563eb; border-radius: 6px; padding: 12px 16px; margin-top: 8px;">
+                                                        <p style="margin: 0; color: #1e293b; font-size: 18px; font-weight: 700; font-family: 'Courier New', monospace; letter-spacing: 0.5px;">
+                                                            {{ user_username }}
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-top: 12px;">
+                                                    <p style="margin: 0; color: #64748b; font-size: 13px; line-height: 1.5;">
+                                                        <strong>Importante:</strong> Utiliza este nombre de usuario junto con tu contraseña para acceder a tu cuenta. {% if is_empresa %}No uses el nombre de tu empresa para iniciar sesión.{% endif %}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Company Info (only for empresas) -->
+                            {% if is_empresa and empresa %}
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 30px;">
+                                <tr>
+                                    <td style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 4px solid #2563eb; border-radius: 8px; padding: 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="padding-bottom: 8px;">
+                                                    <p style="margin: 0; color: #0c4a6e; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                        Empresa Registrada
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <p style="margin: 0; color: #1e293b; font-size: 18px; font-weight: 700;">
+                                                        {{ empresa }}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            {% endif %}
+                            
+                            <!-- Features List -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 30px;">
+                                <tr>
+                                    <td>
+                                        <p style="margin: 0 0 20px 0; color: #1e293b; font-size: 18px; font-weight: 600;">
+                                            {% if is_empresa %}
+                                            Ahora puedes:
+                                            {% else %}
+                                            Comienza a explorar:
+                                            {% endif %}
+                                        </p>
+                                    </td>
+                                </tr>
+                                {% if is_empresa %}
+                                <tr>
+                                    <td style="padding: 16px 0; border-bottom: 1px solid #e2e8f0;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td width="48" valign="top" style="padding-right: 12px;">
+                                                    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%); border-radius: 10px; display: inline-block; text-align: center; vertical-align: middle; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 10px auto; display: block;">
+                                                            <path d="M20 6H16L14 4H10L8 6H4C2.9 6 2 6.9 2 8V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V8C22 6.9 21.1 6 20 6Z" fill="white"/>
+                                                            <path d="M12 17C14.76 17 17 14.76 17 12C17 9.24 14.76 7 12 7C9.24 7 7 9.24 7 12C7 14.76 9.24 17 12 17Z" fill="white" opacity="0.3"/>
+                                                        </svg>
+                                                    </div>
+                                                </td>
+                                                <td valign="top">
+                                                    <p style="margin: 0; color: #1e293b; font-size: 16px; font-weight: 600; line-height: 1.5;">
+                                                        Gestionar tus productos y servicios
+                                                    </p>
+                                                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.4;">
+                                                        Controla tu inventario con herramientas profesionales
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 16px 0; border-bottom: 1px solid #e2e8f0;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td width="48" valign="top" style="padding-right: 12px;">
+                                                    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%); border-radius: 10px; display: inline-block; text-align: center; vertical-align: middle; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 10px auto; display: block;">
+                                                            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="white"/>
+                                                            <path d="M12 6C8.69 6 6 8.69 6 12C6 15.31 8.69 18 12 18C15.31 18 18 15.31 18 12C18 8.69 15.31 6 12 6ZM11 17V15H13V17H11ZM11 13V7H13V13H11Z" fill="white" opacity="0.3"/>
+                                                        </svg>
+                                                    </div>
+                                                </td>
+                                                <td valign="top">
+                                                    <p style="margin: 0; color: #1e293b; font-size: 16px; font-weight: 600; line-height: 1.5;">
+                                                        Crear tu landing page personalizada
+                                                    </p>
+                                                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.4;">
+                                                        Muestra tu negocio de forma profesional
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 16px 0; border-bottom: 1px solid #e2e8f0;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td width="48" valign="top" style="padding-right: 12px;">
+                                                    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%); border-radius: 10px; display: inline-block; text-align: center; vertical-align: middle; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 10px auto; display: block;">
+                                                            <path d="M7 18C5.9 18 5 17.1 5 16C5 14.9 5.9 14 7 14C8.1 14 9 14.9 9 16C9 17.1 8.1 18 7 18Z" fill="white"/>
+                                                            <path d="M19 18C17.9 18 17 17.1 17 16C17 14.9 17.9 14 19 14C20.1 14 21 14.9 21 16C21 17.1 20.1 18 19 18Z" fill="white"/>
+                                                            <path d="M7 13C6.45 13 5.95 13.22 5.59 13.59L3 16.17L1.41 14.59L2.83 13.17L5.59 10.41C5.95 10.05 6.45 9.83 7 9.83H19C19.55 9.83 20.05 10.05 20.41 10.41L23.17 13.17L24.59 14.59L23 16.17L20.41 13.59C20.05 13.22 19.55 13 19 13H7Z" fill="white" opacity="0.3"/>
+                                                            <path d="M7 4H19C19.55 4 20.05 4.22 20.41 4.59L23.17 7.35L24.59 5.94L23 4.35L20.41 1.76C20.05 1.39 19.55 1.17 19 1.17H7C6.45 1.17 5.95 1.39 5.59 1.76L3 4.35L1.41 2.76L2.83 1.35L5.59 4.11C5.95 4.48 6.45 4.7 7 4.7H19V4H7Z" fill="white"/>
+                                                        </svg>
+                                                    </div>
+                                                </td>
+                                                <td valign="top">
+                                                    <p style="margin: 0; color: #1e293b; font-size: 16px; font-weight: 600; line-height: 1.5;">
+                                                        Administrar pedidos y clientes
+                                                    </p>
+                                                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.4;">
+                                                        Gestiona todas tus ventas en un solo lugar
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 16px 0;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td width="48" valign="top" style="padding-right: 12px;">
+                                                    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%); border-radius: 10px; display: inline-block; text-align: center; vertical-align: middle; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 10px auto; display: block;">
+                                                            <path d="M3 13H11V3H3V13ZM3 21H11V15H3V21ZM13 21H21V11H13V21ZM13 3V9H21V3H13Z" fill="white"/>
+                                                        </svg>
+                                                    </div>
+                                                </td>
+                                                <td valign="top">
+                                                    <p style="margin: 0; color: #1e293b; font-size: 16px; font-weight: 600; line-height: 1.5;">
+                                                        Acceder a reportes y análisis
+                                                    </p>
+                                                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.4;">
+                                                        Toma decisiones basadas en datos reales
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td style="padding: 16px 0; border-bottom: 1px solid #e2e8f0;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td width="48" valign="top" style="padding-right: 12px;">
+                                                    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%); border-radius: 10px; display: inline-block; text-align: center; vertical-align: middle; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 10px auto; display: block;">
+                                                            <path d="M7 18C5.9 18 5 17.1 5 16C5 14.9 5.9 14 7 14C8.1 14 9 14.9 9 16C9 17.1 8.1 18 7 18Z" fill="white"/>
+                                                            <path d="M19 18C17.9 18 17 17.1 17 16C17 14.9 17.9 14 19 14C20.1 14 21 14.9 21 16C21 17.1 20.1 18 19 18Z" fill="white"/>
+                                                            <path d="M7 13C6.45 13 5.95 13.22 5.59 13.59L3 16.17L1.41 14.59L2.83 13.17L5.59 10.41C5.95 10.05 6.45 9.83 7 9.83H19C19.55 9.83 20.05 10.05 20.41 10.41L23.17 13.17L24.59 14.59L23 16.17L20.41 13.59C20.05 13.22 19.55 13 19 13H7Z" fill="white" opacity="0.3"/>
+                                                            <path d="M7 4H19C19.55 4 20.05 4.22 20.41 4.59L23.17 7.35L24.59 5.94L23 4.35L20.41 1.76C20.05 1.39 19.55 1.17 19 1.17H7C6.45 1.17 5.95 1.39 5.59 1.76L3 4.35L1.41 2.76L2.83 1.35L5.59 4.11C5.95 4.48 6.45 4.7 7 4.7H19V4H7Z" fill="white"/>
+                                                        </svg>
+                                                    </div>
+                                                </td>
+                                                <td valign="top">
+                                                    <p style="margin: 0; color: #1e293b; font-size: 16px; font-weight: 600; line-height: 1.5;">
+                                                        Explorar productos y servicios
+                                                    </p>
+                                                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.4;">
+                                                        Descubre ofertas de empresas verificadas
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 16px 0;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td width="48" valign="top" style="padding-right: 12px;">
+                                                    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%); border-radius: 10px; display: inline-block; text-align: center; vertical-align: middle; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 10px auto; display: block;">
+                                                            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="white"/>
+                                                        </svg>
+                                                    </div>
+                                                </td>
+                                                <td valign="top">
+                                                    <p style="margin: 0; color: #1e293b; font-size: 16px; font-weight: 600; line-height: 1.5;">
+                                                        Realizar pedidos fácilmente
+                                                    </p>
+                                                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.4;">
+                                                        Compra de forma rápida y segura
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                            
+                            <!-- CTA Button -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 30px;">
+                                <tr>
+                                    <td align="center">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                                            <tr>
+                                                <td style="background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%); border-radius: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
+                                                    <a href="{{ login_url }}" style="display: inline-block; padding: 16px 32px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; line-height: 1.5;">
+                                                        <span style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;">
+                                                                <path d="M13 3L4 14H11L11 21L20 10H13L13 3Z" fill="white"/>
+                                                            </svg>
+                                                        </span>
+                                                        Comenzar Ahora
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Additional Info -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td style="background-color: #f8fafc; border-radius: 8px; padding: 20px; text-align: center;">
+                                        <p style="margin: 0 0 12px 0; color: #1e293b; font-size: 16px; font-weight: 600;">
+                                            {% if is_empresa %}
+                                            ¡Comienza a potenciar tu negocio hoy mismo!
+                                            {% else %}
+                                            ¡Explora todas las posibilidades!
+                                            {% endif %}
+                                        </p>
+                                        <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5;">
+                                            Si tienes alguna pregunta, nuestro equipo de soporte está aquí para ayudarte.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; padding: 30px 40px; border-top: 1px solid #e2e8f0;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center" style="padding-bottom: 20px;">
+                                        <p style="margin: 0; color: #1e293b; font-size: 16px; font-weight: 600;">
+                                            Saludos,
+                                        </p>
+                                        <p style="margin: 8px 0 0 0; color: #2563eb; font-size: 18px; font-weight: 700;">
+                                            El equipo de TEOmanager
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                                        <p style="margin: 0 0 12px 0; color: #64748b; font-size: 12px; line-height: 1.5;">
+                                            Este es un correo automático, por favor no respondas a este mensaje.
+                                        </p>
+                                        <p style="margin: 0; color: #94a3b8; font-size: 11px;">
+                                            © {% now "Y" %} TEOmanager. Todos los derechos reservados.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                
+                <!-- Spacer -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td style="height: 40px;">&nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+

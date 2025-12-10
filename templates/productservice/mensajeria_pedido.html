@@ -1,0 +1,921 @@
+{% load static %}
+<!-- Modal de Mensajería para Pedidos -->
+<div id="mensajeriaModal" class="mensajeria-modal">
+    <div class="mensajeria-modal-content">
+        <!-- Header del Modal -->
+        <div class="mensajeria-header">
+            <div class="mensajeria-header-info">
+                <h3>
+                    <i class="fas fa-comments"></i>
+                    Mensajes del Pedido #{{ pedido.id }}
+                </h3>
+                <p class="mensajeria-subtitle">
+                    Conversación con 
+                    <span id="destinatarioNombre">
+                        {% if user == pedido.usuario %}
+                            {{ pedido.empresa_info }}
+                        {% else %}
+                            {{ pedido.usuario.username }}
+                        {% endif %}
+                    </span>
+                </p>
+            </div>
+            <button class="mensajeria-close" onclick="cerrarMensajeria()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Área de Mensajes -->
+        <div class="mensajeria-messages" id="mensajeriaMessages">
+            <div class="mensajes-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Cargando mensajes...</span>
+            </div>
+        </div>
+
+        <!-- Contador de mensajes no leídos -->
+        <div class="mensajes-no-leidos" id="mensajesNoLeidos" style="display: none;">
+            <i class="fas fa-circle"></i>
+            <span id="contadorNoLeidos">0</span> mensajes nuevos
+        </div>
+
+        <!-- Formulario de Envío -->
+        <div class="mensajeria-form-container">
+            <form id="formEnviarMensaje" class="mensajeria-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mensajeria-input-group">
+                    <textarea 
+                        id="mensajeTexto" 
+                        name="mensaje" 
+                        class="mensajeria-textarea" 
+                        placeholder="Escribe tu mensaje aquí..."
+                        rows="3"></textarea>
+                    <label for="archivoAdjunto" class="mensajeria-file-label" title="Adjuntar archivo">
+                        <i class="fas fa-paperclip"></i>
+                        <input type="file" id="archivoAdjunto" name="archivo_adjunto" accept="image/*,.pdf,.doc,.docx" style="display: none;">
+                    </label>
+                </div>
+                <div class="mensajeria-file-preview" id="filePreview" style="display: none;">
+                    <span id="fileName"></span>
+                    <button type="button" onclick="removerArchivo()" class="remove-file-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="mensajeria-actions">
+                    <button type="submit" class="mensajeria-send-btn" id="btnEnviarMensaje">
+                        <i class="fas fa-paper-plane"></i>
+                        Enviar mensaje
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* === MODAL DE MENSAJERÍA === */
+    .mensajeria-modal {
+        display: none;
+        position: fixed;
+        z-index: 10000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .mensajeria-modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .mensajeria-modal-content {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 700px;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease;
+        overflow: hidden;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Header del Modal */
+    .mensajeria-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mensajeria-header-info h3 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .mensajeria-subtitle {
+        margin: 0;
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+
+    .mensajeria-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        font-size: 1.1rem;
+    }
+
+    .mensajeria-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+
+    /* Área de Mensajes */
+    .mensajeria-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem;
+        background: #f8fafc;
+        min-height: 300px;
+        max-height: 400px;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .mensajeria-messages::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .mensajeria-messages::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .mensajeria-messages::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .mensajeria-messages::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    .mensajes-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        color: #64748b;
+        padding: 2rem;
+    }
+
+    .mensajes-loading i {
+        font-size: 2rem;
+    }
+
+    .mensaje-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        animation: mensajeSlideIn 0.3s ease;
+    }
+
+    @keyframes mensajeSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .mensaje-item.propio {
+        align-items: flex-end;
+    }
+
+    .mensaje-item.recibido {
+        align-items: flex-start;
+    }
+
+    .mensaje-bubble {
+        max-width: 75%;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        word-wrap: break-word;
+        position: relative;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .mensaje-item.propio .mensaje-bubble {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .mensaje-item.recibido .mensaje-bubble {
+        background: white;
+        color: #1e293b;
+        border: 1px solid #e2e8f0;
+        border-bottom-left-radius: 4px;
+    }
+
+    .mensaje-texto {
+        margin: 0;
+        line-height: 1.5;
+        font-size: 0.9375rem;
+    }
+
+    .mensaje-archivo {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        color: inherit;
+        transition: background 0.2s;
+    }
+
+    .mensaje-item.propio .mensaje-archivo {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .mensaje-item.recibido .mensaje-archivo {
+        background: #f1f5f9;
+    }
+
+    .mensaje-archivo:hover {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .mensaje-archivo i {
+        font-size: 1.2rem;
+    }
+
+    .mensaje-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+        padding: 0 0.5rem;
+    }
+
+    .mensaje-item.propio .mensaje-meta {
+        justify-content: flex-end;
+    }
+
+    .mensaje-fecha {
+        font-size: 0.75rem;
+    }
+
+    .mensaje-enviado {
+        color: #9ca3af;
+        font-size: 0.7rem;
+    }
+
+    .mensaje-leido {
+        color: #3b82f6;
+        font-size: 0.7rem;
+    }
+
+    .mensajes-no-leidos {
+        background: #fef3c7;
+        border-top: 1px solid #fde68a;
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #92400e;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .mensajes-no-leidos i {
+        color: #f59e0b;
+        font-size: 0.6rem;
+    }
+
+    /* Formulario de Envío */
+    .mensajeria-form-container {
+        background: white;
+        border-top: 1px solid #e2e8f0;
+        padding: 1rem 1.5rem;
+    }
+
+    .mensajeria-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .mensajeria-input-group {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-end;
+    }
+
+    .mensajeria-textarea {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.9375rem;
+        font-family: inherit;
+        resize: none;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .mensajeria-textarea:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .mensajeria-file-label {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mensajeria-file-label:hover {
+        background: #e2e8f0;
+        color: #3b82f6;
+    }
+
+    .mensajeria-file-preview {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0.75rem;
+        background: #f1f5f9;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        color: #475569;
+    }
+
+    .remove-file-btn {
+        background: none;
+        border: none;
+        color: #dc2626;
+        cursor: pointer;
+        padding: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .remove-file-btn:hover {
+        color: #b91c1c;
+    }
+
+    .mensajeria-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .mensajeria-send-btn {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .mensajeria-send-btn:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .mensajeria-send-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .mensaje-vacio {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #64748b;
+    }
+
+    .mensaje-vacio i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .mensajeria-modal-content {
+            width: 100%;
+            max-width: 100%;
+            height: 100vh;
+            max-height: 100vh;
+            border-radius: 0;
+        }
+
+        .mensajeria-messages {
+            max-height: calc(100vh - 250px);
+        }
+
+        .mensaje-bubble {
+            max-width: 85%;
+        }
+    }
+
+    /* Dark mode compatibility */
+    body.dark-mode .mensajeria-modal-content {
+        background: var(--panel-body-bg);
+    }
+
+    body.dark-mode .mensajeria-messages {
+        background: var(--panel-body-bg);
+    }
+
+    body.dark-mode .mensaje-item.recibido .mensaje-bubble {
+        background: var(--panel-body-bg);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: var(--panel-title-color);
+    }
+
+    body.dark-mode .mensajeria-textarea {
+        background: var(--panel-body-bg);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: var(--panel-title-color);
+    }
+
+    body.dark-mode .mensajeria-file-label {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+</style>
+
+<script>
+let pedidoId = {{ pedido.id }};
+let pollingInterval = null;
+let ultimoMensajeId = 0;
+let userId = {{ user.id|default:0 }};
+
+// Abrir modal de mensajería
+// Función para actualizar el contador del navbar
+function actualizarContadorNavbar() {
+    // Intentar usar la función global primero
+    if (typeof window.actualizarContadorNotificaciones === 'function') {
+        window.actualizarContadorNotificaciones();
+    } else {
+        // Si la función no está disponible, hacer fetch directo
+        fetch('/products/mensajes/conteo/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const badge = document.getElementById('notifications-count');
+                    if (badge) {
+                        if (data.conteo > 0) {
+                            badge.textContent = data.conteo > 99 ? '99+' : data.conteo;
+                            badge.style.display = 'flex';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                }
+            })
+            .catch(error => console.error('Error al actualizar contador:', error));
+    }
+}
+
+function abrirMensajeria() {
+    const modal = document.getElementById('mensajeriaModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        cargarMensajes();
+        iniciarPolling();
+        // Actualizar contador del navbar inmediatamente al abrir
+        setTimeout(() => {
+            actualizarContadorNavbar();
+        }, 500); // Pequeño delay para asegurar que se carguen los mensajes primero
+    }
+}
+
+// Cerrar modal de mensajería
+function cerrarMensajeria() {
+    const modal = document.getElementById('mensajeriaModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        detenerPolling();
+    }
+}
+
+// Cerrar al hacer click fuera del modal
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('mensajeriaModal');
+    if (modal && event.target === modal) {
+        cerrarMensajeria();
+    }
+});
+
+// Cargar mensajes
+function cargarMensajes() {
+    const container = document.getElementById('mensajeriaMessages');
+    
+    // Mostrar loading
+    container.innerHTML = `
+        <div class="mensajes-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Cargando mensajes...</span>
+        </div>
+    `;
+    
+    fetch(`/products/pedido/${pedidoId}/mensajes/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                mostrarMensajes(data.mensajes || []);
+                actualizarContadorNoLeidos(data.mensajes_no_leidos || 0);
+                
+                // Actualizar contador del navbar inmediatamente
+                actualizarContadorNavbar();
+                
+                // También actualizar la página de notificaciones si está abierta
+                if (typeof window.actualizarChats === 'function') {
+                    window.actualizarChats();
+                }
+                
+                // Actualizar último mensaje ID
+                if (data.mensajes && data.mensajes.length > 0) {
+                    ultimoMensajeId = Math.max(...data.mensajes.map(m => m.id));
+                } else {
+                    ultimoMensajeId = 0;
+                }
+            } else {
+                // Si no hay éxito, mostrar mensaje vacío
+                mostrarMensajes([]);
+                console.error('Error al cargar mensajes:', data.error || 'Error desconocido');
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar mensajes:', error);
+            container.innerHTML = `
+                <div class="mensaje-vacio">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error al cargar los mensajes. Por favor, recarga la página.</p>
+                </div>
+            `;
+        });
+}
+
+// Mostrar mensajes en el contenedor
+function mostrarMensajes(mensajes) {
+    const container = document.getElementById('mensajeriaMessages');
+    
+    if (mensajes.length === 0) {
+        container.innerHTML = `
+            <div class="mensaje-vacio">
+                <i class="fas fa-comments"></i>
+                <p>No hay mensajes aún. ¡Sé el primero en escribir!</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = mensajes.map(msg => {
+        const esPropio = msg.remitente_id === userId;
+        const clase = esPropio ? 'propio' : 'recibido';
+        const tieneTexto = msg.mensaje && msg.mensaje.trim() !== '';
+        const archivoHtml = msg.tiene_adjunto ? `
+            <a href="${msg.archivo_url}" target="_blank" class="mensaje-archivo">
+                <i class="fas fa-paperclip"></i>
+                <span>${escapeHtml(msg.archivo_nombre || 'Archivo adjunto')}</span>
+            </a>
+        ` : '';
+        
+        const textoHtml = tieneTexto ? `<p class="mensaje-texto">${escapeHtml(msg.mensaje)}</p>` : '';
+        
+        return `
+            <div class="mensaje-item ${clase}" data-mensaje-id="${msg.id}">
+                <div class="mensaje-bubble">
+                    ${textoHtml}
+                    ${archivoHtml}
+                </div>
+                <div class="mensaje-meta">
+                    <span class="mensaje-fecha">${msg.fecha}</span>
+                    ${esPropio ? (msg.leido ? '<span class="mensaje-leido"><i class="fas fa-check-double"></i></span>' : '<span class="mensaje-enviado"><i class="fas fa-check"></i></span>') : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Scroll al final
+    container.scrollTop = container.scrollHeight;
+}
+
+// Actualizar contador de mensajes no leídos
+function actualizarContadorNoLeidos(count) {
+    const contador = document.getElementById('mensajesNoLeidos');
+    const numero = document.getElementById('contadorNoLeidos');
+    
+    if (count > 0) {
+        contador.style.display = 'flex';
+        numero.textContent = count;
+    } else {
+        contador.style.display = 'none';
+    }
+}
+
+// Obtener CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function getCSRFToken() {
+    // Intentar obtener del meta tag primero
+    const metaToken = document.querySelector('meta[name="csrf-token"]');
+    if (metaToken) {
+        return metaToken.getAttribute('content');
+    }
+    // Intentar obtener de las cookies
+    const cookieToken = getCookie('csrftoken');
+    if (cookieToken) {
+        return cookieToken;
+    }
+    // Intentar obtener del formulario
+    const formToken = document.querySelector('[name="csrfmiddlewaretoken"]');
+    if (formToken) {
+        return formToken.value;
+    }
+    return null;
+}
+
+// Enviar mensaje
+document.addEventListener('DOMContentLoaded', function() {
+    const formEnviarMensaje = document.getElementById('formEnviarMensaje');
+    if (formEnviarMensaje) {
+        formEnviarMensaje.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const btnEnviar = document.getElementById('btnEnviarMensaje');
+            const textarea = document.getElementById('mensajeTexto');
+            const mensajeTexto = textarea.value.trim();
+            const archivo = document.getElementById('archivoAdjunto').files[0];
+            
+            // Validar que haya mensaje o archivo
+            if (!mensajeTexto && !archivo) {
+                alert('Por favor, escribe un mensaje o adjunta un archivo.');
+                textarea.focus();
+                return;
+            }
+            
+            // Si solo hay archivo sin texto, agregar un texto por defecto
+            if (!mensajeTexto && archivo) {
+                formData.set('mensaje', '📎 Archivo adjunto');
+            }
+            
+            // Obtener CSRF token
+            const csrftoken = getCSRFToken() || formData.get('csrfmiddlewaretoken');
+            if (!csrftoken) {
+                alert('Error de seguridad. Por favor, recarga la página.');
+                console.error('No se pudo obtener el token CSRF');
+                return;
+            }
+            
+            // Asegurar que el token esté en el FormData
+            formData.set('csrfmiddlewaretoken', csrftoken);
+            
+            // Deshabilitar botón
+            btnEnviar.disabled = true;
+            btnEnviar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            
+            fetch(`/products/pedido/${pedidoId}/mensajes/enviar/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || `HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    textarea.value = '';
+                    removerArchivo();
+                    cargarMensajes();
+                    // Actualizar contador del navbar después de enviar
+                    actualizarContadorNavbar();
+                } else {
+                    throw new Error(data.error || 'Error desconocido al enviar el mensaje');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al enviar el mensaje: ' + error.message);
+            })
+            .finally(() => {
+                btnEnviar.disabled = false;
+                btnEnviar.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar mensaje';
+            });
+        });
+    }
+});
+
+// Manejo de archivo adjunto
+document.addEventListener('DOMContentLoaded', function() {
+    const archivoAdjunto = document.getElementById('archivoAdjunto');
+    if (archivoAdjunto) {
+        archivoAdjunto.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const preview = document.getElementById('filePreview');
+                const fileName = document.getElementById('fileName');
+                if (preview && fileName) {
+                    fileName.textContent = file.name;
+                    preview.style.display = 'flex';
+                }
+            }
+        });
+    }
+});
+
+function removerArchivo() {
+    document.getElementById('archivoAdjunto').value = '';
+    document.getElementById('filePreview').style.display = 'none';
+}
+
+// Polling para actualización automática
+function iniciarPolling() {
+    // Cargar mensajes cada 5 segundos
+    pollingInterval = setInterval(() => {
+        // Verificar que el modal esté abierto
+        const modal = document.getElementById('mensajeriaModal');
+        if (!modal || !modal.classList.contains('active')) {
+            return;
+        }
+        
+        fetch(`/products/pedido/${pedidoId}/mensajes/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    const container = document.getElementById('mensajeriaMessages');
+                    if (!container) return;
+                    
+                    // Solo actualizar si hay nuevos mensajes o si el contenedor está en estado de carga/vacío
+                    const nuevoUltimoId = data.mensajes && data.mensajes.length > 0 ? 
+                        Math.max(...data.mensajes.map(m => m.id)) : 0;
+                    
+                    const estaCargando = container.innerHTML.includes('mensajes-loading');
+                    const estaVacio = container.innerHTML.includes('mensaje-vacio');
+                    
+                    // Verificar si hay cambios en el estado de lectura de mensajes propios
+                    let hayCambiosLectura = false;
+                    if (data.mensajes && data.mensajes.length > 0) {
+                        // Verificar si algún mensaje propio cambió de estado de lectura
+                        const mensajesPropios = data.mensajes.filter(m => m.remitente_id === userId);
+                        mensajesPropios.forEach(msg => {
+                            const elementoMensaje = container.querySelector(`[data-mensaje-id="${msg.id}"]`);
+                            if (elementoMensaje) {
+                                const tieneLeido = elementoMensaje.querySelector('.mensaje-leido');
+                                const tieneEnviado = elementoMensaje.querySelector('.mensaje-enviado');
+                                if (msg.leido && !tieneLeido) {
+                                    hayCambiosLectura = true;
+                                } else if (!msg.leido && !tieneEnviado) {
+                                    hayCambiosLectura = true;
+                                }
+                            }
+                        });
+                    }
+                    
+                    if (nuevoUltimoId > ultimoMensajeId || estaCargando || estaVacio || hayCambiosLectura) {
+                        mostrarMensajes(data.mensajes || []);
+                        ultimoMensajeId = nuevoUltimoId;
+                    }
+                    
+                    actualizarContadorNoLeidos(data.mensajes_no_leidos || 0);
+                    
+                    // Actualizar contador del navbar siempre (para reflejar cambios en estado de lectura)
+                    actualizarContadorNavbar();
+                    
+                    // Actualizar página de notificaciones si está abierta
+                    if (typeof window.actualizarChats === 'function') {
+                        window.actualizarChats();
+                    }
+                }
+            })
+            .catch(error => {
+                // No mostrar error en polling para no molestar al usuario
+                console.error('Error en polling:', error);
+            });
+    }, 5000);
+}
+
+function detenerPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+}
+
+// Escape HTML para seguridad
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Cerrar con tecla ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarMensajeria();
+    }
+});
+</script>
+

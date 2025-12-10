@@ -1,0 +1,1265 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Panel de Control{% endblock %}
+
+{% block body_attrs %} data-dashboard="true"{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== DASHBOARD SPECIFIC STYLES ===== */
+    .erp-dashboard {
+        padding: 1.5rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        position: relative;
+        /* Animación de entrada suave */
+        opacity: 0;
+        animation: dashboardFadeIn 0.6s ease-out forwards;
+    }
+
+    /* ===== LOADER ANIMATIONS ===== */
+    .dashboard-loader {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(248, 250, 252, 0.95);
+        backdrop-filter: blur(4px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 1;
+        transition: opacity 0.5s ease-out;
+        border-radius: 8px;
+    }
+
+    .dashboard-loader.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .loader-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--border-color);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: loaderSpin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+
+    .loader-text {
+        color: var(--text-color);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    /* ===== KEYFRAMES ===== */
+    @keyframes dashboardFadeIn {
+        from { 
+            opacity: 0; 
+            transform: translateY(20px);
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes loaderSpin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes slideInUp {
+        from { 
+            opacity: 0; 
+            transform: translateY(30px);
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0);
+        }
+    }
+
+    /* Eliminado: pulseGlow keyframe innecesario */
+    
+    /* Header Dashboard */
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, var(--panel-bg) 0%, #e0e7ff 100%);
+        border-radius: 8px;
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+    }
+    
+    .dashboard-welcome h1 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .dashboard-welcome p {
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+    
+    .dashboard-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .quick-action {
+        background: var(--btn-main-bg);
+        border: 1px solid var(--btn-main-bg);
+        color: var(--btn-main-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        /* Optimización de transiciones específicas */
+        transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        /* GPU optimization */
+        will-change: transform;
+        transform: translateZ(0);
+    }
+    
+    .quick-action:hover {
+        background: var(--btn-main-hover-bg);
+        border-color: var(--btn-main-hover-bg);
+        /* Eliminado: transform y animation innecesarios */
+    }
+    
+    .quick-action:active {
+        opacity: 0.9;
+    }
+    
+    /* Métricas KPI */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .kpi-card {
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: var(--panel-shadow);
+        /* Animación de entrada progresiva */
+        opacity: 0;
+        animation: slideInUp 0.5s ease-out forwards;
+        /* Optimización de transiciones */
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+        will-change: transform;
+        transform: translateZ(0);
+    }
+    
+    .kpi-card:nth-child(1) { animation-delay: 0.1s; }
+    .kpi-card:nth-child(2) { animation-delay: 0.2s; }
+    .kpi-card:nth-child(3) { animation-delay: 0.3s; }
+    .kpi-card:nth-child(4) { animation-delay: 0.4s; }
+    
+    .kpi-card:hover {
+        /* Eliminado: transform innecesario */
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+    }
+    
+    .kpi-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .kpi-title {
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+    
+    .kpi-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, #3b82f6 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .kpi-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    .kpi-trend {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #059669;
+    }
+    
+    /* Grid Principal */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-main {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .dashboard-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    /* Panels ERP */
+    .erp-panel {
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: var(--panel-shadow);
+        overflow: hidden;
+    }
+    
+    .erp-panel-header {
+        background: var(--background-color);
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .erp-panel-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .erp-panel-body {
+        padding: 1.5rem;
+    }
+    
+    /* Lista de elementos */
+    .item-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .item-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--background-color);
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        text-decoration: none;
+        color: inherit;
+        transition: background-color 0.2s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+        will-change: transform;
+        transform: translateZ(0);
+        min-height: 70px;
+    }
+    
+    .item-card:hover {
+        background: #f1f5f9;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .item-card:active {
+        opacity: 0.95;
+    }
+    
+    .item-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 6px;
+        object-fit: cover;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        flex-shrink: 0;
+    }
+    
+    .item-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: left;
+        align-items: left;
+        gap: 0.25rem;
+        min-width: 0;
+    }
+    
+    .item-details h4 {
+        width: 100%;
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-color);
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        justify-content: left;
+        align-items: left;
+    }
+    
+    .item-details p {
+        width: 100%;
+        font-size: 0.85rem;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .item-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 0.25rem;
+        flex-shrink: 0;
+        min-width: 80px;
+    }
+    
+    .item-price {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        line-height: 1.2;
+        margin: 0;
+    }
+    
+    .item-stock {
+        font-size: 0.8rem;
+        color: #64748b;
+        line-height: 1.2;
+        margin: 0;
+        white-space: nowrap;
+    }
+    
+    /* Tabla moderna */
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .modern-table th,
+    .modern-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .modern-table th {
+        background: var(--background-color);
+        font-weight: 600;
+        color: var(--text-color);
+        font-size: 0.9rem;
+    }
+    
+    .modern-table tbody tr:hover {
+        background: var(--background-color);
+    }
+    
+    /* Estado badges */
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .status-active {
+        background: #d1fae5;
+        color: #059669;
+    }
+    
+    .status-pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
+    /* Estilos específicos para la información de empresa */
+    .company-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .company-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin: 0;
+    }
+    
+    .company-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #64748b;
+        line-height: 1.4;
+    }
+    
+    .company-detail i {
+        width: 16px;
+        text-align: center;
+        color: #94a3b8;
+    }
+    
+    .company-status {
+        margin-top: 0.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    /* Estilos para accesos rápidos */
+    .quick-actions-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .quick-action-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: var(--btn-main-bg);
+        color: var(--btn-main-color);
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+    
+    .quick-action-btn:hover {
+        background: var(--btn-main-hover-bg);
+        color: var(--btn-main-color);
+        text-decoration: none;
+        transform: translateX(2px);
+    }
+    
+    .quick-action-btn i {
+        width: 16px;
+        text-align: center;
+    }
+    
+    /* Mejoras para servicios en sidebar */
+    .services-compact .item-card {
+        padding: 0.75rem;
+        min-height: 60px;
+    }
+    
+    .services-compact .item-image {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .services-compact .item-details h4 {
+        font-size: 0.95rem;
+    }
+    
+    .services-compact .item-details p {
+        font-size: 0.8rem;
+    }
+    
+    .services-compact .item-price {
+        font-size: 1rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+        .kpi-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .erp-dashboard {
+            padding: 1rem;
+            /* Animación simplificada en móvil */
+            animation: dashboardFadeIn 0.3s ease-out forwards;
+        }
+        .dashboard-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+        .dashboard-actions {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .kpi-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        /* Deshabilitar hover animations en móvil para mejor performance */
+        .kpi-card:hover {
+            transform: none;
+        }
+        .item-card:hover {
+            transform: none;
+        }
+        .quick-action:hover {
+            transform: none;
+            animation: none;
+        }
+        
+        /* Simplificar animaciones en dispositivos con motion reducido */
+        @media (prefers-reduced-motion: reduce) {
+            .erp-dashboard,
+            .kpi-card,
+            .item-card,
+            .quick-action {
+                animation: none;
+                transition: none;
+            }
+        }
+    }
+
+    /* Dark Mode Dashboard Overrides */
+    body.dark-mode .dashboard-header {
+        background: linear-gradient(135deg, var(--panel-bg) 0%, #334155 100%);
+        color: var(--text-color);
+        border-color: var(--border-color);
+    }
+
+    body.dark-mode .dashboard-loader {
+        background: rgba(15, 23, 42, 0.95);
+    }
+
+    body.dark-mode .loader-spinner {
+        border-color: var(--border-color);
+        border-top-color: var(--primary-color);
+    }
+
+    body.dark-mode .item-card:hover {
+        background: #475569;
+        box-shadow: 0 4px 12px rgba(96, 165, 250, 0.1);
+    }
+
+    body.dark-mode .kpi-card:hover {
+        box-shadow: 0 12px 35px rgba(96, 165, 250, 0.2);
+    }
+
+    body.dark-mode .quick-action:hover {
+        animation: pulseGlow 1.5s infinite;
+    }
+
+    body.dark-mode .status-active {
+        background: #064e3b;
+        color: #10b981;
+    }
+
+    body.dark-mode .status-pending {
+        background: #451a03;
+        color: #f59e0b;
+    }
+
+    /* === RESPONSIVE PARA DISPOSITIVOS PEQUEÑOS (Android) === */
+    @media (max-width: 450px) {
+        /* Dashboard container más compacto */
+        .erp-dashboard {
+            padding: 0.75rem;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Header más compacto */
+        .dashboard-header {
+            padding: 1rem 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .dashboard-welcome h1 {
+            font-size: 1.25rem;
+            line-height: 1.3;
+            margin-bottom: 0.25rem;
+        }
+        
+        .dashboard-welcome p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        /* Actions más pequeñas */
+        .dashboard-actions {
+            gap: 0.5rem;
+        }
+        
+        .quick-action {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+        
+        .quick-action i {
+            font-size: 0.75rem;
+        }
+        
+        /* KPI Grid completamente vertical */
+        .kpi-grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* KPI Cards más compactas */
+        .kpi-card {
+            padding: 0.875rem;
+            min-height: auto;
+        }
+        
+        .kpi-header {
+            gap: 0.5rem;
+        }
+        
+        .kpi-title {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .kpi-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 0.9rem;
+        }
+        
+        .kpi-value {
+            font-size: 1.75rem;
+            margin: 0.25rem 0;
+        }
+        
+        .kpi-trend {
+            font-size: 0.7rem;
+            gap: 0.25rem;
+        }
+        
+        .kpi-trend span {
+            display: block;
+            line-height: 1.2;
+        }
+        
+        /* Dashboard grid más simple */
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        /* Panels más compactos */
+        .erp-panel {
+            margin-bottom: 1rem;
+            border-radius: 6px;
+        }
+        
+        .erp-panel-header {
+            padding: 0.875rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .erp-panel-title {
+            font-size: 1rem;
+        }
+        
+        .erp-panel-title i {
+            font-size: 0.9rem;
+        }
+        
+        .erp-panel-body {
+            padding: 0.875rem;
+        }
+        
+        /* Item cards más compactas */
+        .item-card {
+            padding: 0.75rem;
+            gap: 0.75rem;
+            min-height: auto;
+            flex-wrap: wrap;
+        }
+        
+        .item-image {
+            width: 50px;
+            height: 50px;
+            flex-shrink: 0;
+        }
+        
+        .item-details {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .item-details h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .item-details p {
+            font-size: 0.75rem;
+            margin: 0;
+        }
+        
+        .item-meta {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .item-price {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .item-stock {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+        
+        /* Botones más pequeños */
+        .btn-main {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+        
+        /* Tabla responsive */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 6px;
+        }
+        
+        .modern-table {
+            min-width: 280px;
+            font-size: 0.8rem;
+        }
+        
+        .modern-table th,
+        .modern-table td {
+            padding: 0.5rem 0.375rem;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+        }
+        
+        /* Quick actions list más compacta */
+        .quick-actions-list {
+            gap: 0.5rem;
+        }
+        
+        .quick-action-btn {
+            padding: 0.75rem;
+            font-size: 0.85rem;
+        }
+        
+        .quick-action-btn i {
+            font-size: 1rem;
+        }
+        
+        /* Información de empresa más compacta */
+        .company-info p {
+            font-size: 0.8rem;
+            margin: 0.25rem 0;
+        }
+        
+        /* Empty states más pequeños */
+        .empty-state {
+            padding: 1.5rem 1rem;
+        }
+        
+        .empty-state i {
+            font-size: 2rem !important;
+        }
+        
+        .empty-state p {
+            font-size: 0.9rem;
+            margin: 0.75rem 0;
+        }
+        
+        /* Prevenir overflow horizontal */
+        * {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Ajustar imagen en cards */
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Fix para navegadores Android que podrían tener problemas con flexbox */
+        .dashboard-actions {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+        
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        
+        /* Asegurar que ningún elemento se salga del contenedor */
+        .dashboard-grid,
+        .kpi-grid,
+        .item-list {
+            width: 100%;
+            max-width: 100%;
+        }
+    }
+
+    /* === OPTIMIZACIÓN ADICIONAL PARA DISPOSITIVOS MUY PEQUEÑOS === */
+    @media (max-width: 360px) {
+        .erp-dashboard {
+            padding: 0.5rem;
+        }
+        
+        .dashboard-header {
+            padding: 0.75rem 0.25rem;
+        }
+        
+        .dashboard-welcome h1 {
+            font-size: 1.1rem;
+        }
+        
+        .kpi-card {
+            padding: 0.75rem;
+        }
+        
+        .kpi-value {
+            font-size: 1.5rem;
+        }
+        
+        .erp-panel-header,
+        .erp-panel-body {
+            padding: 0.75rem;
+        }
+        
+                 .item-card {
+             padding: 0.625rem;
+         }
+         
+         /* Texto más pequeño para pantallas muy pequeñas */
+         .item-details h4 {
+             font-size: 0.85rem;
+         }
+         
+         .item-details p {
+             font-size: 0.7rem;
+         }
+         
+         .item-price {
+             font-size: 0.85rem;
+         }
+         
+         .item-stock {
+             font-size: 0.7rem;
+         }
+         
+         /* Botones aún más pequeños */
+         .btn-main {
+             padding: 0.375rem 0.625rem;
+             font-size: 0.75rem;
+         }
+         
+         .quick-action {
+             padding: 0.375rem 0.625rem;
+             font-size: 0.75rem;
+         }
+     }
+
+    /* Eliminado: dark mode glow effects innecesarios */
+</style>
+{% endblock %}
+
+{% block content %}
+{% if perfil.tipo_cuenta == 'empresa' %}
+
+<div class="erp-dashboard" id="dashboardContent">
+    <!-- Loader de Dashboard -->
+    <div class="dashboard-loader" id="dashboardLoader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Cargando Dashboard...</div>
+    </div>
+    <!-- Header Dashboard -->
+    <div class="dashboard-header">
+        <div class="dashboard-welcome">
+            <h1>Bienvenido, {{ perfil.empresa }}</h1>
+            <p>Dashboard Ejecutivo - {% now "l, d F Y" %}</p>
+        </div>
+        <div class="dashboard-actions">
+            <a href="{% url 'products:crear_producto' %}" class="quick-action">
+                <i class="fas fa-plus"></i> Nuevo Producto
+            </a>
+            <a href="{% url 'products:crear_servicio' %}" class="quick-action">
+                <i class="fas fa-plus"></i> Nuevo Servicio
+            </a>
+        </div>
+    </div>
+
+    <!-- Métricas KPI -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <span class="kpi-title">Total Productos</span>
+                <div class="kpi-icon">
+                    <i class="fas fa-box"></i>
+                </div>
+            </div>
+            <div class="kpi-value">{{ productos_count }}</div>
+            <div class="kpi-trend">
+                <i class="fas fa-arrow-up"></i>
+                <span>{{ productos_activos }} activos en inventario</span>
+            </div>
+        </div>
+        
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <span class="kpi-title">Servicios Disponibles</span>
+                <div class="kpi-icon">
+                    <i class="fas fa-concierge-bell"></i>
+                </div>
+            </div>
+            <div class="kpi-value">{{ servicios_count }}</div>
+            <div class="kpi-trend">
+                <i class="fas fa-arrow-up"></i>
+                <span>{{ servicios_activos }} en catálogo</span>
+            </div>
+        </div>
+        
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <span class="kpi-title">Pedidos Recientes</span>
+                <div class="kpi-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+            <div class="kpi-value">{{ pedidos_count }}</div>
+            <div class="kpi-trend">
+                <i class="fas fa-arrow-up"></i>
+                <span>Últimos 30 días</span>
+            </div>
+        </div>
+        
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <span class="kpi-title">Estado Sistema</span>
+                <div class="kpi-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+            </div>
+            <div class="kpi-value">
+                <span class="status-badge status-active">Activo</span>
+            </div>
+            <div class="kpi-trend">
+                <i class="fas fa-check-circle"></i>
+                <span>Todos los sistemas OK</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid Principal -->
+    <div class="dashboard-grid">
+        <!-- Columna Principal -->
+        <div class="dashboard-main">
+            <!-- Productos Recientes -->
+            <div class="erp-panel">
+                <div class="erp-panel-header">
+                    <h3 class="erp-panel-title">
+                        <i class="fas fa-box"></i>
+                        Productos Recientes
+                    </h3>
+                    <a href="{% url 'products:productos' %}" class="btn-main">Ver Todos</a>
+                </div>
+                <div class="erp-panel-body">
+                    {% if productos %}
+                        <div class="item-list">
+                            {% for producto in productos|slice:":5" %}
+                                <a href="{% url 'products:detalle_producto' producto.pk %}" class="item-card">
+                                    {% if producto.imagen_principal %}
+                                        <img src="{{ producto.imagen_principal }}" alt="{{ producto.nombre }}" class="item-image">
+                                    {% else %}
+                                        <div class="item-image">
+                                            <i class="fas fa-image"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="item-details">
+                                        <h4>{{ producto.nombre }}</h4>
+                                        <p>{{ producto.categoria }}</p>
+                                    </div>
+                                    <div class="item-meta">
+                                        <div class="item-price">${{ producto.precio }}</div>
+                                        <div class="item-stock">Stock: {{ producto.stock }}</div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 2rem; color: #64748b;">
+                            <i class="fas fa-box" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No hay productos registrados</p>
+                            <a href="{% url 'products:crear_producto' %}" class="btn-main">Crear Primer Producto</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Pedidos Recientes -->
+            <div class="erp-panel">
+                <div class="erp-panel-header">
+                    <h3 class="erp-panel-title">
+                        <i class="fas fa-clock"></i>
+                        Actividad Reciente
+                    </h3>
+                    <a href="{% url 'products:pedidos' %}" class="btn-main">Ver Todos</a>
+                </div>
+                <div class="erp-panel-body">
+                    {% if pedidos %}
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pedido in pedidos %}
+                                        <tr>
+                                            <td><strong>#{{ pedido.id }}</strong></td>
+                                            <td>{{ pedido.fecha_pedido|date:"d M Y" }}</td>
+                                            <td>
+                                                <span class="status-badge status-pending">{{ pedido.estado|title }}</span>
+                                            </td>
+                                            <td><strong>${{ pedido.total }}</strong></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 2rem; color: #64748b;">
+                            <i class="fas fa-receipt" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No hay pedidos recientes</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="dashboard-sidebar">
+            <!-- Información de la Empresa -->
+            <div class="erp-panel">
+                <div class="erp-panel-header">
+                    <h3 class="erp-panel-title">
+                        <i class="fas fa-building"></i>
+                        Mi Empresa
+                    </h3>
+                    <a href="{% url 'perfil' %}" class="btn-main">Editar</a>
+                </div>
+                <div class="erp-panel-body">
+                    <div class="company-info">
+                        <div class="company-name">{{ perfil.empresa }}</div>
+                        <div class="company-detail">
+                            <i class="fas fa-user"></i>
+                            <span>{{ user.username }}</span>
+                        </div>
+                        <div class="company-detail">
+                            <i class="fas fa-envelope"></i>
+                            <span>{{ user.email }}</span>
+                        </div>
+                        <div class="company-detail">
+                            <i class="fas fa-phone"></i>
+                            <span>{{ perfil.telefono|default:"No especificado" }}</span>
+                        </div>
+                        <div class="company-status">
+                            <span class="status-badge status-active">
+                                {{ perfil.estado_suscripcion|title }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Servicios -->
+            <div class="erp-panel">
+                <div class="erp-panel-header">
+                    <h3 class="erp-panel-title">
+                        <i class="fas fa-concierge-bell"></i>
+                        Servicios
+                    </h3>
+                    <a href="{% url 'products:servicios' %}" class="btn-main">Ver Todos</a>
+                </div>
+                <div class="erp-panel-body">
+                    {% if servicios %}
+                        <div class="item-list services-compact">
+                            {% for servicio in servicios|slice:":3" %}
+                                <a href="{% url 'products:detalle_servicio' servicio.pk %}" class="item-card">
+                                    {% if servicio.imagen_principal %}
+                                        <img src="{{ servicio.imagen_principal }}" alt="{{ servicio.nombre }}" class="item-image">
+                                    {% else %}
+                                        <div class="item-image">
+                                            <i class="fas fa-concierge-bell"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="item-details">
+                                        <h4>{{ servicio.nombre }}</h4>
+                                        <p>{{ servicio.duracion }}</p>
+                                    </div>
+                                    <div class="item-meta">
+                                        <div class="item-price">${{ servicio.precio }}</div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 1.5rem; color: #64748b;">
+                            <i class="fas fa-concierge-bell" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                            <p style="font-size: 0.9rem; margin: 0.5rem 0;">No hay servicios</p>
+                            <a href="{% url 'products:crear_servicio' %}" class="btn-main" style="font-size: 0.85rem; margin-top: 0.5rem;">Crear Servicio</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Accesos Rápidos -->
+            <div class="erp-panel">
+                <div class="erp-panel-header">
+                    <h3 class="erp-panel-title">
+                        <i class="fas fa-rocket"></i>
+                        Accesos Rápidos
+                    </h3>
+                </div>
+                <div class="erp-panel-body">
+                    <div class="quick-actions-list">
+                        <a href="{% url 'products:productos' %}" class="quick-action-btn">
+                            <i class="fas fa-box"></i>
+                            <span>Gestionar Productos</span>
+                        </a>
+                        <a href="{% url 'products:servicios' %}" class="quick-action-btn">
+                            <i class="fas fa-concierge-bell"></i>
+                            <span>Gestionar Servicios</span>
+                        </a>
+                        <a href="{% url 'webpages:create_landing_page' %}" class="quick-action-btn">
+                            <i class="fas fa-globe"></i>
+                            <span>Mi Página Web</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% elif perfil.tipo_cuenta == 'usuario' %}
+    {% include 'accounts/home_consumer.html' %}
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ===== DASHBOARD LOADER ANIMATION =====
+    const loader = document.getElementById('dashboardLoader');
+    const dashboard = document.getElementById('dashboardContent');
+    
+    if (loader && dashboard) {
+        // Mostrar el dashboard pero con el loader encima
+        dashboard.style.opacity = '1';
+        
+        // Simular carga de datos
+        setTimeout(() => {
+            loader.classList.add('hidden');
+            
+            // Remover loader después de la transición
+            setTimeout(() => {
+                loader.remove();
+            }, 500);
+        }, 800); // 800ms de loading para mostrar el efecto
+    }
+    
+    // ===== CORE FUNCTIONALITY ONLY =====
+    
+    // Solo mantener funcionalidad esencial
+    console.log('Dashboard loaded successfully');
+    
+    // Lazy loading mejorado para imágenes
+    const images = document.querySelectorAll('.item-image img');
+    images.forEach(img => {
+        img.addEventListener('load', function() {
+            this.style.opacity = '1';
+            this.style.transform = 'scale(1)';
+        });
+        
+        img.style.opacity = '0';
+        img.style.transform = 'scale(0.95)';
+        img.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    });
+    
+    console.log('✅ Dashboard animations initialized');
+});
+</script>
+{% endblock %}

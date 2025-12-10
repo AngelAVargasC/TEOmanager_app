@@ -1,0 +1,685 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}TEOmanager{% endblock %}</title>
+    
+    <!-- CRITICAL CSS: Prevent sidebar flash -->
+    <style>
+        body, html {
+            font-family: "Amazon Ember", Arial, sans-serif !important;
+        }
+        /* Aplicar estado inicial del sidebar inmediatamente */
+        .sidebar.no-transition,
+        .navbar.no-transition,
+        .main-content.no-transition {
+            transition: none !important;
+        }
+        
+        /* Estado inicial basado en localStorage */
+        .sidebar {
+            transform: translateX(0);
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+        }
+        
+        /* Estilos del carrito en el navbar */
+        .cart-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+        
+        .cart-link:hover {
+            background: var(--hover-bg, rgba(59, 130, 246, 0.1));
+            color: var(--primary-color, #3b82f6);
+            text-decoration: none;
+        }
+        
+        .cart-badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            position: absolute;
+            top: -2px;
+            right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        .cart-total {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary-color, #3b82f6);
+        }
+        
+        .cart-empty {
+            font-size: 0.875rem;
+            color: var(--text-muted, #64748b);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Estilos de notificaciones */
+        .notifications-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+        
+        .notifications-link:hover {
+            background: var(--hover-bg, rgba(59, 130, 246, 0.1));
+            color: var(--primary-color, #3b82f6);
+            text-decoration: none;
+        }
+        
+        .notifications-badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            position: absolute;
+            top: -2px;
+            right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        /* Estilos de la vista previa del carrito */
+        .cart-dropdown {
+            position: relative;
+        }
+        
+        .cart-preview-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--main-bg, white);
+            border: 1px solid var(--border-color, #e5e7eb);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            width: 380px;
+            max-height: 500px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+        
+        .cart-dropdown:hover .cart-preview-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .cart-preview-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color, #e5e7eb);
+            background: var(--background-color, #f8fafc);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .cart-preview-header h4 {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .cart-preview-content {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        
+        .cart-preview-items {
+            padding: 0.5rem;
+        }
+        
+        .cart-preview-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        
+        .cart-preview-item:hover {
+            background: var(--hover-bg, rgba(59, 130, 246, 0.05));
+        }
+        
+        .item-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--background-color, #f1f5f9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .item-image i {
+            font-size: 1.5rem;
+            color: var(--text-muted, #64748b);
+        }
+        
+        .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .item-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        
+        .item-qty {
+            color: var(--text-muted, #64748b);
+        }
+        
+        .item-price {
+            color: var(--primary-color, #3b82f6);
+            font-weight: 600;
+        }
+        
+        .cart-preview-more {
+            text-align: center;
+            padding: 0.5rem;
+            color: var(--text-muted, #64748b);
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+        
+        .cart-preview-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color, #e5e7eb);
+            background: var(--background-color, #f8fafc);
+            border-radius: 0 0 12px 12px;
+        }
+        
+        .cart-preview-total {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: var(--text-color);
+        }
+        
+        .cart-preview-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-preview {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-preview.btn-primary {
+            background: transparent;
+            color: var(--primary-color, #3b82f6);
+            border: 1px solid var(--primary-color, #3b82f6);
+        }
+        
+        .btn-preview.btn-primary:hover {
+            background: var(--primary-color, #3b82f6);
+            color: white;
+        }
+        
+        .btn-preview.btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-preview.btn-success:hover {
+            background: #059669;
+        }
+        
+        .cart-preview-empty {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted, #64748b);
+        }
+        
+        .cart-preview-empty i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        
+        .cart-preview-empty p {
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Responsivo para móvil */
+        @media (max-width: 768px) {
+            .cart-link {
+                padding: 0.25rem 0.5rem !important;
+            }
+            
+            .cart-total, .cart-empty {
+                display: none;
+            }
+            
+            .cart-preview-dropdown {
+                width: 320px;
+                right: -100px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .cart-preview-dropdown {
+                width: 280px;
+                right: -120px;
+            }
+        }
+
+        .section-sidebar {
+            font-size: 0.875rem;
+            color: var(--text-muted, #74869e);
+            font-weight: 100;
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+        }
+    </style>
+    
+    <!-- CSS Files - Global Only -->
+    <link rel="stylesheet" href="{% static 'fontawesome-free-6.7.2-web/css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/global-theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/erp-modern.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body {% block body_attrs %}{% endblock %}{% if user.is_authenticated and perfil.tipo_cuenta == 'usuario' %} class="consumer-mode"{% endif %}>
+    
+    <!-- Messages -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                    <div class="alert-content">{{ message }}</div>
+                    <button class="alert-close" onclick="closeAlert(this.parentElement)">&times;</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'home' %}" class="sidebar-brand">
+                <i class="fas fa-cubes"></i> TEOmanager
+            </a>
+        </div>
+        <ul class="sidebar-nav">
+            <li class="sidebar-item">
+                <p class="section-sidebar">
+                    Dashboard
+                </p>
+                <a href="{% url 'home' %}" class="sidebar-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span>Inicio</span>
+                </a>
+            </li>
+            
+            {% if user.is_authenticated %}
+                <!-- Admin Panel - VERIFICACIÓN CORREGIDA -->
+                {% if user.is_superuser or perfil.permisos == 'Administrador' or user_profile.permisos == 'Administrador' %}
+                    <li class="sidebar-item">
+                        <a href="{% url 'admin_dashboard' %}" class="sidebar-link {% if 'admin' in request.path or 'dashboard' in request.path %}active{% endif %}">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Panel Admin</span>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                <!-- Opciones para Empresas -->
+                {% if perfil.tipo_cuenta == 'empresa' %}
+                    <p class="section-sidebar">
+                        Catalogos
+                    </p>
+                    <li class="sidebar-item">
+                        <a href="{% url 'products:productos' %}" class="sidebar-link {% if 'productos' in request.path %}active{% endif %}">
+                            <i class="fas fa-box"></i>
+                            <span>Productos</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{% url 'products:servicios' %}" class="sidebar-link {% if 'servicios' in request.path %}active{% endif %}">
+                            <i class="fas fa-concierge-bell"></i>
+                            <span>Servicios</span>
+                        </a>
+                    </li>
+                    <p class="section-sidebar">
+                        Pedidos
+                    </p>
+                    <li class="sidebar-item">
+                        <a href="{% url 'pedidos_empresa' %}" class="sidebar-link {% if 'pedidos-empresa' in request.path %}active{% endif %}">
+                            <i class="fas fa-inbox"></i>
+                            <span>Pedidos Recibidos</span>
+                        </a>
+                    </li>
+                    <p class="section-sidebar">
+                        Landing Page
+                    </p>
+                    <li class="sidebar-item">
+                        <a href="{% url 'webpages:create_landing_page' %}" class="sidebar-link {% if 'create_landing_page' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="fas fa-globe"></i>
+                            <span>Mi Página Web</span>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                <!-- Opciones para Usuarios -->
+                {% if perfil.tipo_cuenta == 'usuario' %}
+                    <li class="sidebar-item">
+                        <a href="{% url 'marketplace' %}" class="sidebar-link {% if 'marketplace' in request.path %}active{% endif %}">
+                            <i class="fas fa-store"></i>
+                            <span>Marketplace</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{% url 'cart' %}" class="sidebar-link {% if 'cart' in request.path %}active{% endif %}">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Carrito</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{% url 'mis_pedidos' %}" class="sidebar-link {% if 'mis-pedidos' in request.path %}active{% endif %}">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>Mis Pedidos</span>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                <!-- Perfil - Para todos -->
+                <p class="section-sidebar">
+                    Cuenta
+                </p>
+                <li class="sidebar-item">
+                    <a href="{% url 'perfil' %}" class="sidebar-link {% if 'perfil' in request.path %}active{% endif %}">
+                        <i class="fas fa-user"></i>
+                        <span>Perfil</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </aside>
+
+    <!-- Overlay para sidebar móvil -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <button class="navbar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="navbar-nav">
+            <div></div> <!-- Spacer -->
+            <div class="navbar-right">
+                {% if user.is_authenticated %}
+                    <!-- Carrito para usuarios consumidores -->
+                    {% if perfil.tipo_cuenta == 'usuario' %}
+                        <div class="nav-item cart-dropdown">
+                            <a href="{% url 'cart' %}" class="nav-link cart-link" title="Mi Carrito">
+                                <i class="fas fa-shopping-cart"></i>
+                                {% if cart_count > 0 %}
+                                    <span class="cart-badge">{{ cart_count }}</span>
+                                    <span class="cart-total">${{ cart_total|floatformat:2 }}</span>
+                                {% else %}
+                                    <span class="cart-empty">Carrito</span>
+                                {% endif %}
+                            </a>
+                            <!-- Vista previa del carrito -->
+                            <div class="cart-preview-dropdown">
+                                <div class="cart-preview-header">
+                                    <h4><i class="fas fa-shopping-cart"></i> Mi Carrito</h4>
+                                </div>
+                                <div class="cart-preview-content">
+                                    {% if cart_count > 0 %}
+                                        <div class="cart-preview-items">
+                                            {% for item in cart_preview %}
+                                                <div class="cart-preview-item">
+                                                    <div class="item-image">
+                                                        {% if item.producto.imagen_principal %}
+                                                            <img src="{{ item.producto.imagen_principal }}" alt="{{ item.producto.nombre }}">
+                                                        {% else %}
+                                                            <i class="fas fa-box"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="item-info">
+                                                        <div class="item-name">{{ item.producto.nombre }}</div>
+                                                        <div class="item-details">
+                                                            <span class="item-qty">{{ item.cantidad }}x</span>
+                                                            <span class="item-price">${{ item.producto.precio|floatformat:2 }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                            {% if cart_count > 3 %}
+                                                <div class="cart-preview-more">
+                                                    + {{ cart_count|add:"-3" }} producto{{ cart_count|add:"-3"|pluralize }} más
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="cart-preview-footer">
+                                            <div class="cart-preview-total">
+                                                <strong>Total: ${{ cart_total|floatformat:2 }}</strong>
+                                            </div>
+                                            <div class="cart-preview-actions">
+                                                <a href="{% url 'cart' %}" class="btn-preview btn-primary">Ver Carrito</a>
+                                                <a href="{% url 'cart' %}" class="btn-preview btn-success">Pagar</a>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="cart-preview-empty">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            <p>Tu carrito está vacío</p>
+                                            <a href="{% url 'marketplace' %}" class="btn-preview btn-primary">Ir al catálogo</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Notificaciones de mensajes -->
+                    <div class="nav-item notifications-dropdown">
+                        <a href="{% url 'products:notificaciones_mensajes' %}" class="nav-link notifications-link" title="Mensajes">
+                            <i class="fas fa-envelope"></i>
+                            <span id="notifications-count" class="notifications-badge" style="display: none;">0</span>
+                        </a>
+                    </div>
+                    
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-user"></i>
+                            <span>{{ user.username }}</span>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="{% url 'perfil' %}" class="dropdown-item">
+                                <i class="fas fa-user-circle"></i>
+                                Mi Perfil
+                            </a>
+                            <a href="{% url 'logout' %}" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Cerrar Sesión
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Iniciar Sesión
+                    </a>
+                {% endif %}
+                
+                <button class="nav-link theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- JavaScript - Sidebar persistence primero -->
+    <script src="{% static 'js/sidebar-persistence.js' %}"></script>
+    <!-- JavaScript - Solo funcionalidad básica -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <!-- JavaScript para actualizar contador de notificaciones -->
+    {% if user.is_authenticated %}
+    <script>
+        // Función para actualizar el contador de notificaciones
+        function actualizarContadorNotificaciones() {
+            fetch('/products/mensajes/conteo/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const badge = document.getElementById('notifications-count');
+                        if (badge) {
+                            if (data.conteo > 0) {
+                                badge.textContent = data.conteo > 99 ? '99+' : data.conteo;
+                                badge.style.display = 'flex';
+                            } else {
+                                badge.style.display = 'none';
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al actualizar contador de notificaciones:', error);
+                });
+        }
+        
+        // Variable global para el intervalo del navbar
+        let navbarPollingInterval = null;
+        
+        // Actualizar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            actualizarContadorNotificaciones();
+            // Actualizar cada 5 segundos para mejor tiempo real
+            navbarPollingInterval = setInterval(actualizarContadorNotificaciones, 5000);
+        });
+        
+        // Hacer la función accesible globalmente
+        window.actualizarContadorNotificaciones = actualizarContadorNotificaciones;
+    </script>
+    {% endif %}
+    <!-- JavaScript - Funciones del carrito -->
+    {% if user.is_authenticated and perfil.tipo_cuenta == 'usuario' %}
+    <script src="{% static 'js/cart-functions.js' %}"></script>
+    {% endif %}
+    
+    <script>
+        // Funciones básicas globales
+        function closeAlert(alert) {
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 300);
+        }
+        
+        // Theme toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                const themeIcon = themeToggle.querySelector('i');
+                const body = document.body;
+                const isDarkMode = localStorage.getItem('darkMode') === 'true';
+                
+                if (isDarkMode) {
+                    body.classList.add('dark-mode');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+                
+                themeToggle.addEventListener('click', () => {
+                    body.classList.toggle('dark-mode');
+                    const isDark = body.classList.contains('dark-mode');
+                    localStorage.setItem('darkMode', isDark);
+                    
+                    if (isDark) {
+                        themeIcon.classList.remove('fa-moon');
+                        themeIcon.classList.add('fa-sun');
+                    } else {
+                        themeIcon.classList.remove('fa-sun');
+                        themeIcon.classList.add('fa-moon');
+                    }
+                });
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

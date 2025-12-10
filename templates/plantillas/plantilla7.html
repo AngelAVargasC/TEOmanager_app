@@ -1,0 +1,643 @@
+{% load static %}
+{% load webpages_extras %}
+<style>
+/* ⭐ PLANTILLA 7: MOTOS PREMIUM - CSS COMPLETAMENTE AISLADO ⭐ */
+/* Todos los estilos usan prefijo único t7-moto- para evitar conflictos */
+
+.t7-moto-wrapper {
+    font-family: 'Inter', 'Roboto', -apple-system, sans-serif;
+    background: #ffffff;
+    color: #1f2937;
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    isolation: isolate; /* Aislamiento CSS */
+}
+
+/* Variables CSS aisladas */
+.t7-moto-wrapper {
+    --t7-moto-primary: {{ landing.color_primario|default:"#f97316" }};
+    --t7-moto-secondary: {{ landing.color_secundario|default:"#000000" }};
+    --t7-moto-accent: #fbbf24;
+    --t7-moto-bg: #ffffff;
+    --t7-moto-dark: #0a0a0a;
+    --t7-moto-text: #1f2937;
+    --t7-moto-text-light: #6b7280;
+    --t7-moto-border: #e5e7eb;
+    --t7-moto-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    --t7-moto-shadow-hover: 0 8px 32px rgba(249,115,22,0.3);
+}
+
+/* ✨ Header Motos Style - Debajo del navbar del sistema ✨ */
+.t7-moto-header {
+    position: fixed;
+    top: 58px;
+    left: var(--sidebar-width, 250px); /* Respeta el ancho de la sidebar */
+    right: 0;
+    width: calc(100% - var(--sidebar-width, 250px));
+    background: var(--t7-moto-dark);
+    border-bottom: 2px solid var(--t7-moto-primary);
+    padding: 0;
+    z-index: 99;
+    transition: all 0.3s ease, left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.t7-moto-nav {
+    max-width: 100%;
+    margin: 0;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 65px;
+}
+
+.t7-moto-logo {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--t7-moto-primary);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(249,115,22,0.5);
+}
+
+.t7-moto-nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.t7-moto-nav-links a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 0.5rem 0;
+}
+
+.t7-moto-nav-links a::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: var(--t7-moto-primary);
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px var(--t7-moto-primary);
+}
+
+.t7-moto-nav-links a:hover {
+    color: var(--t7-moto-primary);
+    text-shadow: 0 0 8px rgba(249,115,22,0.5);
+}
+
+.t7-moto-nav-links a:hover::before {
+    width: 100%;
+}
+
+.t7-moto-cta-btn {
+    padding: 0.75rem 1.75rem;
+    background: var(--t7-moto-primary);
+    color: #fff;
+    border: 2px solid var(--t7-moto-primary);
+    border-radius: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 12px rgba(249,115,22,0.4);
+}
+
+.t7-moto-cta-btn:hover {
+    background: transparent;
+    color: var(--t7-moto-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(249,115,22,0.6);
+}
+
+/* ✨ Hero Motos Style - Dinámico con Curvas ✨ */
+.t7-moto-hero {
+    min-height: calc(100vh - 150px);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 8rem 2rem 4rem;
+    background: linear-gradient(135deg, var(--t7-moto-dark) 0%, #1a1a1a 50%, var(--t7-moto-dark) 100%);
+    overflow: hidden;
+}
+
+.t7-moto-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 80%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(249,115,22,0.1) 0%, transparent 70%);
+    transform: rotate(45deg);
+    z-index: 1;
+}
+
+.t7-moto-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 60%;
+    height: 100%;
+    background: url('{{ landing|get_hero_url }}') center/cover no-repeat;
+    opacity: 0.2;
+    z-index: 1;
+    transform: rotate(-10deg);
+}
+
+.t7-moto-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+    color: #fff;
+}
+
+.t7-moto-hero h1 {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #fff;
+    text-shadow: 3px 3px 0 var(--t7-moto-primary), 6px 6px 20px rgba(0,0,0,0.5);
+    position: relative;
+}
+
+.t7-moto-hero h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100px;
+    height: 5px;
+    background: var(--t7-moto-accent);
+    box-shadow: 0 0 20px var(--t7-moto-accent);
+}
+
+.t7-moto-hero .subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-weight: 400;
+    margin-bottom: 2.5rem;
+    color: rgba(255,255,255,0.9);
+    line-height: 1.6;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+}
+
+.t7-moto-hero-cta {
+    margin-top: 2rem;
+}
+
+.t7-moto-hero-cta .t7-moto-cta-btn {
+    font-size: 1.1rem;
+    padding: 1.2rem 3rem;
+}
+
+/* ✨ Secciones Motos Style - Con Curvas ✨ */
+.t7-moto-section {
+    padding: 6rem 2rem;
+    width: 100%;
+    margin: 0;
+    position: relative;
+}
+
+.t7-moto-section-title {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--t7-moto-text);
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.t7-moto-section-title::before,
+.t7-moto-section-title::after {
+    content: '⚡';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    color: var(--t7-moto-primary);
+}
+
+.t7-moto-section-title::before {
+    left: calc(50% - 120px);
+}
+
+.t7-moto-section-title::after {
+    right: calc(50% - 120px);
+}
+
+.t7-moto-section-title::after {
+    content: '⚡';
+}
+
+.t7-moto-section-subtitle {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    font-weight: 400;
+    text-align: center;
+    color: var(--t7-moto-text-light);
+    margin-bottom: 4rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ✨ Cards Motos Style - Con Efecto de Velocidad ✨ */
+.t7-moto-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.t7-moto-card {
+    background: var(--t7-moto-bg);
+    border: 3px solid var(--t7-moto-border);
+    border-radius: 0;
+    padding: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--t7-moto-shadow);
+    text-decoration: none;
+    color: var(--t7-moto-text);
+    display: block;
+    overflow: hidden;
+    position: relative;
+    transform-style: preserve-3d;
+}
+
+.t7-moto-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--t7-moto-primary) 0%, var(--t7-moto-accent) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+}
+
+.t7-moto-card:hover::before {
+    opacity: 0.1;
+}
+
+.t7-moto-card:hover {
+    box-shadow: var(--t7-moto-shadow-hover);
+    transform: translateY(-12px) rotateX(5deg);
+    border-color: var(--t7-moto-primary);
+}
+
+.t7-moto-card-image-container {
+    width: 100%;
+    height: 280px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    position: relative;
+}
+
+.t7-moto-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.t7-moto-card:hover .t7-moto-card-image {
+    transform: scale(1.15) rotate(2deg);
+}
+
+.t7-moto-card-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--t7-moto-primary);
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    z-index: 2;
+    box-shadow: 0 4px 12px rgba(249,115,22,0.4);
+}
+
+.t7-moto-card-content {
+    padding: 2rem;
+    position: relative;
+    z-index: 2;
+    background: var(--t7-moto-bg);
+}
+
+.t7-moto-card-title {
+    font-size: 1.6rem;
+    font-weight: 900;
+    margin-bottom: 0.75rem;
+    color: var(--t7-moto-text);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.t7-moto-card-description {
+    font-size: 0.95rem;
+    color: var(--t7-moto-text-light);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+.t7-moto-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--t7-moto-border);
+}
+
+.t7-moto-card-price {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--t7-moto-primary);
+    text-shadow: 0 0 10px rgba(249,115,22,0.3);
+}
+
+.t7-moto-card-cta {
+    color: var(--t7-moto-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    position: relative;
+}
+
+.t7-moto-card-cta::after {
+    content: '→';
+    margin-left: 0.5rem;
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+.t7-moto-card:hover .t7-moto-card-cta::after {
+    transform: translateX(5px);
+}
+
+/* ✨ About Section Motos Style ✨ */
+.t7-moto-about {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-top: 4px solid var(--t7-moto-primary);
+    border-bottom: 4px solid var(--t7-moto-primary);
+    position: relative;
+}
+
+.t7-moto-about::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--t7-moto-accent), transparent);
+}
+
+.t7-moto-about-content {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.t7-moto-about-text {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--t7-moto-text-light);
+}
+
+/* ✨ CTA Section Motos Style ✨ */
+.t7-moto-cta-section {
+    background: linear-gradient(135deg, var(--t7-moto-dark) 0%, #1a1a1a 100%);
+    color: #fff;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.t7-moto-cta-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 80%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(249,115,22,0.15) 0%, transparent 70%);
+    transform: rotate(45deg);
+}
+
+.t7-moto-cta-section .t7-moto-section-title {
+    color: #fff;
+    position: relative;
+    z-index: 2;
+}
+
+.t7-moto-cta-section .t7-moto-section-title::before,
+.t7-moto-cta-section .t7-moto-section-title::after {
+    color: var(--t7-moto-primary);
+}
+
+.t7-moto-cta-section .t7-moto-section-subtitle {
+    color: rgba(255,255,255,0.9);
+    position: relative;
+    z-index: 2;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .t7-moto-nav-links {
+        display: none;
+    }
+    .t7-moto-hero {
+        padding: 6rem 1.5rem 3rem;
+        justify-content: center;
+    }
+    .t7-moto-hero-content {
+        text-align: center;
+    }
+    .t7-moto-section {
+        padding: 4rem 1.5rem;
+    }
+    .t7-moto-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    .t7-moto-section-title::before,
+    .t7-moto-section-title::after {
+        display: none;
+    }
+}
+
+/* Ajuste cuando la sidebar está colapsada */
+.main-content.sidebar-collapsed ~ * .t7-moto-header,
+body:has(.sidebar.collapsed) .t7-moto-header {
+    left: 0;
+    width: 100%;
+}
+</style>
+
+<div class="t7-moto-wrapper">
+    <!-- ✨ Header Motos Style ✨ -->
+    <header class="t7-moto-header">
+        <nav class="t7-moto-nav">
+            <a href="#" class="t7-moto-logo">{{ landing.titulo|truncatewords:2 }}</a>
+            <ul class="t7-moto-nav-links">
+                <li><a href="#about">Sobre Nosotros</a></li>
+                <li><a href="#products">Motos</a></li>
+                <li><a href="#services">Servicios</a></li>
+                <li><a href="#contact">Contacto</a></li>
+            </ul>
+            {% if landing.texto_boton_hero and landing.url_boton_hero %}
+            <a href="{{ landing.url_boton_hero }}" class="t7-moto-cta-btn">{{ landing.texto_boton_hero }}</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <!-- ✨ Hero Motos Style ✨ -->
+    <section class="t7-moto-hero" {% if landing|get_hero_url %}style="background-image: url('{{ landing|get_hero_url }}'); background-size: cover; background-position: center;"{% endif %}>
+        <div class="t7-moto-hero-content">
+            <h1>{{ landing.titulo }}</h1>
+            {% if landing.subtitulo_hero %}
+            <p class="subtitle">{{ landing.subtitulo_hero }}</p>
+            {% elif landing.descripcion %}
+            <p class="subtitle">{{ landing.descripcion }}</p>
+            {% endif %}
+            {% if landing.texto_boton_hero and landing.url_boton_hero %}
+            <div class="t7-moto-hero-cta">
+                <a href="{{ landing.url_boton_hero }}" class="t7-moto-cta-btn">{{ landing.texto_boton_hero }}</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ✨ About Section ✨ -->
+    {% if landing.seccion_sobre_nosotros_texto or landing.contenido %}
+    <section class="t7-moto-section moto-about" id="about">
+        <h2 class="t7-moto-section-title">{{ landing.seccion_sobre_nosotros_titulo|default:"Sobre Nosotros" }}</h2>
+        <div class="t7-moto-about-content">
+            <p class="t7-moto-about-text">{{ landing.seccion_sobre_nosotros_texto|default:landing.contenido|safe }}</p>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Products Section ✨ -->
+    {% if products %}
+    <section class="t7-moto-section" id="products">
+        <h2 class="t7-moto-section-title">{{ landing.seccion_productos_titulo|default:"Nuestras Motos" }}</h2>
+        {% if landing.seccion_productos_subtitulo %}
+        <p class="t7-moto-section-subtitle">{{ landing.seccion_productos_subtitulo }}</p>
+        {% endif %}
+        <div class="t7-moto-cards-grid">
+            {% for product in products %}
+            <a href="{% url 'products:detalle_producto' product.pk %}" class="t7-moto-card">
+                <div class="t7-moto-card-image-container">
+                    {% if product.imagen_principal %}
+                    <img src="{{ product.imagen_principal }}" alt="{{ product.nombre }}" class="t7-moto-card-image">
+                    {% endif %}
+                    <div class="t7-moto-card-badge">Nuevo</div>
+                </div>
+                <div class="t7-moto-card-content">
+                    <h3 class="t7-moto-card-title">{{ product.nombre }}</h3>
+                    <p class="t7-moto-card-description">{{ product.descripcion|truncatechars:120 }}</p>
+                    <div class="t7-moto-card-footer">
+                        <div class="t7-moto-card-price">${{ product.precio }}</div>
+                        <span class="t7-moto-card-cta">Ver Detalles</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Services Section ✨ -->
+    {% if services %}
+    <section class="t7-moto-section" id="services" style="background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); border-top: 4px solid var(--t7-moto-primary);">
+        <h2 class="t7-moto-section-title">{{ landing.seccion_servicios_titulo|default:"Nuestros Servicios" }}</h2>
+        {% if landing.seccion_servicios_subtitulo %}
+        <p class="t7-moto-section-subtitle">{{ landing.seccion_servicios_subtitulo }}</p>
+        {% endif %}
+        <div class="t7-moto-cards-grid">
+            {% for srv in services %}
+            <a href="{% url 'products:detalle_servicio' srv.pk %}" class="t7-moto-card">
+                <div class="t7-moto-card-image-container">
+                    {% if srv.imagen_principal %}
+                    <img src="{{ srv.imagen_principal }}" alt="{{ srv.nombre }}" class="t7-moto-card-image">
+                    {% endif %}
+                    <div class="t7-moto-card-badge">Servicio</div>
+                </div>
+                <div class="t7-moto-card-content">
+                    <h3 class="t7-moto-card-title">{{ srv.nombre }}</h3>
+                    <p class="t7-moto-card-description">{{ srv.descripcion|truncatechars:120 }}</p>
+                    <div class="t7-moto-card-footer">
+                        <div class="t7-moto-card-price">${{ srv.precio }}</div>
+                        <span class="t7-moto-card-cta">Ver Detalles</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Testimonials Section ✨ -->
+    {% if landing.seccion_testimonios_texto %}
+    <section class="t7-moto-section" style="background: var(--t7-moto-bg);">
+        <h2 class="t7-moto-section-title">{{ landing.seccion_testimonios_titulo|default:"Lo que dicen nuestros clientes" }}</h2>
+        <div class="t7-moto-about-content">
+            <div class="t7-moto-about-text">{{ landing.seccion_testimonios_texto|safe }}</div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ CTA Final Section ✨ -->
+    {% if landing.seccion_contacto_texto %}
+    <section class="t7-moto-section moto-cta-section" id="contact">
+        <h2 class="t7-moto-section-title">{{ landing.seccion_contacto_titulo|default:"¿Listo para la aventura?" }}</h2>
+        <p class="t7-moto-section-subtitle">{{ landing.seccion_contacto_texto }}</p>
+        {% if landing.seccion_contacto_boton_texto and landing.seccion_contacto_boton_url %}
+        <a href="{{ landing.seccion_contacto_boton_url }}" class="t7-moto-cta-btn" style="position: relative; z-index: 2;">{{ landing.seccion_contacto_boton_texto }}</a>
+        {% endif %}
+    </section>
+    {% endif %}
+</div>
+

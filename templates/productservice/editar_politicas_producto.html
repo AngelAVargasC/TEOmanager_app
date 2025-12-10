@@ -1,0 +1,621 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Políticas - {{ producto.nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* === ESTILO MODERNO ERP === */
+    .erp-form-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    .erp-form-header {
+        background: linear-gradient(135deg, var(--panel-bg) 0%, var(--background-color) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: 8px 8px 0 0;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--shadow);
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .header-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-color);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+    }
+
+    .header-text h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .header-text p {
+        margin: 0.25rem 0 0 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .erp-form-content {
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        padding: 2rem;
+        box-shadow: var(--shadow);
+    }
+
+    /* === SECCIONES DE POLÍTICAS === */
+    .politics-section {
+        background: var(--surface);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .section-body {
+        padding: 1.5rem;
+    }
+
+    /* === ITEMS DE POLÍTICAS === */
+    .politics-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .politics-item {
+        background: var(--background-color);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .politics-item:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+    }
+
+    .icon-input {
+        width: 150px;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--surface);
+        color: var(--text-color);
+        font-size: 0.85rem;
+    }
+
+    .text-input {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--surface);
+        color: var(--text-color);
+        font-size: 0.9rem;
+    }
+
+    .delete-btn {
+        background: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.5rem;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        min-width: 40px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .delete-btn:hover {
+        background: #b91c1c;
+    }
+
+    /* === BOTONES === */
+    .erp-btn {
+        padding: 0.625rem 1.25rem;
+        border-radius: 6px;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .erp-btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .erp-btn-primary:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+    .erp-btn-secondary {
+        background: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .erp-btn-secondary:hover {
+        background: #cbd5e1;
+    }
+
+    .erp-btn-success {
+        background: #10b981;
+        color: white;
+    }
+
+    .erp-btn-success:hover {
+        background: #059669;
+    }
+
+    .erp-btn-warning {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .erp-btn-warning:hover {
+        background: #d97706;
+    }
+
+    .add-btn {
+        background: #10b981;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .add-btn:hover {
+        background: #059669;
+    }
+
+    /* === VALORES POR DEFECTO === */
+    .default-values {
+        background: #f0f9ff;
+        border: 1px solid #0ea5e9;
+        border-radius: 6px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .default-values h6 {
+        color: #0c4a6e;
+        margin: 0 0 0.75rem 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .default-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .default-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #0c4a6e;
+        font-size: 0.85rem;
+    }
+
+    .default-item i {
+        width: 16px;
+        text-align: center;
+        color: #0ea5e9;
+    }
+
+    /* === ACCIONES === */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .primary-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+        .erp-form-container {
+            padding: 1rem;
+        }
+
+        .erp-form-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .politics-item {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.75rem;
+        }
+
+        .icon-input {
+            width: 100%;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .primary-actions {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* === DARK MODE === */
+    body.dark-mode .default-values {
+        background: #0f172a;
+        border-color: #0ea5e9;
+    }
+
+    body.dark-mode .default-values h6 {
+        color: #0ea5e9;
+    }
+
+    body.dark-mode .default-item {
+        color: #cbd5e1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="erp-form-container">
+    <!-- Header -->
+    <div class="erp-form-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fas fa-cog"></i>
+            </div>
+            <div class="header-text">
+                <h1>Editar Políticas de Producto</h1>
+                <p>Personaliza las políticas de envío y devoluciones para {{ producto.nombre }}</p>
+            </div>
+        </div>
+        <a href="{% url 'products:detalle_producto' producto.pk %}" class="erp-btn erp-btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver al Producto
+        </a>
+    </div>
+
+    <!-- Formulario -->
+    <div class="erp-form-content">
+        <form method="post" id="politicas-form">
+            {% csrf_token %}
+            
+            <!-- Políticas de Envío -->
+            <div class="politics-section">
+                <div class="section-header">
+                    <h5 class="section-title">
+                        <i class="fas fa-shipping-fast"></i>
+                        Información de Envío
+                    </h5>
+                    <button type="button" class="add-btn" onclick="agregarPolitica('envio')">
+                        <i class="fas fa-plus"></i> Agregar Política
+                    </button>
+                </div>
+                <div class="section-body">
+                    <div id="envio-container" class="politics-container">
+                        <!-- Los items se cargarán dinámicamente aquí -->
+                    </div>
+                    
+                    <div class="default-values">
+                        <h6><i class="fas fa-info-circle"></i> Valores por defecto:</h6>
+                        <ul class="default-list">
+                            {% for item in politicas_envio_default %}
+                                <li class="default-item">
+                                    <i class="{{ item.icon }}"></i>
+                                    <span>{{ item.text }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Políticas de Devoluciones -->
+            <div class="politics-section">
+                <div class="section-header">
+                    <h5 class="section-title">
+                        <i class="fas fa-undo-alt"></i>
+                        Política de Devoluciones
+                    </h5>
+                    <button type="button" class="add-btn" onclick="agregarPolitica('devoluciones')">
+                        <i class="fas fa-plus"></i> Agregar Política
+                    </button>
+                </div>
+                <div class="section-body">
+                    <div id="devoluciones-container" class="politics-container">
+                        <!-- Los items se cargarán dinámicamente aquí -->
+                    </div>
+                    
+                    <div class="default-values">
+                        <h6><i class="fas fa-info-circle"></i> Valores por defecto:</h6>
+                        <ul class="default-list">
+                            {% for item in politicas_devoluciones_default %}
+                                <li class="default-item">
+                                    <i class="{{ item.icon }}"></i>
+                                    <span>{{ item.text }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campos ocultos -->
+            {{ form.envio_items }}
+            {{ form.devoluciones_items }}
+            
+            <!-- Debug: Verificar que los campos existen -->
+            <script>
+            console.log('Verificando campos del formulario...');
+            console.log('Campo envio_items existe:', document.getElementById('id_envio_items') !== null);
+            console.log('Campo devoluciones_items existe:', document.getElementById('id_devoluciones_items') !== null);
+            </script>
+
+            <!-- Acciones -->
+            <div class="form-actions">
+                <div class="primary-actions">
+                    <button type="submit" class="erp-btn erp-btn-primary">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                    <a href="{% url 'products:detalle_producto' producto.pk %}" class="erp-btn erp-btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+                <button type="button" class="erp-btn erp-btn-warning" onclick="resetearPoliticas()">
+                    <i class="fas fa-undo"></i> Restablecer por Defecto
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Inicializar datos
+let envioItems = [];
+let devolucionesItems = [];
+
+// Cargar datos iniciales del formulario
+try {
+    const envioValue = document.getElementById('id_envio_items').value;
+    const devolucionesValue = document.getElementById('id_devoluciones_items').value;
+    
+    envioItems = envioValue ? JSON.parse(envioValue) : [];
+    devolucionesItems = devolucionesValue ? JSON.parse(devolucionesValue) : [];
+} catch (e) {
+    console.error('Error parsing initial data:', e);
+    envioItems = [];
+    devolucionesItems = [];
+}
+
+function renderizarPoliticas() {
+    renderizarSeccion('envio', envioItems);
+    renderizarSeccion('devoluciones', devolucionesItems);
+    actualizarCamposOcultos();
+}
+
+function renderizarSeccion(tipo, items) {
+    const container = document.getElementById(`${tipo}-container`);
+    container.innerHTML = '';
+    
+    items.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'politics-item';
+        itemDiv.innerHTML = `
+            <input type="text" 
+                   class="icon-input" 
+                   value="${item.icon || ''}" 
+                   placeholder="fas fa-truck"
+                   onchange="actualizarItem('${tipo}', ${index}, 'icon', this.value)">
+            <input type="text" 
+                   class="text-input" 
+                   value="${item.text || ''}" 
+                   placeholder="Texto de la política"
+                   onchange="actualizarItem('${tipo}', ${index}, 'text', this.value)">
+            <button type="button" 
+                    class="delete-btn" 
+                    onclick="eliminarItem('${tipo}', ${index})"
+                    title="Eliminar">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        container.appendChild(itemDiv);
+    });
+}
+
+function agregarPolitica(tipo) {
+    const items = tipo === 'envio' ? envioItems : devolucionesItems;
+    items.push({ 
+        icon: 'fas fa-info-circle', 
+        text: 'Nueva política' 
+    });
+    
+    if (tipo === 'envio') {
+        envioItems = items;
+    } else {
+        devolucionesItems = items;
+    }
+    
+    renderizarSeccion(tipo, items);
+    actualizarCamposOcultos();
+}
+
+function eliminarItem(tipo, index) {
+    if (confirm('¿Está seguro que desea eliminar esta política?')) {
+        if (tipo === 'envio') {
+            envioItems.splice(index, 1);
+            renderizarSeccion('envio', envioItems);
+        } else {
+            devolucionesItems.splice(index, 1);
+            renderizarSeccion('devoluciones', devolucionesItems);
+        }
+        actualizarCamposOcultos();
+    }
+}
+
+function actualizarItem(tipo, index, campo, valor) {
+    if (tipo === 'envio') {
+        envioItems[index][campo] = valor;
+    } else {
+        devolucionesItems[index][campo] = valor;
+    }
+    actualizarCamposOcultos();
+}
+
+function actualizarCamposOcultos() {
+    document.getElementById('id_envio_items').value = JSON.stringify(envioItems);
+    document.getElementById('id_devoluciones_items').value = JSON.stringify(devolucionesItems);
+}
+
+function resetearPoliticas() {
+    if (confirm('¿Está seguro que desea restablecer las políticas a los valores por defecto? Se perderán todos los cambios personalizados.')) {
+        fetch('{% url "products:resetear_politicas_producto" producto.pk %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mostrar mensaje de éxito
+                alert('Políticas restablecidas correctamente');
+                location.reload();
+            } else {
+                alert('Error al restablecer las políticas');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar la solicitud');
+        });
+    }
+}
+
+// Validar formulario antes de enviar
+document.getElementById('politicas-form').addEventListener('submit', function(e) {
+    console.log('Formulario enviándose...');
+    console.log('Envío items:', envioItems);
+    console.log('Devoluciones items:', devolucionesItems);
+    
+    // Asegurar que los campos ocultos estén actualizados
+    actualizarCamposOcultos();
+    
+    // Verificar los valores de los campos ocultos
+    const envioValue = document.getElementById('id_envio_items').value;
+    const devolucionesValue = document.getElementById('id_devoluciones_items').value;
+    console.log('Campo envío final:', envioValue);
+    console.log('Campo devoluciones final:', devolucionesValue);
+    
+    // Validación simplificada - solo verificar que los campos obligatorios no estén vacíos
+    let isValid = true;
+    let errorMessage = '';
+    
+    // Solo validar si hay items - si no hay items, usar políticas por defecto
+    if (envioItems.length > 0) {
+        for (let i = 0; i < envioItems.length; i++) {
+            if (!envioItems[i].text || envioItems[i].text.trim() === '') {
+                errorMessage = 'Por favor, complete el texto de todas las políticas de envío o elimínelas para usar las políticas por defecto';
+                isValid = false;
+                break;
+            }
+        }
+    }
+    
+    if (isValid && devolucionesItems.length > 0) {
+        for (let i = 0; i < devolucionesItems.length; i++) {
+            if (!devolucionesItems[i].text || devolucionesItems[i].text.trim() === '') {
+                errorMessage = 'Por favor, complete el texto de todas las políticas de devolución o elimínelas para usar las políticas por defecto';
+                isValid = false;
+                break;
+            }
+        }
+    }
+    
+    if (!isValid) {
+        alert(errorMessage);
+        e.preventDefault();
+        return false;
+    }
+    
+    console.log('Formulario válido, enviando...');
+});
+
+// Inicializar cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    renderizarPoliticas();
+});
+</script>
+{% endblock %} 

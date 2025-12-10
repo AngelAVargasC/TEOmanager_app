@@ -1,0 +1,544 @@
+{% load static %}
+{% load webpages_extras %}
+<style>
+/* ⭐ PLANTILLA 6: AUTOS PREMIUM - CSS COMPLETAMENTE AISLADO ⭐ */
+/* Todos los estilos usan prefijo único t6-auto- para evitar conflictos */
+
+.t6-auto-wrapper {
+    font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
+    background: #ffffff;
+    color: #1f2937;
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    isolation: isolate; /* Aislamiento CSS */
+}
+
+/* Variables CSS aisladas */
+.t6-auto-wrapper {
+    --t6-auto-primary: {{ landing.color_primario|default:"#dc2626" }};
+    --t6-auto-secondary: {{ landing.color_secundario|default:"#1f2937" }};
+    --t6-auto-bg: #ffffff;
+    --t6-auto-dark: #0f172a;
+    --t6-auto-text: #1f2937;
+    --t6-auto-text-light: #6b7280;
+    --t6-auto-accent: #f59e0b;
+    --t6-auto-border: #e5e7eb;
+    --t6-auto-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    --t6-auto-shadow-hover: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+/* ✨ Header Autos Style - Aislado ✨ */
+.t6-auto-header {
+    position: fixed;
+    top: 58px;
+    left: var(--sidebar-width, 250px); /* Respeta el ancho de la sidebar */
+    right: 0;
+    width: calc(100% - var(--sidebar-width, 250px));
+    background: var(--t6-auto-dark);
+    border-bottom: 3px solid var(--t6-auto-primary);
+    padding: 0;
+    z-index: 99;
+    transition: all 0.3s ease, left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.t6-auto-nav {
+    max-width: 100%;
+    margin: 0;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+}
+
+.t6-auto-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.t6-auto-nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.t6-auto-nav-links a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.3s ease;
+    position: relative;
+}
+
+.t6-auto-nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--t6-auto-primary);
+    transition: width 0.3s ease;
+}
+
+.t6-auto-nav-links a:hover {
+    color: var(--t6-auto-primary);
+}
+
+.t6-auto-nav-links a:hover::after {
+    width: 100%;
+}
+
+.t6-auto-cta-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--t6-auto-primary);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.t6-auto-cta-btn:hover {
+    background: #b91c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220,38,38,0.4);
+}
+
+/* ✨ Hero Autos Style - Full Width con Imagen ✨ */
+.t6-auto-hero {
+    min-height: calc(100vh - 150px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 8rem 2rem 4rem;
+    background: linear-gradient(135deg, var(--t6-auto-dark) 0%, #1e293b 100%);
+    overflow: hidden;
+}
+
+.t6-auto-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('{{ landing|get_hero_url }}') center/cover no-repeat;
+    opacity: 0.3;
+    z-index: 1;
+}
+
+.t6-auto-hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 900px;
+    color: #fff;
+}
+
+.t6-auto-hero h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+}
+
+.t6-auto-hero .subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    font-weight: 400;
+    margin-bottom: 2rem;
+    color: rgba(255,255,255,0.9);
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+}
+
+.t6-auto-hero-cta {
+    margin-top: 2rem;
+}
+
+.t6-auto-hero-cta .t6-auto-cta-btn {
+    font-size: 1.1rem;
+    padding: 1rem 2.5rem;
+    margin: 0 0.5rem;
+}
+
+/* ✨ Secciones Autos Style ✨ */
+.t6-auto-section {
+    padding: 6rem 2rem;
+    width: 100%;
+    margin: 0;
+    position: relative;
+}
+
+.t6-auto-section-title {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--t6-auto-text);
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.t6-auto-section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: var(--t6-auto-primary);
+}
+
+.t6-auto-section-subtitle {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    font-weight: 400;
+    text-align: center;
+    color: var(--t6-auto-text-light);
+    margin-bottom: 4rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ✨ Cards Autos Style - Con efecto de velocidad ✨ */
+.t6-auto-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.t6-auto-card {
+    background: var(--t6-auto-bg);
+    border: 2px solid var(--t6-auto-border);
+    border-radius: 8px;
+    padding: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--t6-auto-shadow);
+    text-decoration: none;
+    color: var(--t6-auto-text);
+    display: block;
+    overflow: hidden;
+    position: relative;
+}
+
+.t6-auto-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(220,38,38,0.1), transparent);
+    transition: left 0.5s ease;
+    z-index: 1;
+}
+
+.t6-auto-card:hover::before {
+    left: 100%;
+}
+
+.t6-auto-card:hover {
+    box-shadow: var(--t6-auto-shadow-hover);
+    transform: translateY(-8px);
+    border-color: var(--t6-auto-primary);
+}
+
+.t6-auto-card-image-container {
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    background: #f3f4f6;
+    position: relative;
+}
+
+.t6-auto-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.t6-auto-card:hover .t6-auto-card-image {
+    transform: scale(1.1);
+}
+
+.t6-auto-card-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--t6-auto-primary);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    z-index: 2;
+}
+
+.t6-auto-card-content {
+    padding: 1.5rem;
+}
+
+.t6-auto-card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--t6-auto-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.t6-auto-card-description {
+    font-size: 0.95rem;
+    color: var(--t6-auto-text-light);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.t6-auto-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--t6-auto-border);
+}
+
+.t6-auto-card-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--t6-auto-primary);
+}
+
+.t6-auto-card-cta {
+    color: var(--t6-auto-primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+/* ✨ About Section Autos Style ✨ */
+.t6-auto-about {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-top: 3px solid var(--t6-auto-primary);
+    border-bottom: 3px solid var(--t6-auto-primary);
+}
+
+.t6-auto-about-content {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.t6-auto-about-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--t6-auto-text-light);
+}
+
+/* ✨ CTA Section Autos Style ✨ */
+.t6-auto-cta-section {
+    background: linear-gradient(135deg, var(--t6-auto-dark) 0%, #1e293b 100%);
+    color: #fff;
+    text-align: center;
+}
+
+.t6-auto-cta-section .t6-auto-section-title {
+    color: #fff;
+}
+
+.t6-auto-cta-section .t6-auto-section-title::after {
+    background: var(--t6-auto-primary);
+}
+
+.t6-auto-cta-section .t6-auto-section-subtitle {
+    color: rgba(255,255,255,0.9);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .t6-auto-nav-links {
+        display: none;
+    }
+    .t6-auto-hero {
+        padding: 6rem 1.5rem 3rem;
+    }
+    .t6-auto-section {
+        padding: 4rem 1.5rem;
+    }
+    .t6-auto-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+
+/* Ajuste cuando la sidebar está colapsada */
+.main-content.sidebar-collapsed ~ * .t6-auto-header,
+body:has(.sidebar.collapsed) .t6-auto-header {
+    left: 0;
+    width: 100%;
+}
+</style>
+
+<div class="t6-auto-wrapper">
+    <!-- ✨ Header Autos Style ✨ -->
+    <header class="t6-auto-header">
+        <nav class="t6-auto-nav">
+            <a href="#" class="t6-auto-logo">{{ landing.titulo|truncatewords:2 }}</a>
+            <ul class="t6-auto-nav-links">
+                <li><a href="#about">Sobre Nosotros</a></li>
+                <li><a href="#products">Vehículos</a></li>
+                <li><a href="#services">Servicios</a></li>
+                <li><a href="#contact">Contacto</a></li>
+            </ul>
+            {% if landing.texto_boton_hero and landing.url_boton_hero %}
+            <a href="{{ landing.url_boton_hero }}" class="t6-auto-cta-btn">{{ landing.texto_boton_hero }}</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <!-- ✨ Hero Autos Style ✨ -->
+    <section class="t6-auto-hero" {% if landing|get_hero_url %}style="background-image: url('{{ landing|get_hero_url }}'); background-size: cover; background-position: center;"{% endif %}>
+        <div class="t6-auto-hero-content">
+            <h1>{{ landing.titulo }}</h1>
+            {% if landing.subtitulo_hero %}
+            <p class="subtitle">{{ landing.subtitulo_hero }}</p>
+            {% elif landing.descripcion %}
+            <p class="subtitle">{{ landing.descripcion }}</p>
+            {% endif %}
+            {% if landing.texto_boton_hero and landing.url_boton_hero %}
+            <div class="t6-auto-hero-cta">
+                <a href="{{ landing.url_boton_hero }}" class="t6-auto-cta-btn">{{ landing.texto_boton_hero }}</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ✨ About Section ✨ -->
+    {% if landing.seccion_sobre_nosotros_texto or landing.contenido %}
+    <section class="t6-auto-section auto-about" id="about">
+        <h2 class="t6-auto-section-title">{{ landing.seccion_sobre_nosotros_titulo|default:"Sobre Nosotros" }}</h2>
+        <div class="t6-auto-about-content">
+            <p class="t6-auto-about-text">{{ landing.seccion_sobre_nosotros_texto|default:landing.contenido|safe }}</p>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Products Section ✨ -->
+    {% if products %}
+    <section class="t6-auto-section" id="products">
+        <h2 class="t6-auto-section-title">{{ landing.seccion_productos_titulo|default:"Nuestros Vehículos" }}</h2>
+        {% if landing.seccion_productos_subtitulo %}
+        <p class="t6-auto-section-subtitle">{{ landing.seccion_productos_subtitulo }}</p>
+        {% endif %}
+        <div class="t6-auto-cards-grid">
+            {% for product in products %}
+            <a href="{% url 'products:detalle_producto' product.pk %}" class="t6-auto-card">
+                <div class="t6-auto-card-image-container">
+                    {% if product.imagen_principal %}
+                    <img src="{{ product.imagen_principal }}" alt="{{ product.nombre }}" class="t6-auto-card-image">
+                    {% endif %}
+                    <div class="t6-auto-card-badge">Nuevo</div>
+                </div>
+                <div class="t6-auto-card-content">
+                    <h3 class="t6-auto-card-title">{{ product.nombre }}</h3>
+                    <p class="t6-auto-card-description">{{ product.descripcion|truncatechars:120 }}</p>
+                    <div class="t6-auto-card-footer">
+                        <div class="t6-auto-card-price">${{ product.precio }}</div>
+                        <span class="t6-auto-card-cta">Ver Detalles →</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Services Section ✨ -->
+    {% if services %}
+    <section class="t6-auto-section" id="services" style="background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);">
+        <h2 class="t6-auto-section-title">{{ landing.seccion_servicios_titulo|default:"Nuestros Servicios" }}</h2>
+        {% if landing.seccion_servicios_subtitulo %}
+        <p class="t6-auto-section-subtitle">{{ landing.seccion_servicios_subtitulo }}</p>
+        {% endif %}
+        <div class="t6-auto-cards-grid">
+            {% for srv in services %}
+            <a href="{% url 'products:detalle_servicio' srv.pk %}" class="t6-auto-card">
+                <div class="t6-auto-card-image-container">
+                    {% if srv.imagen_principal %}
+                    <img src="{{ srv.imagen_principal }}" alt="{{ srv.nombre }}" class="t6-auto-card-image">
+                    {% endif %}
+                    <div class="t6-auto-card-badge">Servicio</div>
+                </div>
+                <div class="t6-auto-card-content">
+                    <h3 class="t6-auto-card-title">{{ srv.nombre }}</h3>
+                    <p class="t6-auto-card-description">{{ srv.descripcion|truncatechars:120 }}</p>
+                    <div class="t6-auto-card-footer">
+                        <div class="t6-auto-card-price">${{ srv.precio }}</div>
+                        <span class="t6-auto-card-cta">Ver Detalles →</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Testimonials Section ✨ -->
+    {% if landing.seccion_testimonios_texto %}
+    <section class="t6-auto-section" style="background: var(--t6-auto-bg);">
+        <h2 class="t6-auto-section-title">{{ landing.seccion_testimonios_titulo|default:"Lo que dicen nuestros clientes" }}</h2>
+        <div class="t6-auto-about-content">
+            <div class="t6-auto-about-text">{{ landing.seccion_testimonios_texto|safe }}</div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ CTA Final Section ✨ -->
+    {% if landing.seccion_contacto_texto %}
+    <section class="t6-auto-section auto-cta-section" id="contact">
+        <h2 class="t6-auto-section-title">{{ landing.seccion_contacto_titulo|default:"¿Listo para encontrar tu vehículo ideal?" }}</h2>
+        <p class="t6-auto-section-subtitle">{{ landing.seccion_contacto_texto }}</p>
+        {% if landing.seccion_contacto_boton_texto and landing.seccion_contacto_boton_url %}
+        <a href="{{ landing.seccion_contacto_boton_url }}" class="t6-auto-cta-btn">{{ landing.seccion_contacto_boton_texto }}</a>
+        {% endif %}
+    </section>
+    {% endif %}
+</div>
+

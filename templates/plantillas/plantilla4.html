@@ -1,0 +1,556 @@
+{% load webpages_extras %}
+<style>
+/* ⭐ PLANTILLA 4: MINIMALISTA APPLE-LIKE PREMIUM - CSS COMPLETAMENTE AISLADO ⭐ */
+/* Todos los estilos usan prefijo único t4-apple- para evitar conflictos */
+
+.t4-apple-wrapper {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    color: var(--t4-apple-text);
+    line-height: 1.47059;
+    background: var(--t4-apple-bg);
+    overflow-x: hidden;
+    font-weight: 400;
+    letter-spacing: -0.022em;
+    /* Aislar estilos para no interferir con navbar del sistema */
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    isolation: isolate; /* Aislamiento CSS */
+}
+
+/* Variables CSS aisladas */
+.t4-apple-wrapper {
+    --t4-apple-primary: {{ landing.color_primario|default:"#000000" }};
+    --t4-apple-secondary: {{ landing.color_secundario|default:"#1d1d1f" }};
+    --t4-apple-text: #1d1d1f;
+    --t4-apple-text-light: #86868b;
+    --t4-apple-bg: #ffffff;
+    --t4-apple-bg-alt: #f5f5f7;
+}
+
+/* ✨ Hero Apple Style - Aislado ✨ */
+.t4-apple-hero {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    padding-top: 6rem; /* Espacio para navbar del sistema */
+    position: relative;
+    background: var(--t4-apple-bg);
+}
+
+.t4-apple-hero.with-image {
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.t4-apple-hero.with-image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+}
+
+.t4-apple-hero-content {
+    max-width: 100%;
+    margin: 0;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.t4-apple-hero h1 {
+    font-size: clamp(3.5rem, 12vw, 8rem);
+    font-weight: 600;
+    letter-spacing: -0.05em;
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+    color: var(--t4-apple-text);
+    animation: appleFadeIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.t4-apple-hero.with-image h1 {
+    color: #fff;
+}
+
+@keyframes appleFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.t4-apple-hero .subtitle {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 400;
+    color: var(--t4-apple-text-light);
+    margin-bottom: 2rem;
+    letter-spacing: 0.01em;
+    animation: appleFadeIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
+}
+
+.t4-apple-hero.with-image .subtitle {
+    color: rgba(255,255,255,0.9);
+}
+
+.t4-apple-hero p {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    color: var(--t4-apple-text-light);
+    margin-bottom: 3rem;
+    font-weight: 400;
+    max-width: 100%;
+    margin: 0 auto;
+    width: 100%;
+    animation: appleFadeIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
+}
+
+.t4-apple-hero.with-image p {
+    color: rgba(255,255,255,0.85);
+}
+
+.t4-apple-hero .cta-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: var(--t4-apple-primary);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 22px;
+    font-size: 1.05rem;
+    font-weight: 400;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation: appleFadeIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s both;
+}
+
+.t4-apple-hero.with-image .cta-button {
+    background: #fff;
+    color: var(--t4-apple-primary);
+}
+
+.t4-apple-hero .cta-button:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+/* ✨ Section Apple Style - Full Width Blocks ✨ */
+.t4-apple-section {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.t4-apple-section-content {
+    max-width: 100%;
+    margin: 0;
+    width: 100%;
+    padding: 8rem 2rem;
+}
+
+.t4-apple-section-header {
+    text-align: center;
+    margin-bottom: 6rem;
+}
+
+.t4-apple-section-header h2 {
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.07143;
+    margin-bottom: 1rem;
+    color: var(--t4-apple-text);
+}
+
+.t4-apple-section-header .subtitle {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    color: var(--t4-apple-text-light);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+}
+
+/* ✨ About Section - Large Text Block ✨ */
+.t4-apple-about {
+    background: var(--t4-apple-bg);
+}
+
+.t4-apple-about-text {
+    font-size: clamp(1.3rem, 3vw, 2rem);
+    line-height: 1.47059;
+    color: var(--t4-apple-text);
+    font-weight: 400;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    letter-spacing: -0.011em;
+}
+
+/* ✨ Products/Services - Large Cards Side by Side ✨ */
+.t4-apple-showcase {
+    background: var(--t4-apple-bg-alt);
+    padding: 8rem 0;
+}
+
+.t4-apple-showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.t4-apple-showcase-item {
+    background: var(--t4-apple-bg);
+    padding: 6rem 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.3s ease;
+    border-right: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.t4-apple-showcase-item:nth-child(even) {
+    border-right: none;
+}
+
+.t4-apple-showcase-item:hover {
+    background: var(--t4-apple-bg-alt);
+}
+
+.t4-apple-showcase-image {
+    width: 100%;
+    height: 400px;
+    background: var(--t4-apple-bg-alt);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    border-radius: 18px;
+}
+
+.t4-apple-showcase-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.t4-apple-showcase-item:hover .t4-apple-showcase-image img {
+    transform: scale(1.05);
+}
+
+.t4-apple-showcase-item h3 {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    color: var(--t4-apple-text);
+    line-height: 1.07143;
+}
+
+.t4-apple-showcase-item p {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    color: var(--t4-apple-text-light);
+    line-height: 1.47059;
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+}
+
+.t4-apple-showcase-price {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 400;
+    color: var(--t4-apple-text);
+    letter-spacing: -0.02em;
+}
+
+/* ✨ Stats - Horizontal Bar Style ✨ */
+.t4-apple-stats {
+    background: var(--t4-apple-bg);
+    padding: 6rem 0;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.t4-apple-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 100%;
+    margin: 0;
+    width: 100%;
+    padding: 0 2rem;
+    gap: 4rem;
+}
+
+.t4-apple-stat {
+    text-align: center;
+}
+
+.t4-apple-stat-number {
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: var(--t4-apple-text);
+    line-height: 1.07143;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.t4-apple-stat-label {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    color: var(--t4-apple-text-light);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+}
+
+/* ✨ Testimonial - Large Quote Block ✨ */
+.t4-apple-testimonial {
+    background: var(--t4-apple-bg-alt);
+    padding: 10rem 2rem;
+    text-align: center;
+}
+
+.t4-apple-testimonial-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.t4-apple-testimonial blockquote {
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--t4-apple-text);
+    margin: 0 0 3rem 0;
+    letter-spacing: -0.02em;
+    font-style: italic;
+}
+
+.t4-apple-testimonial cite {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    color: var(--t4-apple-text-light);
+    font-style: normal;
+    font-weight: 400;
+}
+
+/* ✨ CTA - Simple Centered ✨ */
+.t4-apple-cta {
+    background: var(--t4-apple-bg);
+    padding: 10rem 2rem;
+    text-align: center;
+}
+
+.t4-apple-cta-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.t4-apple-cta h2 {
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.07143;
+    margin-bottom: 1.5rem;
+    color: var(--t4-apple-text);
+}
+
+.t4-apple-cta p {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    color: var(--t4-apple-text-light);
+    margin-bottom: 3rem;
+    font-weight: 400;
+    line-height: 1.47059;
+}
+
+.t4-apple-cta-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: var(--t4-apple-primary);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 22px;
+    font-size: 1.05rem;
+    font-weight: 400;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.t4-apple-cta-button:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .t4-apple-showcase-grid {
+        grid-template-columns: 1fr;
+    }
+    .t4-apple-showcase-item {
+        border-right: none;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .t4-apple-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .t4-apple-hero {
+        padding: 6rem 1.5rem;
+    }
+    .t4-apple-section-content {
+        padding: 5rem 1.5rem;
+    }
+    .t4-apple-showcase-item {
+        padding: 4rem 2rem;
+    }
+    .t4-apple-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+}
+</style>
+
+<div class="t4-apple-wrapper">
+    <!-- ✨ Hero Apple Style ✨ -->
+    <section class="t4-apple-hero {% if landing|get_hero_url %}with-image{% endif %}" 
+             {% if landing|get_hero_url %}style="background-image: url('{{ landing|get_hero_url }}');"{% endif %}>
+        <div class="t4-apple-hero-content">
+            {% if landing.subtitulo_hero %}
+            <div class="subtitle">{{ landing.subtitulo_hero }}</div>
+            {% endif %}
+            <h1>{{ landing.titulo }}</h1>
+            {% if landing.descripcion %}
+            <p>{{ landing.descripcion }}</p>
+            {% endif %}
+            {% if landing.texto_boton_hero and landing.url_boton_hero %}
+            <a href="{{ landing.url_boton_hero }}" class="cta-button">{{ landing.texto_boton_hero }}</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ✨ About - Large Text Block ✨ -->
+    {% if landing.seccion_sobre_nosotros_texto or landing.contenido %}
+    <section class="t4-apple-section apple-about">
+        <div class="t4-apple-section-content">
+            <div class="t4-apple-about-text">
+                {{ landing.seccion_sobre_nosotros_texto|default:landing.contenido|safe }}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Stats - Horizontal Bar ✨ -->
+    <section class="t4-apple-stats">
+        <div class="t4-apple-stats-grid">
+            <div class="t4-apple-stat">
+                <span class="t4-apple-stat-number">{{ products|length|default:"0" }}</span>
+                <div class="t4-apple-stat-label">Productos</div>
+            </div>
+            <div class="t4-apple-stat">
+                <span class="t4-apple-stat-number">{{ services|length|default:"0" }}</span>
+                <div class="t4-apple-stat-label">Servicios</div>
+            </div>
+            <div class="t4-apple-stat">
+                <span class="t4-apple-stat-number">1000+</span>
+                <div class="t4-apple-stat-label">Clientes</div>
+            </div>
+            <div class="t4-apple-stat">
+                <span class="t4-apple-stat-number">5+</span>
+                <div class="t4-apple-stat-label">Años</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ✨ Products - Large Cards Side by Side ✨ -->
+    {% if products %}
+    <section class="t4-apple-showcase">
+        <div class="t4-apple-section-content">
+            <div class="t4-apple-section-header">
+                <h2>{{ landing.seccion_productos_titulo|default:"Nuestros Productos" }}</h2>
+                {% if landing.seccion_productos_subtitulo %}
+                <p class="subtitle">{{ landing.seccion_productos_subtitulo }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="t4-apple-showcase-grid">
+            {% for product in products %}
+            <a href="{% url 'products:detalle_producto' product.pk %}" class="t4-apple-showcase-item">
+                <div class="t4-apple-showcase-image">
+                    {% if product.imagen_principal %}
+                    <img src="{{ product.imagen_principal }}" alt="{{ product.nombre }}">
+                    {% else %}
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: var(--t4-apple-bg-alt);">
+                        <i class="fas fa-box" style="font-size: 6rem; color: #d2d2d7;"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <h3>{{ product.nombre }}</h3>
+                <p>{{ product.descripcion|truncatechars:150 }}</p>
+                <div class="t4-apple-showcase-price">$ {{ product.precio }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Services - Large Cards Side by Side ✨ -->
+    {% if services %}
+    <section class="t4-apple-showcase" style="background: var(--t4-apple-bg);">
+        <div class="t4-apple-section-content">
+            <div class="t4-apple-section-header">
+                <h2>{{ landing.seccion_servicios_titulo|default:"Nuestros Servicios" }}</h2>
+                {% if landing.seccion_servicios_subtitulo %}
+                <p class="subtitle">{{ landing.seccion_servicios_subtitulo }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="t4-apple-showcase-grid">
+            {% for srv in services %}
+            <a href="{% url 'products:detalle_servicio' srv.pk %}" class="t4-apple-showcase-item">
+                <div class="t4-apple-showcase-image">
+                    {% if srv.imagen_principal %}
+                    <img src="{{ srv.imagen_principal }}" alt="{{ srv.nombre }}">
+                    {% else %}
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: var(--t4-apple-bg-alt);">
+                        <i class="fas fa-concierge-bell" style="font-size: 6rem; color: #d2d2d7;"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <h3>{{ srv.nombre }}</h3>
+                <p>{{ srv.descripcion|truncatechars:150 }}</p>
+                <div class="t4-apple-showcase-price">$ {{ srv.precio }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Testimonial - Large Quote ✨ -->
+    {% if landing.seccion_testimonios_texto %}
+    <section class="t4-apple-testimonial">
+        <div class="t4-apple-testimonial-content">
+            <blockquote>{{ landing.seccion_testimonios_texto|safe }}</blockquote>
+            <cite>— Cliente Satisfecho</cite>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ✨ Final CTA ✨ -->
+    {% if landing.seccion_contacto_texto %}
+    <section class="t4-apple-cta">
+        <div class="t4-apple-cta-content">
+            <h2>{{ landing.seccion_contacto_titulo|default:"¿Listo para comenzar?" }}</h2>
+            <p>{{ landing.seccion_contacto_texto }}</p>
+            {% if landing.seccion_contacto_boton_texto and landing.seccion_contacto_boton_url %}
+            <a href="{{ landing.seccion_contacto_boton_url }}" class="t4-apple-cta-button">{{ landing.seccion_contacto_boton_texto }}</a>
+            {% endif %}
+        </div>
+    </section>
+    {% endif %}
+</div>

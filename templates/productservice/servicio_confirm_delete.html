@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Servicio{% endblock %}
+
+{% block content %}
+<div class="section-title">Eliminar Servicio</div>
+<div class="section-desc">¿Estás seguro de que deseas eliminar el servicio "{{ servicio.nombre }}"?</div>
+
+<div class="button-group">
+    <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn-main btn-danger"><i class="fas fa-trash"></i> Eliminar</button>
+    </form>
+    <a href="{% url 'products:servicios' %}" class="btn-main btn-cancelar"><i class="fas fa-times"></i> Cancelar</a>
+</div>
+
+<style>
+.section-title {
+    font-size: 1.5rem;
+    color: var(--btn-main-bg);
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+.section-desc {
+    color: #555;
+    margin-bottom: 2rem;
+}
+.btn-main {
+    display: inline-block;
+    padding: 0.7em 1.5em;
+    background: var(--btn-main-bg);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-right: 1rem;
+}
+.btn-main:hover {
+    background: #1746a2;
+}
+.btn-main.btn-danger {
+    background: #b91c1c;
+}
+.btn-main.btn-danger:hover {
+    background: #7f1d1d;
+}
+.btn-main.btn-cancelar {
+    background: #e5e7eb;
+    color: #374151;
+}
+.btn-main.btn-cancelar:hover {
+    background: #cbd5e1;
+}
+</style>
+
+<!-- Dark-mode overrides para confirmación de eliminación de servicio -->
+<style>
+body.dark-mode .section-title {
+    color: var(--primary-color);
+}
+body.dark-mode .section-desc {
+    color: var(--text-color);
+}
+body.dark-mode .btn-main {
+    background: var(--btn-main-bg);
+    color: var(--btn-main-color);
+}
+body.dark-mode .btn-main.btn-danger {
+    background: var(--badge-inactive-bg);
+    color: var(--badge-inactive-color);
+}
+body.dark-mode .btn-main.btn-cancelar {
+    background: var(--btn-main-hover-bg);
+    color: var(--btn-main-color);
+}
+</style>
+{% endblock %} 

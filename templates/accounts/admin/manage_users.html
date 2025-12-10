@@ -1,0 +1,2138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Usuarios | Admin ERP{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% load static %}{% static 'css/admin-buttons.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% load static %}{% static 'js/admin-functions.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<!-- CSRF Token oculto para JavaScript -->
+{% csrf_token %}
+
+<!-- Header Ejecutivo -->
+<div class="executive-header">
+    <div class="header-content">
+        <div class="title-section">
+            <div class="title-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="title-text">
+                <h1>Gestión de Usuarios</h1>
+                <p class="subtitle">Administrar cuentas, permisos y actividad de usuarios</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="user-stats">
+                <div class="stat-item">
+                    <span class="stat-value">{{ users.paginator.count }}</span>
+                    <span class="stat-label">Total</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ active_users_count|default:0 }}</span>
+                    <span class="stat-label">Activos</span>
+                </div>
+            </div>
+            <button class="btn-export" onclick="exportUsers()">
+                <i class="fas fa-download"></i>
+                Exportar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="panel modern-panel">
+    <div class="panel-header">
+        <div class="header-left">
+            <h2>
+                <i class="fas fa-user-cog"></i>
+                Lista de Usuarios
+            </h2>
+            <span class="user-count">{{ users.paginator.count }} usuarios registrados</span>
+        </div>
+        <div class="header-actions">
+            <button class="btn-icon" title="Filtros avanzados" onclick="toggleAdvancedFilters()">
+                <i class="fas fa-filter"></i>
+            </button>
+            <button class="btn-icon" title="Actualizar lista" onclick="location.reload()">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+    <div class="panel-content">
+        <!-- Barra de búsqueda y filtros modernizada -->
+        <div class="advanced-search-section">
+            <form method="get" class="search-form">
+                <div class="search-row">
+                    <div class="search-input-group">
+                        <i class="fas fa-search"></i>
+                        <input type="text" name="search" placeholder="Buscar por nombre, email o empresa..." 
+                               value="{{ request.GET.search|default:'' }}" class="search-input">
+                    </div>
+                    <div class="filter-group">
+                        <select name="status" class="filter-select">
+                            <option value="">Estado</option>
+                            <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Activos</option>
+                            <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactivos</option>
+                        </select>
+                        <select name="role" class="filter-select">
+                            <option value="">Rol</option>
+                            <option value="admin" {% if request.GET.role == 'admin' %}selected{% endif %}>Administradores</option>
+                            <option value="user" {% if request.GET.role == 'user' %}selected{% endif %}>Usuarios</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                        Buscar
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Filtros avanzados (ocultos por defecto) -->
+            <div class="advanced-filters" id="advancedFilters" style="display: none;">
+                <div class="filter-row">
+                    <div class="filter-item">
+                        <label>Fecha de registro</label>
+                        <input type="date" name="date_from" value="{{ request.GET.date_from }}">
+                        <span>hasta</span>
+                        <input type="date" name="date_to" value="{{ request.GET.date_to }}">
+                    </div>
+                    <div class="filter-item">
+                        <label>Empresa</label>
+                        <input type="text" name="company" placeholder="Filtrar por empresa" value="{{ request.GET.company }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de usuarios modernizada -->
+        <div class="users-table-container">
+            <div class="table-header">
+                <div class="table-info">
+                    <span class="results-count">
+                        Mostrando {{ users.start_index|default:0 }}-{{ users.end_index|default:0 }} de {{ users.paginator.count }} usuarios
+                    </span>
+                </div>
+                <div class="view-options">
+                    <button class="view-btn active" data-view="table">
+                        <i class="fas fa-table"></i>
+                    </button>
+                    <button class="view-btn" data-view="cards">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <table class="users-table modern-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="username">
+                            <div class="th-content">
+                                <i class="fas fa-user"></i>
+                                <span>Usuario</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="email">
+                            <div class="th-content">
+                                <i class="fas fa-envelope"></i>
+                                <span>Email</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="company">
+                            <div class="th-content">
+                                <i class="fas fa-building"></i>
+                                <span>Empresa</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="date_joined">
+                            <div class="th-content">
+                                <i class="fas fa-calendar"></i>
+                                <span>Registro</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="th-content">
+                                <i class="fas fa-toggle-on"></i>
+                                <span>Estado</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="th-content">
+                                <i class="fas fa-cogs"></i>
+                                <span>Acciones</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="user-row" data-user-id="{{ user.id }}">
+                        <td class="user-info">
+                            <div class="user-avatar">
+                                {% if user.userprofile.foto %}
+                                    <img src="{{ user.userprofile.foto.url }}" alt="{{ user.username }}">
+                                {% else %}
+                                    <div class="avatar-placeholder">
+                                        {{ user.username|first|upper }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="user-details">
+                                <div class="username">{{ user.username }}</div>
+                                <div class="user-meta">
+                                    {% if user.first_name or user.last_name %}
+                                        <span class="full-name">{{ user.first_name }} {{ user.last_name }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="email-cell">
+                            <div class="email-info">
+                                <span class="email">{{ user.email }}</span>
+                                {% if user.email_verified %}
+                                    <i class="fas fa-check-circle verified" title="Email verificado"></i>
+                                {% else %}
+                                    <i class="fas fa-exclamation-triangle unverified" title="Email no verificado"></i>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="company-cell">
+                            <div class="company-info">
+                                <span class="company-name">{{ user.userprofile.empresa|default:"Sin empresa" }}</span>
+                                {% if user.userprofile.tipo_empresa %}
+                                    <span class="company-type">{{ user.userprofile.tipo_empresa }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="date-cell">
+                            <div class="date-info">
+                                <span class="date">{{ user.date_joined|date:"d/m/Y" }}</span>
+                                <span class="time">{{ user.date_joined|date:"H:i" }}</span>
+                            </div>
+                        </td>
+                        <td class="status-cell">
+                            <div class="status-container">
+                                <span class="status-badge {% if user.is_active %}active{% else %}inactive{% endif %}">
+                                    {% if user.is_active %}
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Activo</span>
+                                    {% else %}
+                                        <i class="fas fa-times-circle"></i>
+                                        <span>Inactivo</span>
+                                    {% endif %}
+                                </span>
+                                {% if user.is_superuser %}
+                                    <span class="role-badge admin">
+                                        <i class="fas fa-crown"></i>
+                                        Admin
+                                    </span>
+                                {% elif user.is_staff %}
+                                    <span class="role-badge staff">
+                                        <i class="fas fa-user-cog"></i>
+                                        Staff
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="actions-cell">
+                            <div class="actions-group">
+                                <div class="quick-actions">
+                                    <a href="{% url 'user_detail' user.id %}" class="action-btn view" title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="action-btn edit" title="Editar usuario">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <div class="dropdown">
+                                        <button class="action-btn dropdown-toggle" data-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a href="{% url 'admin_products' user.id %}" class="dropdown-item">
+                                                <i class="fas fa-box"></i>
+                                                Ver productos ({{ user.productos.count|default:0 }})
+                                            </a>
+                                            <a href="{% url 'admin_services' user.id %}" class="dropdown-item">
+                                                <i class="fas fa-cogs"></i>
+                                                Ver servicios ({{ user.servicios.count|default:0 }})
+                                            </a>
+                                            <a href="{% url 'admin_orders' user.id %}" class="dropdown-item">
+                                                <i class="fas fa-shopping-cart"></i>
+                                                Ver pedidos
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <button class="dropdown-item reset-password" data-user-id="{{ user.id }}">
+                                                <i class="fas fa-key"></i>
+                                                Resetear contraseña
+                                            </button>
+                                            <button class="dropdown-item toggle-status" data-user-id="{{ user.id }}" data-status="{{ user.is_active }}">
+                                                <i class="fas fa-power-off"></i>
+                                                {% if user.is_active %}Desactivar{% else %}Activar{% endif %}
+                                            </button>
+                                            <div class="dropdown-divider"></div>
+                                            <button class="dropdown-item delete-user" data-user-id="{{ user.id }}" data-username="{{ user.username }}" style="color: #dc3545;">
+                                                <i class="fas fa-trash-alt"></i>
+                                                Eliminar usuario permanentemente
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="6" class="empty-message">
+                            <div class="empty-state">
+                                <i class="fas fa-user-slash"></i>
+                                <h3>No se encontraron usuarios</h3>
+                                <p>Intenta ajustar los filtros de búsqueda</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if users.has_other_pages %}
+        <div class="pagination">
+            {% if users.has_previous %}
+                <a href="?page={{ users.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+                   class="pagination-btn">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </a>
+            {% endif %}
+            
+            <span class="pagination-info">
+                Página {{ users.number }} de {{ users.paginator.num_pages }}
+            </span>
+
+            {% if users.has_next %}
+                <a href="?page={{ users.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+                   class="pagination-btn">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+/* === EXECUTIVE HEADER === */
+.executive-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    color: #1e293b;
+    padding: 2rem 1rem;
+    margin: 0 0 2rem 0;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.title-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.title-icon {
+    background: rgba(59, 130, 246, 0.1);
+    padding: 1rem;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+}
+
+.title-icon i {
+    font-size: 2rem;
+    color: #3b82f6;
+}
+
+.title-text {
+    min-width: 0;
+    flex: 1;
+}
+
+.title-text h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.subtitle {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+    line-height: 1.3;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.user-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(59, 130, 246, 0.08);
+    padding: 0.8rem 1.2rem;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    flex-wrap: wrap;
+    border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.stat-item {
+    text-align: center;
+    min-width: 60px;
+}
+
+.stat-number {
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: block;
+    color: #1e293b;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    color: #64748b;
+}
+
+.btn-back {
+    background: #3b82f6;
+    border: none;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-back:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .title-text h1 {
+        font-size: 2rem;
+    }
+    
+    .header-actions {
+        gap: 0.5rem;
+    }
+    
+    .user-stats {
+        padding: 0.6rem 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .executive-header {
+        padding: 1.5rem 1rem;
+        margin: 0 0 1.5rem 0;
+        border-radius: 12px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .title-section {
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .title-text h1 {
+        font-size: 1.8rem;
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+    }
+    
+    .header-actions {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .user-stats {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .executive-header {
+        padding: 1rem;
+        border-radius: 10px;
+    }
+    
+    .title-icon {
+        padding: 0.8rem;
+    }
+    
+    .title-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .title-text h1 {
+        font-size: 1.5rem;
+    }
+    
+    .btn-back {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .user-stats {
+        gap: 0.5rem;
+        padding: 0.5rem 0.8rem;
+    }
+}
+
+/* === MODERN PANEL === */
+.modern-panel .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.header-left h2 {
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.5rem;
+    color: #1e293b;
+}
+
+.user-count {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    color: #64748b;
+    padding: 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    background: #f1f5f9;
+    color: #3b82f6;
+}
+
+/* === ADVANCED SEARCH === */
+.advanced-search-section {
+    padding: 2rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.search-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.search-input-group {
+    flex: 1;
+    position: relative;
+}
+
+.search-input-group i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-group {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.filter-select {
+    padding: 0.8rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background: white;
+    font-size: 0.9rem;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.filter-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.search-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+/* === ADVANCED FILTERS === */
+.advanced-filters {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+}
+
+.filter-row {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-item label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.filter-item input {
+    padding: 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+/* === TABLE HEADER === */
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.results-count {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.view-options {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.view-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    padding: 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-btn.active,
+.view-btn:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+/* === TABLE CONTAINER === */
+.users-table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* === MODERN TABLE === */
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    overflow: hidden;
+}
+
+.modern-table th {
+    background: #f8fafc;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 2px solid #e2e8f0;
+    font-weight: 600;
+    color: #374151;
+    position: relative;
+}
+
+.th-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.th-content i:first-child {
+    color: #6b7280;
+}
+
+.sort-icon {
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sortable:hover .sort-icon {
+    opacity: 1;
+}
+
+.sortable.active .sort-icon {
+    opacity: 1;
+    color: #3b82f6;
+}
+
+/* === USER ROW === */
+.user-row {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.user-row:hover {
+    background: #f8fafc;
+    transform: translateX(2px);
+}
+
+.user-row td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+}
+
+/* === USER INFO === */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.user-details {
+    flex: 1;
+}
+
+.username {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+.user-meta {
+    margin-top: 0.2rem;
+}
+
+.full-name {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* === EMAIL CELL === */
+.email-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.email {
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+.verified {
+    color: #10b981;
+}
+
+.unverified {
+    color: #f59e0b;
+}
+
+/* === COMPANY CELL === */
+.company-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.company-name {
+    font-weight: 500;
+    color: #1e293b;
+    font-size: 0.9rem;
+}
+
+.company-type {
+    font-size: 0.8rem;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* === DATE CELL === */
+.date-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.date {
+    font-weight: 500;
+    color: #1e293b;
+    font-size: 0.9rem;
+}
+
+.time {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* === STATUS CELL === */
+.status-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    width: fit-content;
+}
+
+.status-badge.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.role-badge.admin {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.role-badge.staff {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+/* === ACTIONS CELL === */
+.actions-group {
+    display: flex;
+    justify-content: center;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    padding: 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    background: #f1f5f9;
+    color: #3b82f6;
+    transform: translateY(-1px);
+}
+
+.action-btn.view:hover {
+    color: #10b981;
+}
+
+.action-btn.edit:hover {
+    color: #f59e0b;
+}
+
+/* === DROPDOWN === */
+.dropdown {
+    position: relative;
+    z-index: 100;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    z-index: 1050;
+    min-width: 200px;
+    max-width: 250px;
+    display: none;
+    overflow: hidden;
+    transform: translateY(5px);
+    word-wrap: break-word;
+}
+
+/* Dropdown con posición fija - MEJORADO */
+.dropdown-menu.dropdown-fixed {
+    position: fixed !important;
+    z-index: 9999 !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    border: 1px solid #cbd5e1;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+    transform: none !important;
+    animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Scrollbar personalizado para dropdowns fijos */
+.dropdown-menu.dropdown-fixed::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dropdown-menu.dropdown-fixed::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.dropdown-menu.dropdown-fixed::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.dropdown-menu.dropdown-fixed::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.dropdown-menu-right {
+    right: 0;
+    left: auto;
+}
+
+/* Dropdown que se abre hacia arriba */
+.dropdown-menu.dropup {
+    top: auto;
+    bottom: 100%;
+    transform: translateY(-5px);
+}
+
+.dropdown-menu.dropup.show {
+    animation: dropupFadeIn 0.15s ease-out;
+}
+
+@keyframes dropupFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-5px);
+    }
+}
+
+/* Dropdown con posición fija inteligente */
+.dropdown-menu.dropdown-fixed {
+    position: fixed !important;
+    z-index: 1060;
+    transform: none !important;
+    visibility: visible !important;
+}
+
+.dropdown-menu.dropdown-fixed::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dropdown-menu.dropdown-fixed::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.dropdown-menu.dropdown-fixed::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.dropdown-menu.dropdown-fixed::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.dropdown.open .dropdown-menu,
+.dropdown.show .dropdown-menu {
+    display: block;
+    animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(5px);
+    }
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem 1rem;
+    color: #374151;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.dropdown-item:hover {
+    background: #f8fafc;
+    color: #3b82f6;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 0.5rem 0;
+}
+
+/* Asegurar que las filas no interfieran con el dropdown */
+.users-table tbody tr {
+    position: relative;
+    z-index: 1;
+}
+
+.users-table tbody tr:hover {
+    z-index: 5;
+}
+
+.actions-cell {
+    position: relative;
+    z-index: 10;
+}
+
+.dropdown.show,
+.dropdown.open {
+    z-index: 1060;
+}
+
+/* === EMPTY STATE === */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #64748b;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #374151;
+}
+
+.empty-state p {
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* === PAGINATION === */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    background: #f8fafc;
+    margin-bottom: 3rem;
+}
+
+.pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #374151;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.pagination-btn:hover {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+    transform: translateY(-1px);
+}
+
+.pagination-info {
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+    .search-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-group {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+    }
+    
+    .title-section {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .user-stats {
+        order: -1;
+    }
+    
+    .executive-header {
+        margin: -1rem -1rem 1rem -1rem;
+        padding: 1.5rem;
+    }
+    
+    .modern-table {
+        font-size: 0.8rem;
+    }
+    
+    .user-row td {
+        padding: 0.8rem;
+    }
+    
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+}
+
+/* === DARK MODE === */
+body.dark-mode .modern-table,
+body.dark-mode .dropdown-menu {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-mode .modern-table th {
+    background: #334155;
+    color: #f1f5f9;
+    border-color: #475569;
+}
+
+body.dark-mode .user-row:hover {
+    background: #334155;
+}
+
+body.dark-mode .username,
+body.dark-mode .email,
+body.dark-mode .company-name,
+body.dark-mode .date {
+    color: #f1f5f9;
+}
+
+body.dark-mode .user-meta,
+body.dark-mode .company-type,
+body.dark-mode .time {
+    color: #cbd5e1;
+}
+
+body.dark-mode .dropdown-item {
+    color: #f1f5f9;
+}
+
+body.dark-mode .dropdown-item:hover {
+    background: #475569;
+    color: #3b82f6;
+}
+
+body.dark-mode .dropdown-item:hover {
+    background: #475569;
+}
+
+body.dark-mode .empty-state h3 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .table-header {
+    background: #334155;
+    border-color: #475569;
+}
+
+body.dark-mode .advanced-filters {
+    background: #334155;
+}
+
+body.dark-mode .search-input,
+body.dark-mode .filter-select {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+
+body.dark-mode .pagination {
+    background: #334155;
+}
+
+body.dark-mode .pagination-btn {
+    background: #1e293b;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+</style>
+
+<script>
+// Funciones para filtros avanzados
+function toggleAdvancedFilters() {
+    const filters = document.getElementById('advancedFilters');
+    if (filters.style.display === 'none') {
+        filters.style.display = 'block';
+    } else {
+        filters.style.display = 'none';
+    }
+}
+
+// Funciones para exportar usuarios
+function exportUsers() {
+    const users = [];
+    document.querySelectorAll('.user-row').forEach(row => {
+        const userData = {
+            username: row.querySelector('.username')?.textContent,
+            email: row.querySelector('.email')?.textContent,
+            company: row.querySelector('.company-name')?.textContent,
+            status: row.querySelector('.status-badge')?.textContent.trim()
+        };
+        users.push(userData);
+    });
+    
+    const csv = convertToCSV(users);
+    downloadCSV(csv, 'usuarios.csv');
+}
+
+function convertToCSV(data) {
+    const headers = ['Usuario', 'Email', 'Empresa', 'Estado'];
+    const csvContent = [
+        headers.join(','),
+        ...data.map(user => [
+            user.username,
+            user.email,
+            user.company,
+            user.status
+        ].join(','))
+    ].join('\n');
+    
+    return csvContent;
+}
+
+function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', filename);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// Funciones para dropdowns
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar dropdowns
+    document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const dropdown = this.closest('.dropdown');
+            const dropdownMenu = dropdown.querySelector('.dropdown-menu');
+            
+            // Cerrar otros dropdowns
+            document.querySelectorAll('.dropdown').forEach(d => {
+                if (d !== dropdown) {
+                    d.classList.remove('open', 'show');
+                    d.querySelector('.dropdown-menu')?.classList.remove('dropup');
+                }
+            });
+            
+            // Posicionamiento dinámico inteligente del dropdown
+            const rect = dropdown.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+            const dropdownHeight = 280; // Altura estimada del dropdown
+            const dropdownWidth = 200; // Ancho del dropdown
+            
+            // Resetear clases
+            dropdownMenu.classList.remove('dropup', 'dropdown-fixed');
+            dropdownMenu.style.position = '';
+            dropdownMenu.style.top = '';
+            dropdownMenu.style.bottom = '';
+            dropdownMenu.style.left = '';
+            dropdownMenu.style.right = '';
+            
+            // Verificar si el dropdown está cerrado para abrirlo
+            const isOpening = !dropdown.classList.contains('open');
+            
+            if (isOpening) {
+                // Mostrar temporalmente para medir
+                dropdownMenu.style.visibility = 'hidden';
+                dropdownMenu.style.display = 'block';
+                
+                // Esperar un frame para que se renderice
+                requestAnimationFrame(() => {
+                    // Obtener dimensiones reales después del renderizado
+                    const dropdownRect = dropdownMenu.getBoundingClientRect();
+                    const actualHeight = dropdownRect.height || dropdownHeight;
+                    const actualWidth = dropdownRect.width || dropdownWidth;
+                    
+                    let needsRepositioning = false;
+                    
+                    // Verificar si se corta verticalmente - MEJORADO
+                    const wouldCutBottom = dropdownRect.bottom > viewportHeight - 20;
+                    const wouldCutTop = dropdownRect.top < 20;
+                    
+                    // Calcular espacios disponibles
+                    const spaceBelow = viewportHeight - rect.bottom - 20;
+                    const spaceAbove = rect.top - 20;
+                    
+                    console.log('Dropdown positioning:', {
+                        wouldCutBottom,
+                        wouldCutTop,
+                        spaceBelow,
+                        spaceAbove,
+                        actualHeight,
+                        dropdownBottom: dropdownRect.bottom,
+                        viewportHeight
+                    });
+                    
+                    if (wouldCutBottom) {
+                        if (spaceAbove >= actualHeight && spaceAbove > spaceBelow) {
+                            // Hay más espacio arriba, abrir hacia arriba
+                            dropdownMenu.classList.add('dropup');
+                            console.log('Opening upward');
+                        } else {
+                            // Usar posición fija con altura limitada
+                            needsRepositioning = true;
+                            console.log('Using fixed positioning');
+                        }
+                    }
+                    
+                    // Verificar si se corta horizontalmente
+                    const wouldCutRight = dropdownRect.right > viewportWidth - 10;
+                    const wouldCutLeft = dropdownRect.left < 10;
+                    
+                    if (wouldCutRight && !wouldCutLeft) {
+                        // Se corta por la derecha, alinear a la derecha del botón
+                        dropdownMenu.style.right = '0';
+                        dropdownMenu.style.left = 'auto';
+                    } else if (wouldCutLeft && !wouldCutRight) {
+                        // Se corta por la izquierda, alinear a la izquierda del botón
+                        dropdownMenu.style.right = 'auto';
+                        dropdownMenu.style.left = '0';
+                    } else if (wouldCutRight && wouldCutLeft) {
+                        // Se corta en ambos lados horizontalmente
+                        needsRepositioning = true;
+                    }
+                    
+                    // Si necesita reposicionamiento especial - MEJORADO
+                    if (needsRepositioning) {
+                        console.log('Applying fixed positioning...');
+                        
+                        dropdownMenu.classList.add('dropdown-fixed');
+                        dropdownMenu.style.position = 'fixed';
+                        dropdownMenu.style.zIndex = '9999';
+                        
+                        // Determinar la mejor posición vertical
+                        const availableSpaceBelow = viewportHeight - rect.bottom - 10;
+                        const availableSpaceAbove = rect.top - 10;
+                        const minHeight = 150; // Altura mínima para que sea usable
+                        
+                        if (availableSpaceBelow >= minHeight) {
+                            // Posicionar abajo
+                            dropdownMenu.style.top = (rect.bottom + 5) + 'px';
+                            dropdownMenu.style.bottom = 'auto';
+                            dropdownMenu.style.maxHeight = Math.min(actualHeight, availableSpaceBelow - 10) + 'px';
+                            console.log('Fixed position: below');
+                        } else if (availableSpaceAbove >= minHeight) {
+                            // Posicionar arriba
+                            dropdownMenu.style.bottom = (viewportHeight - rect.top + 5) + 'px';
+                            dropdownMenu.style.top = 'auto';
+                            dropdownMenu.style.maxHeight = Math.min(actualHeight, availableSpaceAbove - 10) + 'px';
+                            console.log('Fixed position: above');
+                        } else {
+                            // Centrar verticalmente si no hay espacio suficiente
+                            const centerY = viewportHeight / 2;
+                            const maxAvailableHeight = viewportHeight - 40; // 20px margin top/bottom
+                            dropdownMenu.style.top = '20px';
+                            dropdownMenu.style.bottom = 'auto';
+                            dropdownMenu.style.maxHeight = Math.min(actualHeight, maxAvailableHeight) + 'px';
+                            console.log('Fixed position: centered');
+                        }
+                        
+                        // Posicionamiento horizontal inteligente
+                        const availableSpaceRight = viewportWidth - rect.left - 10;
+                        const availableSpaceLeft = rect.right - 10;
+                        
+                        if (availableSpaceRight >= actualWidth) {
+                            // Alinear a la izquierda del botón
+                            dropdownMenu.style.left = rect.left + 'px';
+                            dropdownMenu.style.right = 'auto';
+                        } else if (availableSpaceLeft >= actualWidth) {
+                            // Alinear a la derecha del botón
+                            dropdownMenu.style.right = (viewportWidth - rect.right) + 'px';
+                            dropdownMenu.style.left = 'auto';
+                        } else {
+                            // Centrar horizontalmente
+                            dropdownMenu.style.left = '10px';
+                            dropdownMenu.style.right = '10px';
+                            dropdownMenu.style.width = 'auto';
+                        }
+                        
+                        // Habilitar scroll interno si es necesario
+                        dropdownMenu.style.overflowY = 'auto';
+                        dropdownMenu.style.overflowX = 'hidden';
+                        
+                        // Agregar overlay sutil para enfocar atención
+                        const overlay = document.createElement('div');
+                        overlay.className = 'dropdown-overlay';
+                        overlay.style.cssText = `
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: rgba(0, 0, 0, 0.1);
+                            z-index: 9998;
+                            pointer-events: none;
+                            opacity: 0;
+                            transition: opacity 0.2s ease;
+                        `;
+                        document.body.appendChild(overlay);
+                        
+                        // Fade in del overlay
+                        requestAnimationFrame(() => {
+                            overlay.style.opacity = '1';
+                        });
+                        
+                        // Guardar referencia para limpieza
+                        dropdownMenu.setAttribute('data-overlay-id', 'dropdown-overlay-' + Date.now());
+                        overlay.setAttribute('id', dropdownMenu.getAttribute('data-overlay-id'));
+                    }
+                    
+                    // Mostrar el dropdown
+                    dropdownMenu.style.visibility = 'visible';
+                });
+            }
+            
+            dropdown.classList.toggle('open');
+            dropdown.classList.toggle('show');
+        });
+    });
+    
+    // Cerrar dropdowns al hacer clic fuera (pero no si es un botón dentro del dropdown)
+    document.addEventListener('click', function(e) {
+        // No cerrar si el clic es en un botón dentro del dropdown
+        if (e.target.closest('.dropdown-item')) {
+            return;
+        }
+        
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            dropdown.classList.remove('open', 'show');
+            const dropdownMenu = dropdown.querySelector('.dropdown-menu');
+            if (dropdownMenu) {
+                // Limpiar estilos personalizados - MEJORADO
+                dropdownMenu.classList.remove('dropup', 'dropdown-fixed');
+                dropdownMenu.style.position = '';
+                dropdownMenu.style.top = '';
+                dropdownMenu.style.bottom = '';
+                dropdownMenu.style.left = '';
+                dropdownMenu.style.right = '';
+                dropdownMenu.style.maxHeight = '';
+                dropdownMenu.style.overflowY = '';
+                dropdownMenu.style.overflowX = '';
+                dropdownMenu.style.minWidth = '';
+                dropdownMenu.style.width = '';
+                dropdownMenu.style.zIndex = '';
+                dropdownMenu.style.visibility = '';
+                dropdownMenu.style.display = '';
+                
+                // Limpiar overlay si existe
+                const overlayId = dropdownMenu.getAttribute('data-overlay-id');
+                if (overlayId) {
+                    const overlay = document.getElementById(overlayId);
+                    if (overlay) {
+                        overlay.style.opacity = '0';
+                        setTimeout(() => {
+                            if (overlay.parentNode) {
+                                overlay.parentNode.removeChild(overlay);
+                            }
+                        }, 200);
+                    }
+                    dropdownMenu.removeAttribute('data-overlay-id');
+                }
+            }
+        });
+    });
+    
+    // Manejar acciones de usuario
+    document.querySelectorAll('.toggle-status').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            const isActive = this.dataset.status === 'True';
+            
+            if (confirm(`¿Estás seguro de que quieres ${isActive ? 'desactivar' : 'activar'} este usuario?`)) {
+                toggleUserStatus(userId, !isActive);
+            }
+        });
+    });
+    
+    document.querySelectorAll('.reset-password').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            
+            if (confirm('¿Estás seguro de que quieres resetear la contraseña de este usuario?')) {
+                resetUserPassword(userId);
+            }
+        });
+    });
+    
+    // Funciones de ordenamiento
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', function() {
+            const sortBy = this.dataset.sort;
+            sortTable(sortBy);
+        });
+    });
+});
+
+function toggleUserStatus(userId, newStatus) {
+    // Aquí implementar la llamada AJAX para cambiar el estado
+    fetch(`/admin/users/${userId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value
+        },
+        body: JSON.stringify({ is_active: newStatus })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error al cambiar el estado del usuario');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al cambiar el estado del usuario');
+    });
+}
+
+function resetUserPassword(userId) {
+    // Implementar reset de contraseña
+    fetch(`/admin/users/${userId}/reset-password/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Contraseña reseteada exitosamente. Se ha enviado un email al usuario.');
+        } else {
+            alert('Error al resetear la contraseña');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al resetear la contraseña');
+    });
+}
+
+function sortTable(sortBy) {
+    // Implementar ordenamiento de tabla
+    const url = new URL(window.location.href);
+    const currentSort = url.searchParams.get('sort');
+    const currentOrder = url.searchParams.get('order') || 'asc';
+    
+    if (currentSort === sortBy && currentOrder === 'asc') {
+        url.searchParams.set('order', 'desc');
+    } else {
+        url.searchParams.set('order', 'asc');
+    }
+    
+    url.searchParams.set('sort', sortBy);
+    window.location.href = url.toString();
+}
+
+// Animaciones de entrada
+document.addEventListener('DOMContentLoaded', function() {
+    const rows = document.querySelectorAll('.user-row');
+    rows.forEach((row, index) => {
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            row.style.transition = 'all 0.5s ease';
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+        }, index * 50);
+    });
+});
+</script>
+
+<!-- Modal de Eliminación de Usuario -->
+<div id="deleteUserModal" class="delete-modal-overlay">
+    <div class="delete-modal">
+        <div class="delete-modal-header">
+            <div class="delete-modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2 class="delete-modal-title">Eliminar Usuario Permanentemente</h2>
+        </div>
+        <div class="delete-modal-body">
+            <p class="delete-modal-warning">
+                <strong>⚠️ ADVERTENCIA: Esta acción es IRREVERSIBLE ⚠️</strong>
+            </p>
+            <p class="delete-modal-message">
+                Estás a punto de eliminar al usuario <strong id="deleteModalUsername"></strong> y <strong>TODOS</strong> sus datos asociados:
+            </p>
+            <ul class="delete-modal-list">
+                <li><i class="fas fa-box"></i> Todos los productos y sus imágenes</li>
+                <li><i class="fas fa-cogs"></i> Todos los servicios y sus imágenes</li>
+                <li><i class="fas fa-shopping-cart"></i> Todos los pedidos y mensajes</li>
+                <li><i class="fas fa-globe"></i> Todas las landing pages</li>
+                <li><i class="fas fa-credit-card"></i> Todas las suscripciones</li>
+                <li><i class="fas fa-user"></i> El perfil y cuenta del usuario</li>
+            </ul>
+            <div class="delete-modal-confirm">
+                <label for="deleteConfirmInput" class="delete-confirm-label">
+                    Para confirmar, escribe <strong>"ELIMINAR"</strong> en el campo:
+                </label>
+                <input 
+                    type="text" 
+                    id="deleteConfirmInput" 
+                    class="delete-confirm-input" 
+                    placeholder="Escribe ELIMINAR aquí"
+                    autocomplete="off"
+                >
+            </div>
+        </div>
+        <div class="delete-modal-footer">
+            <button type="button" class="delete-modal-btn delete-modal-cancel" onclick="closeDeleteModal()">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button type="button" class="delete-modal-btn delete-modal-confirm-btn" id="deleteModalConfirmBtn" disabled>
+                <i class="fas fa-trash-alt"></i> Eliminar Permanentemente
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Modal de Eliminación */
+.delete-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.delete-modal-overlay.show {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.delete-modal {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 550px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease-out;
+    position: relative;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.delete-modal-header {
+    padding: 2rem 2rem 1rem 2rem;
+    text-align: center;
+    border-bottom: 2px solid #fee2e2;
+}
+
+.delete-modal-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem auto;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.delete-modal-icon i {
+    font-size: 2.5rem;
+    color: #dc3545;
+}
+
+.delete-modal-title {
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.delete-modal-body {
+    padding: 1.5rem 2rem;
+}
+
+.delete-modal-warning {
+    background: #fee2e2;
+    border-left: 4px solid #dc3545;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    color: #991b1b;
+    font-size: 0.95rem;
+}
+
+.delete-modal-message {
+    color: #475569;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.delete-modal-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.delete-modal-list li {
+    padding: 0.7rem 0;
+    color: #64748b;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.delete-modal-list li:last-child {
+    border-bottom: none;
+}
+
+.delete-modal-list li i {
+    color: #dc3545;
+    width: 20px;
+    text-align: center;
+}
+
+.delete-modal-confirm {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #e2e8f0;
+}
+
+.delete-confirm-label {
+    display: block;
+    color: #1e293b;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.delete-confirm-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s;
+    font-family: monospace;
+    text-transform: uppercase;
+}
+
+.delete-confirm-input:focus {
+    outline: none;
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.delete-confirm-input.error {
+    border-color: #dc3545;
+    background: #fee2e2;
+}
+
+.delete-confirm-input.success {
+    border-color: #10b981;
+    background: #d1fae5;
+}
+
+.delete-modal-footer {
+    padding: 1.5rem 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    border-top: 2px solid #f1f5f9;
+    background: #f8fafc;
+    border-radius: 0 0 16px 16px;
+}
+
+.delete-modal-btn {
+    padding: 0.875rem 1.75rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+}
+
+.delete-modal-cancel {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.delete-modal-cancel:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px);
+}
+
+.delete-modal-confirm-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.delete-modal-confirm-btn:hover:not(:disabled) {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.delete-modal-confirm-btn:disabled {
+    background: #cbd5e1;
+    color: #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Dark mode para el modal */
+body.dark-mode .delete-modal {
+    background: #1e293b;
+    color: #f1f5f9;
+}
+
+body.dark-mode .delete-modal-header {
+    border-bottom-color: #334155;
+}
+
+body.dark-mode .delete-modal-title {
+    color: #f1f5f9;
+}
+
+body.dark-mode .delete-modal-warning {
+    background: rgba(220, 53, 69, 0.2);
+    border-left-color: #dc3545;
+    color: #fca5a5;
+}
+
+body.dark-mode .delete-modal-message {
+    color: #cbd5e1;
+}
+
+body.dark-mode .delete-modal-list {
+    background: #0f172a;
+}
+
+body.dark-mode .delete-modal-list li {
+    color: #94a3b8;
+    border-bottom-color: #1e293b;
+}
+
+body.dark-mode .delete-confirm-label {
+    color: #f1f5f9;
+}
+
+body.dark-mode .delete-confirm-input {
+    background: #0f172a;
+    border-color: #334155;
+    color: #f1f5f9;
+}
+
+body.dark-mode .delete-confirm-input:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}
+
+body.dark-mode .delete-modal-footer {
+    background: #0f172a;
+    border-top-color: #1e293b;
+}
+
+body.dark-mode .delete-modal-cancel {
+    background: #334155;
+    color: #cbd5e1;
+}
+
+body.dark-mode .delete-modal-cancel:hover {
+    background: #475569;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .delete-modal {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .delete-modal-header,
+    .delete-modal-body,
+    .delete-modal-footer {
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .delete-modal-footer {
+        flex-direction: column-reverse;
+    }
+    
+    .delete-modal-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %} 

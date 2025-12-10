@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ landing.titulo }} | TEOmanager{% endblock %}
+
+{% block content %}
+    <div class="landing-page-wrapper" style="position: relative; z-index: 1; min-height: calc(100vh - 80px); margin: 0; padding: 0; width: 100%;">
+        {% include 'plantillas/'|add:landing.plantilla|add:'.html' %}
+    </div>
+{% endblock %}
+

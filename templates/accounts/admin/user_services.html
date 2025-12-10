@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+
+{% block title %}Servicios de {{ user_detail.username }} | TEOmanager{% endblock %}
+
+{% block extra_css %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/admin-buttons.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin-functions.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="panel">
+    <div class="panel-header">
+        <h2>Servicios de {{ user_detail.username }}</h2>
+        <div class="floating-icons">
+            <i class="fas fa-cogs"></i>
+            <i class="fas fa-tools"></i>
+            <i class="fas fa-wrench"></i>
+            <i class="fas fa-screwdriver"></i>
+            <i class="fas fa-hammer"></i>
+        </div>
+    </div>
+    <div class="panel-content">
+        <!-- Información del usuario -->
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-details">
+                <h3>{{ user_detail.userprofile.empresa }}</h3>
+                <p><i class="fas fa-envelope"></i> {{ user_detail.email }}</p>
+                <p><i class="fas fa-phone"></i> {{ user_detail.userprofile.telefono }}</p>
+            </div>
+        </div>
+
+        <!-- Lista de servicios -->
+        <div class="services-grid">
+            {% for service in services %}
+            <div class="service-card">
+                <div class="service-image">
+                    {% if service.imagen_principal %}
+                        <img src="{{ service.imagen_principal }}" alt="{{ service.nombre }}" class="service-img">
+                    {% else %}
+                        <i class="fas fa-cogs"></i>
+                    {% endif %}
+                </div>
+                <div class="service-info">
+                    <h4>{{ service.nombre }}</h4>
+                    <p class="service-category">
+                        <i class="fas fa-tag"></i> {{ service.categoria }}
+                    </p>
+                    <div class="service-details">
+                        <span class="price">
+                            <i class="fas fa-dollar-sign"></i> {{ service.precio }}
+                        </span>
+                        <span class="duration">
+                            <i class="fas fa-clock"></i> {{ service.duracion }} min
+                        </span>
+                    </div>
+                    <p class="service-description">
+                        {{ service.descripcion|truncatechars:100 }}
+                    </p>
+                    <div class="service-actions">
+                        <button class="btn-edit" onclick="editService('{{ service.id }}')">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn-delete" onclick="deleteService('{{ service.id }}')">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <i class="fas fa-tools"></i>
+                <p>Este usuario no tiene servicios registrados</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="action-buttons">
+            <a href="{% url 'user_detail' user_detail.id %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Volver a Detalles
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .user-avatar {
+        font-size: 3rem;
+        color: #2563eb;
+    }
+
+    .user-details h3 {
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-details p {
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .service-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+    }
+
+    .service-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .service-image {
+        height: 200px;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .service-image img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+    }
+
+    .service-image i {
+        font-size: 3rem;
+        color: #94a3b8;
+    }
+
+    .service-info {
+        padding: 1.5rem;
+    }
+
+    .service-info h4 {
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .service-category {
+        color: #64748b;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .service-details {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .price, .duration {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .price {
+        color: #2563eb;
+        font-weight: 600;
+    }
+
+    .duration {
+        color: #64748b;
+    }
+
+    .service-description {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .service-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-edit,
+    .btn-delete {
+        flex: 1;
+        padding: 0.6rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .btn-edit {
+        background: #2563eb;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-delete {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .btn-delete:hover {
+        background: #fecaca;
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        color: #64748b;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: flex-start;
+        gap: 1rem;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        color: #475569;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-back:hover {
+        background: #e2e8f0;
+    }
+
+    @media (max-width: 768px) {
+        .user-info {
+            flex-direction: column;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .services-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .service-card {
+            max-width: 100%;
+        }
+    }
+
+    .service-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+</style>
+
+<!-- Dark-mode overrides para servicios de usuario -->
+<style>
+body.dark-mode .user-info {
+    background: #1e293b;
+    color: #f1f5f9;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.25);
+}
+body.dark-mode .service-card {
+    background: #1e293b;
+    color: #f1f5f9;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.25);
+}
+body.dark-mode .service-image {
+    background: #334155;
+}
+body.dark-mode .service-info h4, body.dark-mode .service-category, body.dark-mode .price {
+    color: #60a5fa;
+}
+body.dark-mode .duration,
+body.dark-mode .service-description {
+    color: #cbd5e1;
+}
+body.dark-mode .btn-edit {
+    background: rgba(96,165,250,0.12);
+    color: #f1f5f9;
+    border: 1px solid rgba(96,165,250,0.18);
+}
+body.dark-mode .btn-delete {
+    background: #7f1d1d;
+    color: #fca5a5;
+}
+body.dark-mode .empty-state {
+    background: #334155;
+    color: #cbd5e1;
+}
+body.dark-mode .btn-back {
+    background: rgba(96,165,250,0.12);
+    color: #f1f5f9;
+    border: 1px solid rgba(96,165,250,0.18);
+}
+</style>
+
+<!-- Dark-mode overrides para panel en servicios de usuario -->
+<style>
+body.dark-mode .panel { background: #1e293b; color: #f1f5f9; }
+body.dark-mode .panel-header { 
+    background: var(--panel-header-bg); 
+    color: var(--panel-header-color); 
+}
+body.dark-mode .panel-content { background: var(--panel-body-bg); }
+body.dark-mode .floating-icons i { color: var(--primary-color); }
+</style>
+
+<!-- Dark-mode overrides para h3 en user-info de servicios de usuario -->
+<style>
+body.dark-mode .user-info h3 {
+    color: var(--text-color) !important;
+}
+</style>
+
+<script>
+function editService(serviceId) {
+    // Implementar lógica de edición
+    console.log('Editar servicio:', serviceId);
+}
+
+function deleteService(serviceId) {
+    if (confirm('¿Estás seguro de que deseas eliminar este servicio?')) {
+        // Implementar lógica de eliminación
+        console.log('Eliminar servicio:', serviceId);
+    }
+}
+</script>
+{% endblock %} 

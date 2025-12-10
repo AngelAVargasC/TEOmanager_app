@@ -1,0 +1,1046 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro | TEOmanager</title>
+    <link rel="stylesheet" href="{% static 'fontawesome-free-6.7.2-web/css/all.min.css' %}">
+    <style>
+        :root {
+            /* Variables modo claro */
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --error: #ef4444;
+            --success: #22c55e;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --input-bg: #ffffff;
+            --input-border: #e2e8f0;
+            --hero-gradient-start: #2563eb;
+            --hero-gradient-end: #1e40af;
+            --hero-feature-bg: rgba(255, 255, 255, 0.1);
+            --hero-feature-hover: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Modo Oscuro */
+        [data-theme="dark"] {
+            --primary: #60a5fa !important;
+            --primary-dark: #3b82f6 !important;
+            --secondary: #94a3b8 !important;
+            --background: #0f172a !important;
+            --surface: #1e293b !important;
+            --text-primary: #f1f5f9 !important;
+            --text-secondary: #94a3b8 !important;
+            --border-color: #334155 !important;
+            --input-bg: #334155 !important;
+            --input-border: #475569 !important;
+            --hero-gradient-start: #1e293b !important;
+            --hero-gradient-end: #334155 !important;
+            --hero-feature-bg: rgba(96, 165, 250, 0.1) !important;
+            --hero-feature-hover: rgba(96, 165, 250, 0.15) !important;
+        }
+
+        * {
+            margin: 0;   
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: grid;
+            background: var(--surface);
+            overflow: auto;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .register-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 100vh;
+            background: var(--surface);
+        }
+
+        .register-hero {
+            background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            color: white;
+        }
+
+        .register-form {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+            background: var(--surface);
+        }
+
+        .mobile-header {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .mobile-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.3rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .mobile-logo i {
+            font-size: 1.3rem;
+        }
+
+        .mobile-header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .to-landing {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .to-landing:hover {
+            background: var(--background);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .to-landing i {
+            font-size: 0.9rem;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .register-header h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .register-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.5;
+            animation: fadeInUp 0.6s ease-out 0.1s backwards;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: .5rem;
+            animation: fadeInUp 0.6s ease-out 0.2s backwards;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .input-group {
+            position: relative;
+            border: 0px !important;   
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: var(--input-bg) important;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus { 
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(96,165,250,0.2);
+            outline: none;
+        }
+
+        .form-input.input-error {
+            border-color: var(--error);
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+
+        .form-input.input-error:focus {
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .error-message i {
+            font-size: 0.9rem;
+        }
+
+        .register-button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+        }
+
+        .register-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .register-button i {
+            font-size: 1.1rem;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--text-secondary);
+            animation: fadeInUp 0.6s ease-out 0.5s backwards;
+        }
+
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Aquí van los media queries que agregamos antes */
+        @media (max-width: 1024px) {
+            /* Haz que el container deje de tener dos columnas */
+            .register-container {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Oculta la mitad izquierda */
+            .register-info {
+                display: none !important;
+            }
+
+            /* El form ahora sí ocupa todo el ancho posible */
+            .register-form {
+                max-width: 100% !important;
+                padding: 2rem 1.5rem; /* ajusta relleno si quieres */
+                min-height: 100vh;
+                width: 100%;
+            }
+
+            /* Permite scroll vertical y quita overflow hidden */
+            body {
+                overflow-y: auto;
+                height: auto;
+            }
+            }
+
+            @media (max-width: 640px) {
+            /* En lugar de grid, usa flex-column para simplificar */
+            .register-container {
+                max-width: 98%;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .register-form {
+                padding: 0rem;
+                margin: 0;
+            }
+            }
+
+        @media (max-width: 640px) {
+            body {
+                background: var(--surface);
+            }
+
+            .register-form {
+                padding: 1.5rem;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .mobile-header {
+                margin-bottom: 2rem;
+            }
+
+            .mobile-header-right {
+                gap: 0.5rem;
+            }
+
+            .to-landing {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .register-header {
+                margin-bottom: 2rem;
+            }
+
+            .register-header h2 {
+                font-size: 1.8rem;
+            }
+
+            .register-header p {
+                font-size: 1rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.25rem;
+            }
+
+            .form-input {
+                padding: 0.875rem 1rem 0.875rem 2.75rem;
+            }
+
+            .input-group i {
+                font-size: 1.1rem;
+                left: 0.875rem;
+            }
+
+            .register-button {
+                margin-top: 1.5rem;
+                padding: 0.875rem;
+            }
+
+            .form-grid {
+                gap: 1rem;
+            }
+        }
+
+        /* Scrollbar personalizada */
+        .register-form::-webkit-scrollbar {
+            width: 8px;
+            background: #f1f5f9;
+        }
+        .register-form::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .register-form::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .btn-register {
+            width: 100%;
+            max-width: 600px;
+            padding: 1.2em;
+            background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 2rem auto 0 auto;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(37,99,235,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+        .btn-register:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(37,99,235,0.25);
+        }
+        .btn-register::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255,255,255,0.1);
+            transform: rotate(45deg);
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+        .btn-register:hover::after {
+            opacity: 1;
+            transform: rotate(45deg) translate(50%, 50%);
+        }
+        .register-benefit {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.1rem;
+            color: white;
+            padding: 0.5rem 0;
+            transition: transform 0.3s ease;
+        }
+        .register-benefit:hover {
+            transform: translateX(10px);
+        }
+        .register-benefit i {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.7rem;
+            border-radius: 50%;
+            font-size: 1rem;
+            width: 1rem;
+            height: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .register-benefit:hover i {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+        .register-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 2.2rem;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        .register-logo i {
+            font-size: 2rem;
+        }
+        .register-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #2563eb, #8dcdfe);
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .register-subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+        .login-link {
+            text-align: center;
+            margin: 1.5rem auto 0 auto;
+            color: #64748b;
+            max-width: 600px;
+        }
+        .login-link a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 0.5rem;
+            transition: color 0.3s ease;
+        }
+        .login-link a:hover {
+            color: #1e40af;
+            text-decoration: underline;
+        }
+        .alert {
+            background: var(--error);
+            color: white;
+            padding: 0.875rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .alert i {
+            font-size: 1rem;
+        }
+        .error-message {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .error-message i {
+            font-size: 0.8rem;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .form-group.full {
+            grid-column: span 2;
+        }
+
+        /* Animaciones adicionales */
+        .register-info h2 {
+            animation: slideIn 0.8s ease-out;
+        }
+        .register-benefits {
+            animation: fadeInUp 1s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .register-benefits {
+            animation: fadeInUp 1s ease-out;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mejoras en el hover de los inputs */
+        .form-group {
+            position: relative;
+        }
+        .form-group::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #2563eb;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        .form-group:focus-within::after {
+            width: 100%;
+        }
+
+        .register-info {
+            background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            color: white;
+        }
+
+        .register-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 2.2rem;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .register-logo i {
+            font-size: 2rem;
+        }
+
+        .register-info h2 {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            animation: fadeInUp 0.6s ease-out;
+            line-height: 1.2;
+        }
+
+        .register-info p {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            line-height: 1.5;
+            animation: fadeInUp 0.6s ease-out 0.1s backwards;
+        }
+
+        .register-benefits {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            animation: fadeInUp 0.6s ease-out 0.2s backwards;
+        }
+
+        .register-benefit {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.1rem;
+            color: white;
+            padding: 0.5rem 0;
+            transition: transform 0.3s ease;
+        }
+
+        .register-benefit:hover {
+            transform: translateX(10px);
+        }
+
+        .register-benefit i {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.7rem;
+            border-radius: 50%;
+            font-size: 1rem;
+            width: 1rem;
+            height: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .register-benefit:hover i {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            animation: float 25s infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            right: -150px;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            bottom: -100px;
+            left: 10%;
+            animation-delay: -8s;
+        }
+
+        .shape:nth-child(3) {
+            width: 400px;
+            height: 400px;
+            bottom: 20%;
+            right: -200px;
+            animation-delay: -16s;
+        }
+
+        .shape:nth-child(4) {
+            width: 250px;
+            height: 250px;
+            top: 30%;
+            left: -100px;
+            animation-delay: -12s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(15%, 15%) rotate(120deg);
+            }
+            50% {
+                transform: translate(-10%, -10%) rotate(240deg);
+            }
+            75% {
+                transform: translate(-15%, 10%) rotate(360deg);
+            }
+        }
+
+        /* Botón de tema */
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            margin-left: 1rem;
+        }
+
+        .theme-toggle:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+        /* -------------------------------------- */
+        /* Estilo para “Te registras como…?”      */
+        /* -------------------------------------- */
+        fieldset.form-group.full {
+        border: none;               /* quitamos el borde por defecto */
+        margin-bottom: 1.5rem;
+        padding: 0;
+        }
+
+        fieldset.form-group.full legend {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+        }
+
+        /* contenedor de las opciones */
+        .radio-group {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        gap: 0.5rem;
+        border: 2px solid var(--input-border);
+        border-radius: 10px;
+        background: var(--input-bg);
+        padding: 5px;
+        background-color: transparent !important;
+        }
+
+        /* cada opción */
+        .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        color: var(--text-primary);
+        font-size: 1rem;
+        }
+
+        /* radio nativo coloreado */
+        .radio-option input[type="radio"] {
+        accent-color: var(--primary);
+        width: 1rem;
+        height: 1rem;
+        background-color: transparent;
+      
+        }
+        .empresa-field{
+            grid-column: span 2;
+        }
+        .usuario-field{
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-info">
+            <div class="register-logo">
+                <i class="fas fa-cubes"></i>
+                TEOmanager
+            </div>
+            <h2>¡Únete a la revolución digital!</h2>
+            <p>Gestiona tu negocio de manera inteligente y eficiente.</p>
+            <div class="register-benefits">
+                <div class="register-benefit">
+                    <i class="fas fa-check"></i>
+                    <span>Panel administrativo intuitivo</span>
+                </div>
+                <div class="register-benefit">
+                    <i class="fas fa-check"></i>
+                    <span>Soporte técnico incluido</span>
+                </div>
+                <div class="register-benefit">
+                    <i class="fas fa-check"></i>
+                    <span>Sin costos ocultos</span>
+                </div>
+                <div class="register-benefit">
+                    <i class="fas fa-check"></i>
+                    <span>Actualizaciones gratuitas</span>
+                </div>
+                <div class="register-benefit">
+                    <i class="fas fa-check"></i>
+                    <span>Acceso desde cualquier dispositivo</span>
+                </div>
+            </div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+        </div>
+
+        <section class="register-form">
+            <div class="mobile-header">
+                <div class="mobile-logo">
+                    <i class="fas fa-cubes"></i>
+                    <span>TEOmanager</span>
+                </div>
+                <div class="mobile-header-right">
+                    <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <a href="{% url 'landing' %}" class="to-landing">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver
+                    </a>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% endif %}">
+                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% endif %}"></i>
+                    <div class="alert-content">{{ message }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="register-header">
+                <h2 class="register-title">Crea tu cuenta</h2>
+                <p>Comienza a optimizar tu negocio en minutos</p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+              
+                <div class="form-grid">
+                  <!-- Campos comunes -->
+                  <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Usuario</label>
+                    <div class="input-group">
+                      <i class="fas fa-user"></i>
+                      {{ form.username }}
+                    </div>
+                    {{ form.username.errors }}
+                  </div>
+              
+                  <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Correo Electrónico</label>
+                    <div class="input-group">
+                      <i class="fas fa-envelope"></i>
+                      {{ form.email }}
+                    </div>
+                    {{ form.email.errors }}
+                  </div>
+              
+                  <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}">Contraseña</label>
+                    <div class="input-group">
+                      <i class="fas fa-lock"></i>
+                      {{ form.password1 }}
+                    </div>
+                    {{ form.password1.errors }}
+                  </div>
+              
+                  <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}">Confirmar Contraseña</label>
+                    <div class="input-group">
+                      <i class="fas fa-lock"></i>
+                      {{ form.password2 }}
+                    </div>
+                    {{ form.password2.errors }}
+                  </div>
+              
+                  <!-- Tipo de cuenta -->
+                  <fieldset class="form-group full">
+                    <legend>{{ form.tipo_cuenta.label }}</legend>
+                    <div class="input-group radio-group">
+                      {{ form.tipo_cuenta }}
+                    </div>
+                    {{ form.tipo_cuenta.errors }}
+                  </fieldset>
+              
+                  <!-- Bloque Usuario -->
+                  <div class="usuario-field">
+                    <div class="form-group">
+                      <label for="{{ form.first_name.id_for_label }}">Nombre</label>
+                      <div class="input-group">
+                        <i class="fas fa-id-card"></i>
+                        {{ form.first_name }}
+                      </div>
+                      {{ form.first_name.errors }}
+                    </div>
+                    <div class="form-group">
+                      <label for="{{ form.last_name.id_for_label }}">Apellido</label>
+                      <div class="input-group">
+                        <i class="fas fa-id-card"></i>
+                        {{ form.last_name }}
+                      </div>
+                      {{ form.last_name.errors }}
+                    </div>
+                  </div>
+              
+                  <!-- Bloque Empresa -->
+                  <div class="empresa-field">
+                    <div class="form-group">
+                      <label for="{{ form.empresa.id_for_label }}">Empresa</label>
+                      <div class="input-group">
+                        <i class="fas fa-building"></i>
+                        {{ form.empresa }}
+                      </div>
+                      {{ form.empresa.errors }}
+                    </div>
+
+                  </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.telefono.id_for_label }}">Teléfono</label>
+                    <div class="input-group">
+                      <i class="fas fa-phone"></i>
+                      {{ form.telefono }}
+                    </div>
+                    {{ form.telefono.errors }}
+                </div>
+                <div class="form-group full">
+                    <label for="{{ form.direccion.id_for_label }}">Dirección</label>
+                    <div class="input-group">
+                      <i class="fas fa-map-marker-alt"></i>
+                      {{ form.direccion }}
+                    </div>
+                    {{ form.direccion.errors }}
+                </div>
+                <button type="submit" class="register-button">
+                  <i class="fas fa-user-plus"></i> Crear Cuenta
+                </button>
+              </form>
+
+            <div class="login-link">
+                ¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia sesión</a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Manejo del tema oscuro/claro
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = themeToggle.querySelector('i');
+            const html = document.documentElement;
+            
+            // Verificar tema guardado
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                html.setAttribute('data-theme', 'dark');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('darkMode', newTheme === 'dark');
+                
+                // Cambiar el icono
+                const newIcon = newTheme === 'dark' ? 'fa-sun' : 'fa-moon';
+                const oldIcon = newTheme === 'dark' ? 'fa-moon' : 'fa-sun';
+                themeIcon.classList.replace(oldIcon, newIcon);
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function(){
+            function toggleCampos(){
+                const tipo = document.querySelector('input[name="tipo_cuenta"]:checked').value;
+                document.querySelector('.usuario-field').style.display = tipo==='usuario'? '':'none';
+                document.querySelector('.empresa-field').style.display = tipo==='empresa'? '':'none';
+            }
+            document.querySelectorAll('input[name="tipo_cuenta"]').forEach(radio=>{
+                radio.addEventListener('change', toggleCampos);
+            });
+            toggleCampos();
+            });
+    </script>
+</body>
+</html> 

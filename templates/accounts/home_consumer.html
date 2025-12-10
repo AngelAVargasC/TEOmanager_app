@@ -1,0 +1,2806 @@
+{% extends 'base.html' %}
+
+{% block title %}Marketplace - Descubre Productos Increíbles{% endblock %}
+{% load static %}
+{% load dict_extras %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cards.css' %}">
+<style>
+/* === VARIABLES MODERNAS === */
+:root {
+  --primary: #2563eb;
+  --primary-light: #3b82f6;
+  --primary-dark: #1d4ed8;
+  --secondary: #64748b;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --radius: 0.5rem;
+  --radius-lg: 0.75rem;
+  
+  /* === HERO VARIABLES - OPTIMIZADO PARA CONVERSIÓN === */
+  --hero-gradient-1: linear-gradient(135deg, #ff9e7b 0%, #f7931e 100%);
+  --hero-gradient-2: linear-gradient(135deg, #ff9068 0%, #fd746c 100%);
+  --hero-gradient-3: linear-gradient(135deg, #256eff 0%, #2dadfd 100%);
+  --hero-accent: #ffab00;
+  --hero-highlight: #ffab00;
+}
+
+/* === HERO SECTION COMPACTO ESTILO ML === */
+.hero-section {
+  position: relative;
+  min-height: 25vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--hero-gradient-3);
+  border-radius: 5px;
+  margin-bottom: 1rem;
+}
+
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* === FORMAS GEOMÉTRICAS EN EL FONDO === */
+.hero-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.shape {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.shape-1 {
+  width: 200px;
+  height: 200px;
+  top: -100px;
+  right: -100px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.shape-2 {
+  width: 150px;
+  height: 150px;
+  bottom: -75px;
+  left: -75px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.shape-3 {
+  width: 100px;
+  height: 100px;
+  top: 20%;
+  left: 10%;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.shape-4 {
+  width: 80px;
+  height: 80px;
+  bottom: 30%;
+  right: 15%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.shape-square {
+  border-radius: 15px;
+  transform: rotate(45deg);
+}
+
+.shape-triangle {
+  width: 0;
+  height: 0;
+  border-radius: 0;
+  border-left: 30px solid transparent;
+  border-right: 30px solid transparent;
+  border-bottom: 52px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+}
+
+.shape-5 {
+  top: 50%;
+  left: 5%;
+  transform: translateY(-50%);
+}
+
+.shape-6 {
+  width: 120px;
+  height: 120px;
+  top: 10%;
+  right: 20%;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hero-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--hero-gradient-3);
+  opacity: 0.88;
+  animation: gradientShift 8s ease-in-out infinite;
+}
+
+.hero-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
+    radial-gradient(circle at 40% 20%, rgba(255,255,255,0.15) 1px, transparent 1px),
+    radial-gradient(circle at 90% 40%, rgba(255,255,255,0.1) 1px, transparent 1px),
+    radial-gradient(circle at 60% 80%, rgba(255,255,255,0.2) 1px, transparent 1px);
+  background-size: 150px 150px, 200px 200px, 180px 180px, 220px 220px;
+  animation: floatParticles 20s linear infinite;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 3;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  text-align: center;
+  color: white;
+}
+
+.hero-text {
+  margin-bottom: 1rem;
+  animation: fadeInUp 1s ease-out;
+}
+
+.hero-title {
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-title .title-icon {
+  font-size: 1.2em;
+  color: var(--hero-highlight);
+  margin-right: 0.25rem;
+}
+
+.hero-highlight {
+  background: linear-gradient(135deg, #fff700 100%, #ffff00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+}
+
+.hero-accent {
+  background: linear-gradient(135deg, #ff885d 0%, #ff9859 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+}
+
+.hero-subtitle {
+  font-size: clamp(0.9rem, 1.2vw, 1rem);
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 450px;
+  margin: 0 auto 0.3rem auto;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.hero-subtitle .subtitle-icon {
+  font-size: 1.1em;
+  color: rgba(255, 255, 255, 0.8);
+  margin-right: 0.25rem;
+}
+
+.hero-search {
+  margin-bottom: 1.5rem;
+  animation: fadeInUp 1s ease-out 0.3s both;
+}
+
+.hero-search-form {
+  margin-bottom: 1.5rem;
+}
+
+.hero-search-container {
+  display: flex;
+  align-items: center;
+  max-width: 700px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.98);
+  /* backdrop-filter removido para mejorar rendimiento */
+  border-radius: 50px;
+  padding: 0.5rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: all 0.3s ease;
+}
+
+.hero-search-container:hover {
+  background: rgba(255,255,255,1);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.search-icon-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+}
+
+.hero-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 1rem 0.5rem;
+  font-size: 1.1rem;
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.hero-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.hero-search-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #ff1744 0%, #ff5722 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 15px rgba(255, 23, 68, 0.4);
+}
+
+.hero-search-btn:hover {
+  background: linear-gradient(135deg, #d50000 0%, #ff3d00 100%);
+  transform: translateX(5px) translateY(-2px);
+  box-shadow: 0 15px 30px rgba(255, 23, 68, 0.5);
+}
+
+.hero-suggestions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.suggestion-label {
+  color: rgba(255,255,255,0.9);
+  font-weight: 600;
+  margin-right: 0.5rem;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.suggestion-label i {
+  color: var(--hero-highlight);
+  font-size: 0.9em;
+}
+
+.suggestion-tag {
+  background: rgba(255,255,255,0.25);
+  color: white;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255,255,255,0.4);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.suggestion-tag i {
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
+.suggestion-tag:hover {
+  background: rgba(255,255,255,0.35);
+  transform: translateY(-1px);
+  color: white;
+  text-decoration: none;
+  border-color: rgba(255,255,255,0.6);
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  animation: fadeInUp 1s ease-out 0.4s both;
+  margin-bottom: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+  color: var(--hero-highlight);
+  margin-bottom: 0.25rem;
+}
+
+.stat-number {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  margin-bottom: 0.2rem;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.9);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+/* === CONTROLES EN HERO === */
+.hero-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 15px;
+  border: 2px solid rgba(255,255,255,0.2);
+  box-shadow: 
+    0 8px 32px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  animation: fadeInUp 1s ease-out 0.9s both;
+}
+
+.results-summary {
+  color: rgba(255,255,255,0.95);
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+.results-summary strong {
+  color: #ffffff;
+  font-size: 1.2rem;
+  text-shadow: 
+    0 2px 4px rgba(0,0,0,0.5),
+    0 0 10px rgba(255,255,255,0.3);
+}
+
+.hero-view-controls {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.hero-control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.control-label {
+  color: rgba(255,255,255,0.9);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  white-space: nowrap;
+}
+
+.hero-sort-select {
+  padding: 0.6rem 1rem;
+  background: rgba(255,255,255,0.9);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  min-width: 160px;
+}
+
+.hero-sort-select:hover {
+  background: rgba(255,255,255,1);
+  border-color: rgba(255,255,255,0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.hero-sort-select:focus {
+  outline: none;
+  background: rgba(255,255,255,1);
+  border-color: rgba(255,255,255,0.6);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.2);
+}
+
+.hero-view-switch {
+  display: flex;
+  background: rgba(255,255,255,0.2);
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.hero-view-btn {
+  padding: 0.6rem 0.8rem;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-view-btn:hover:not(.active) {
+  background: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,1);
+}
+
+.hero-view-btn.active {
+  background: rgba(255,255,255,0.9);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Hero visual eliminado para mejorar rendimiento */
+
+/* Elementos flotantes eliminados para mejorar rendimiento */
+
+/* === NAVEGACIÓN DE CONTENIDO === */
+.content-navigation {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 70px;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-tab.active {
+  color: var(--primary);
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.nav-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.nav-tab:hover:not(.active) {
+  color: var(--text-primary);
+  background: var(--border-light);
+}
+
+.tab-count {
+  background: var(--border);
+  color: var(--text-muted);
+  padding: 0.25rem 0.5rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-width: 25px;
+  text-align: center;
+}
+
+.nav-tab.active .tab-count {
+  background: var(--primary);
+  color: white;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.view-switch {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.view-btn {
+  padding: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.view-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+.view-btn:hover:not(.active) {
+  background: var(--border-light);
+}
+
+/* === ANIMACIONES === */
+@keyframes gradientShift {
+  0%, 100% { opacity: 0.88; }
+  50% { opacity: 0.82; }
+}
+
+/* Animación floatParticles eliminada para mejorar rendimiento */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animaciones pulse y glow eliminadas para mejorar rendimiento */
+
+/* Animación float eliminada para mejorar rendimiento */
+
+/* === LAYOUT PRINCIPAL === */
+.marketplace {
+  min-height: calc(100vh - 100px);
+  background: var(--background);
+}
+
+.marketplace-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+}
+
+
+
+/* === SIDEBAR DE FILTROS === */
+.filters-sidebar {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.filters-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.clear-filters {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.clear-filters:hover {
+  text-decoration: underline;
+}
+
+.filter-section {
+  margin-bottom: 2rem;
+}
+
+.filter-section:last-child {
+  margin-bottom: 0;
+}
+
+.filter-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  display: block;
+  font-size: 0.975rem;
+}
+
+/* Filtro de Categorías */
+.category-list {
+  space-y: 0.5rem;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.category-item:last-child {
+  border-bottom: none;
+}
+
+.category-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  transition: color 0.2s;
+  flex: 1;
+}
+
+.category-link:hover {
+  color: var(--primary);
+}
+
+.category-link.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.category-count {
+  background: var(--border-light);
+  color: var(--text-muted);
+  padding: 0.125rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Filtro de Precio */
+.price-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.price-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.apply-price {
+  width: 100%;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.apply-price:hover {
+  background: var(--primary-dark);
+}
+
+/* === PRODUCTOS GRID/LIST === */
+.products-container {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  min-height: 400px;
+  transition: opacity 0.3s ease;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* === CARD BASE UNIFICADA (PRODUCTOS Y SERVICIOS) === */
+.product-card, .service-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* === HOVER EFFECT UNIFICADO === */
+.product-card:hover, .service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-light);
+}
+
+
+
+/* === BADGE DE CATEGORÍA PARA SERVICIOS === */
+.service-badge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+/* === BADGE DE DURACIÓN === */
+.service-duration-badge {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 2;
+}
+
+.product-image {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  background: var(--border-light);
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image img {
+  transform: scale(1.05);
+}
+
+.product-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: var(--primary);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.stock-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.stock-badge.high {
+  background: var(--success);
+  color: white;
+}
+
+.stock-badge.low {
+  background: var(--warning);
+  color: white;
+}
+
+.stock-badge.out {
+  background: var(--danger);
+  color: white;
+}
+
+.product-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: 3rem;
+}
+
+.product-info {
+  padding: 1.25rem;
+}
+
+.product-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-description {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.product-price {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.product-seller {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.product-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-view {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  border-radius: var(--radius);
+  text-decoration: none;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.btn-view:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-cart {
+  padding: 0.75rem 1rem;
+  background: var(--success);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-cart:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.btn-cart:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* === BOTONES UNIFICADOS PARA SERVICIOS === */
+.btn-service, .btn-request {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #10b981;
+  background: transparent;
+  color: #10b981;
+  border-radius: var(--radius);
+  text-decoration: none;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-service:hover, .btn-request:hover {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  border-color: #059669;
+}
+
+/* === BOTÓN SECUNDARIO PARA SERVICIOS === */
+.btn-contact {
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-contact:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* === VISTA LISTA ESTILO MERCADOLIBRE === */
+.product-card.list-view, .service-card.list-view {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  padding: 0;
+  min-height: 200px;
+  max-height: 200px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow);
+}
+
+.product-card.list-view:hover, .service-card.list-view:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* === IMAGEN EN VISTA LISTA (COLUMNA 1) === */
+.list-view .product-image {
+  width: 240px;
+  height: 200px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  background: var(--border-light);
+}
+
+.list-view .product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+  /* SOLUCIÓN DEFINITIVA - Fuerza cobertura completa */
+  transform: scale(1.03);
+}
+
+.list-view:hover .product-image img {
+  transform: scale(1.06);
+}
+
+/* === INFORMACIÓN PRINCIPAL (COLUMNA 2) === */
+.list-view .product-info {
+  display: flex;
+  flex: 1;
+  padding: 0;
+}
+
+.list-view .product-details {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+.list-view .product-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.list-view .product-description {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.list-view .product-seller {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.list-view .product-seller i {
+  color: var(--primary);
+}
+
+/* === PRECIO Y ACCIONES (COLUMNA 3) === */
+.list-view .product-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  min-width: 220px;
+  max-width: 220px;
+  padding: 1.5rem;
+  border-left: 1px solid var(--border-light);
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.list-view .product-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.list-view .product-price {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+  margin: 0;
+}
+
+.list-view .product-actions .btn-view,
+.list-view .product-actions .btn-cart,
+.list-view .product-actions .btn-service {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 6px;
+  text-align: center;
+  white-space: nowrap;
+  margin-bottom: 0.5rem;
+}
+
+.list-view .product-actions .btn-view {
+  order: 2;
+}
+
+.list-view .product-actions .btn-cart,
+.list-view .product-actions .btn-service {
+  order: 1;
+}
+
+/* === MODO OSCURO PARA VISTA LISTA === */
+body.dark-mode .list-view .product-actions {
+  background: rgba(30, 41, 59, 0.8);
+  border-left-color: var(--border);
+}
+
+/* === BADGES EN VISTA LISTA === */
+.list-view .product-badge,
+.list-view .service-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2;
+}
+
+.list-view .stock-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+}
+
+.list-view .service-duration-badge {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 2;
+}
+
+/* === PAGINACIÓN === */
+.pagination-container {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.page-btn {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: all 0.2s;
+}
+
+.page-btn:hover {
+  background: var(--border-light);
+  color: var(--text-primary);
+}
+
+.page-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.page-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* === ESTADO VACÍO === */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
+}
+
+.empty-state i {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+}
+
+.empty-state h3 {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+  .marketplace-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .filters-sidebar {
+    position: static;
+    margin-bottom: 1rem;
+  }
+  
+  .search-main {
+    flex-direction: column;
+  }
+  
+  .search-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  /* === VISTA LISTA EN TABLETS === */
+  .list-view .product-image {
+    width: 160px;
+    height: 140px;
+  }
+  
+  .list-view .product-info {
+    padding: 1.25rem;
+  }
+  
+  .list-view .product-actions-area {
+    min-width: 180px;
+  }
+  
+  .list-view .product-price {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Estas reglas se movieron arriba para evitar duplicados */
+  
+  /* === RESPONSIVE VISTA LISTA === */
+  .product-card.list-view, .service-card.list-view {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .list-view .product-image {
+    width: 100%;
+    height: 220px;
+  }
+  
+  .list-view .product-info {
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+  
+  .list-view .product-actions-area {
+    min-width: auto;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .list-view .product-price-section {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .list-view .product-actions {
+    flex-direction: row;
+    gap: 1rem;
+  }
+}
+
+/* Estas reglas se movieron arriba para evitar duplicados */
+
+/* === RESPONSIVE HERO === */
+@media (max-width: 1024px) {
+  .hero-stats {
+    gap: 2rem;
+  }
+  
+  .floating-card {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+  
+  .nav-container {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    min-height: auto;
+  }
+  
+  .nav-tabs {
+    justify-content: center;
+  }
+}
+
+/* Ya se movieron estas reglas arriba - eliminando duplicados */
+
+/* Ya se movieron estas reglas arriba - eliminando duplicados */
+
+/* === ANIMACIONES === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.product-card {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* === LOADING STATE === */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: var(--text-muted);
+}
+
+.loading i {
+  font-size: 2rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* === MEJORAS ESTÉTICAS ADICIONALES === */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+}
+
+.empty-state i {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.5;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--hero-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.empty-state a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.empty-state a:hover {
+  text-decoration: underline;
+}
+
+/* === MEJORAS DE PAGINACIÓN === */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.pagination {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(.disabled) {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.page-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  width: auto;
+  padding: 0 1rem;
+  font-weight: 600;
+}
+
+.page-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* === MEJORAS DE FILTROS MÓVIL === */
+@media (max-width: 768px) {
+  .filters-sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    height: 100vh;
+    width: 80%;
+    max-width: 350px;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+  }
+  
+  .filters-sidebar.mobile-visible {
+    left: 0;
+  }
+  
+  .filters-sidebar.mobile-visible::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: -1;
+  }
+}
+
+/* === RESPONSIVE HERO MOBILE - ESTILO MERCADOLIBRE === */
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: auto;
+    padding: 1rem 0;
+    border-radius: 0;
+    margin-bottom: 0;
+    background: var(--hero-gradient-3);
+  }
+  
+  .hero-content {
+    padding: 1rem;
+    max-width: 100%;
+  }
+  
+  /* === TÍTULO SIMPLIFICADO === */
+  .hero-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+    text-align: left;
+    display: block;
+  }
+  
+  .hero-title .title-icon {
+    display: none;
+  }
+  
+  .hero-subtitle {
+    display: none; /* Ocultar subtítulo en mobile */
+  }
+  
+  .hero-text {
+    margin-bottom: 1rem;
+  }
+  
+  /* === BÚSQUEDA SIMPLIFICADA ESTILO ML === */
+  .hero-search {
+    margin-bottom: 0.5rem;
+  }
+  
+  .hero-search-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 0.3rem;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.95);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .search-icon-hero {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .hero-search-input {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .hero-search-input::placeholder {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+  
+  .hero-search-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3);
+  }
+  
+  .hero-search-btn span {
+    display: none; /* Solo mostrar icono en mobile */
+  }
+  
+  /* === SUGERENCIAS COMPACTAS === */
+  .hero-suggestions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .suggestion-label {
+    font-size: 0.8rem;
+    margin-right: 0.25rem;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 0.5rem;
+  }
+  
+  .suggestion-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 15px;
+  }
+  
+  .suggestion-tag i {
+    display: none; /* Ocultar iconos en mobile */
+  }
+  
+  /* === OCULTAR ELEMENTOS INNECESARIOS === */
+  .hero-stats {
+    display: none; /* Ocultar estadísticas en mobile */
+  }
+  
+  .hero-controls {
+    display: none; /* Ocultar controles complejos en mobile */
+  }
+  
+  .hero-shapes {
+    display: none; /* Ocultar formas decorativas para mejor rendimiento */
+  }
+  
+  .hero-particles {
+    display: none; /* Ocultar partículas para mejor rendimiento */
+  }
+  
+  .hero-background {
+    background: var(--hero-gradient-3);
+  }
+  
+  .hero-gradient {
+    opacity: 0.9;
+  }
+}
+
+/* === NAVEGACIÓN SIMPLIFICADA MOBILE === */
+@media (max-width: 768px) {
+  .content-navigation {
+    position: static;
+    border-bottom: 1px solid var(--border);
+    box-shadow: none;
+    background: white;
+  }
+  
+  .nav-container {
+    padding: 0.75rem 1rem;
+    min-height: auto;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .nav-tabs {
+    gap: 0.25rem;
+  }
+  
+  .nav-tab {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+  
+  .nav-tab i {
+    font-size: 0.9rem;
+  }
+  
+  .tab-count {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    min-width: 20px;
+  }
+  
+  .nav-actions {
+    gap: 0.5rem;
+  }
+  
+  .action-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+  }
+  
+  .view-switch {
+    border-radius: 6px;
+  }
+  
+  .view-btn {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* === MARKETPLACE CONTAINER MOBILE === */
+@media (max-width: 768px) {
+  .marketplace-container {
+    padding: 0.5rem;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .products-container {
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+/* === RESPONSIVE PARA DISPOSITIVOS PEQUEÑOS (ANDROID) === */
+@media (max-width: 400px) {
+  /* Grid de productos/servicios: 1 columna para evitar cortes */
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0 0.5rem;
+  }
+  
+  .products-list {
+    gap: 0.75rem;
+    padding: 0 0.5rem;
+  }
+  
+  /* Cards más compactas */
+  .product-card, .service-card {
+    margin: 0;
+    max-width: 100%;
+  }
+  
+  /* Optimizar imagen de producto */
+  .product-image {
+    height: 180px;
+  }
+  
+  .product-image img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Info de producto más compacta */
+  .product-info {
+    padding: 0.875rem;
+  }
+  
+  .product-title {
+    font-size: 1rem;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+  }
+  
+  .product-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  
+  /* Botones más pequeños */
+  .product-actions {
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  
+  .btn-details {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .btn-cart {
+    padding: 0.5rem;
+    min-width: 40px;
+  }
+  
+  /* Navegación más compacta */
+  .content-navigation {
+    padding: 0.75rem 1rem;
+  }
+  
+  .nav-tabs {
+    gap: 0.5rem;
+  }
+  
+  .nav-tab {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .tab-count {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
+  }
+  
+  /* Filtros más compactos */
+  .filters-section {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+  
+  .filter-group {
+    gap: 0.5rem;
+  }
+  
+  .filter-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Hero section ajustado */
+  .hero-section {
+    min-height: 22vh;
+    padding: 1rem 0.75rem;
+  }
+  
+  .hero-search-container {
+    padding: 0.375rem;
+    margin: 0 0.5rem;
+  }
+  
+  .hero-search-input {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .hero-search-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .hero-suggestions {
+    margin: 0.75rem 0.5rem 0;
+    gap: 0.5rem;
+  }
+  
+  .suggestion-tag {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Stats más compactas */
+  .hero-stats {
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 0 1rem;
+  }
+  
+  .stat-item {
+    min-width: auto;
+  }
+  
+  .stat-number {
+    font-size: 1.25rem;
+  }
+  
+  .stat-label {
+    font-size: 0.75rem;
+  }
+  
+  .stat-icon {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* === EXTRA SMALL DEVICES === */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1rem;
+    text-align: center;
+  }
+  
+  .hero-search-container {
+    padding: 0.25rem;
+  }
+  
+  .search-icon-hero {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .hero-search-input {
+    padding: 0.6rem 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .hero-search-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+  }
+  
+  .suggestion-tag {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+  }
+  
+  .nav-tab {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  
+  .nav-tab span {
+    display: none; /* Solo mostrar iconos en pantallas muy pequeñas */
+  }
+  
+  /* Ya se aplica 1fr desde 400px, aquí mantenemos consistencia */
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ===== HERO HEADER ESPECTACULAR ===== -->
+<div class="hero-section">
+  <div class="hero-background">
+    <div class="hero-particles"></div>
+    <div class="hero-gradient"></div>
+  </div>
+  
+  <!-- Formas Geométricas -->
+  <div class="hero-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+    <div class="shape shape-4"></div>
+    <div class="shape shape-5 shape-square"></div>
+    <div class="shape shape-6"></div>
+    <div class="shape-triangle shape-5"></div>
+  </div>
+  
+  <div class="hero-content">
+    <div class="hero-text">
+            <h1 class="hero-title">
+        <i class="fas fa-search title-icon"></i>
+        <span class="hero-highlight">Descubre</span> lo extraordinario en cada <span class="hero-accent">compra</span>
+      </h1>
+      <p class="hero-subtitle">
+        <i class="fas fa-store subtitle-icon"></i>
+        <span>Explora miles de productos y servicios únicos de emprendedores locales.</span>
+      </p>
+    </div>
+    
+    <div class="hero-search">
+      <form method="get" class="hero-search-form">
+        <div class="hero-search-container">
+          <div class="search-icon-hero">
+            <i class="fas fa-search"></i>
+          </div>
+          <input 
+            type="text" 
+            name="q" 
+            value="{{ search_query }}" 
+            placeholder="¿Qué estás buscando hoy? Productos, servicios, marcas..."
+            class="hero-search-input"
+          >
+          <button type="submit" class="hero-search-btn">
+            <span>Buscar</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+        <input type="hidden" name="view" value="{{ view_mode }}">
+      </form>
+      
+      <div class="hero-suggestions">
+        <span class="suggestion-label">
+          <i class="fas fa-fire"></i> Tendencias:
+        </span>
+        <a href="?q=comida" class="suggestion-tag">
+          <i class="fas fa-utensils"></i> Comida
+        </a>
+        <a href="?q=belleza" class="suggestion-tag">
+          <i class="fas fa-spa"></i> Belleza
+        </a>
+        <a href="?q=hogar" class="suggestion-tag">
+          <i class="fas fa-home"></i> Hogar
+        </a>
+        <a href="?q=electrónica" class="suggestion-tag">
+          <i class="fas fa-mobile-alt"></i> Electrónica
+        </a>
+      </div>
+    </div>
+    
+    <div class="hero-stats">
+      <div class="stat-item">
+        <i class="fas fa-box stat-icon"></i>
+        <div class="stat-number">{{ total_products }}+</div>
+        <div class="stat-label">Productos</div>
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-building stat-icon"></i>
+        <div class="stat-number">{{ total_companies }}+</div>
+        <div class="stat-label">Empresas</div>
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-concierge-bell stat-icon"></i>
+        <div class="stat-number">{{ total_services }}+</div>
+        <div class="stat-label">Servicios</div>
+      </div>
+    </div>
+    
+    <!-- Controles en Hero -->
+    <div class="hero-controls">
+      <div class="results-summary">
+        <strong>{{ total_products }}</strong> productos encontrados
+      </div>
+      
+      <div class="hero-view-controls">
+        <div class="hero-control-group">
+          <label for="hero-sort-select" class="control-label">Ordenar por:</label>
+          <select id="hero-sort-select" class="hero-sort-select" onchange="updateSort(this.value)">
+            <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Nombre (A-Z)</option>
+            <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>Precio: Menor a Mayor</option>
+            <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>Precio: Mayor a Menor</option>
+            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Más Recientes</option>
+          </select>
+        </div>
+        
+        <div class="hero-control-group">
+          <span class="control-label">Vista:</span>
+          <div class="hero-view-switch">
+            <button class="hero-view-btn {% if view_mode == 'grid' %}active{% endif %}" onclick="setView('grid')" title="Vista Grid">
+              <i class="fas fa-th-large"></i>
+            </button>
+            <button class="hero-view-btn {% if view_mode == 'list' %}active{% endif %}" onclick="setView('list')" title="Vista Lista">
+              <i class="fas fa-list"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Elementos visuales flotantes eliminados para mejorar rendimiento -->
+</div>
+
+<!-- ===== NAVEGACIÓN DE CONTENIDO ===== -->
+<div class="content-navigation">
+  <div class="nav-container">
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="productos">
+        <i class="fas fa-box"></i>
+        <span>Productos</span>
+        <div class="tab-count">{{ total_products }}</div>
+      </button>
+      <button class="nav-tab" data-tab="servicios">
+        <i class="fas fa-concierge-bell"></i>
+        <span>Servicios</span>
+        <div class="tab-count">{{ total_services }}</div>
+      </button>
+    </div>
+    
+    <div class="nav-actions">
+      <button class="action-btn" id="filter-toggle">
+        <i class="fas fa-filter"></i>
+        <span>Filtros</span>
+      </button>
+      <div class="view-switch">
+        <button class="view-btn {% if view_mode == 'grid' %}active{% endif %}" onclick="setView('grid')">
+          <i class="fas fa-th-large"></i>
+        </button>
+        <button class="view-btn {% if view_mode == 'list' %}active{% endif %}" onclick="setView('list')">
+          <i class="fas fa-list"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="marketplace">
+  <div class="marketplace-container">
+    
+
+
+    <!-- Sidebar de Filtros -->
+    <div class="filters-sidebar">
+      <div class="filters-header">
+        <h3 class="filters-title">
+          <i class="fas fa-filter"></i> Filtros
+        </h3>
+        {% if category_filter or min_price or max_price %}
+        <a href="?q={{ search_query }}&sort={{ sort_by }}&view={{ view_mode }}" class="clear-filters">
+          <i class="fas fa-times"></i> Limpiar Todo
+        </a>
+        {% endif %}
+      </div>
+
+      <!-- Filtro por Categoría -->
+      <div class="filter-section">
+        <label class="filter-label">
+          <i class="fas fa-tags"></i> Categoría
+        </label>
+        <div class="category-list">
+          <div class="category-item">
+            <a href="?q={{ search_query }}&min_price={{ min_price }}&max_price={{ max_price }}&sort={{ sort_by }}&view={{ view_mode }}" 
+               class="category-link {% if not category_filter %}active{% endif %}">
+              <i class="fas fa-th"></i>
+              Todas las categorías
+            </a>
+            <span class="category-count">{{ total_products }}</span>
+          </div>
+          {% for category in categories %}
+          <div class="category-item">
+            <a href="?q={{ search_query }}&category={{ category }}&min_price={{ min_price }}&max_price={{ max_price }}&sort={{ sort_by }}&view={{ view_mode }}"
+               class="category-link {% if category == category_filter %}active{% endif %}">
+              <i class="fas fa-folder"></i>
+              {{ categorias_display|get_item:category|default:category }}
+            </a>
+            <span class="category-count">{{ category_counts|get_item:category }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Filtro por Rango de Precio -->
+      <div class="filter-section">
+        <label class="filter-label">
+          <i class="fas fa-dollar-sign"></i> Rango de Precio
+        </label>
+        <form method="get" class="price-form">
+          <div class="price-filters">
+            <input 
+              type="number" 
+              name="min_price" 
+              value="{{ min_price }}" 
+              placeholder="Mín"
+              class="price-input"
+              min="0"
+              step="0.01"
+            >
+            <input 
+              type="number" 
+              name="max_price" 
+              value="{{ max_price }}" 
+              placeholder="Máx"
+              class="price-input"
+              min="0"
+              step="0.01"
+            >
+          </div>
+          <button type="submit" class="apply-price">
+            <i class="fas fa-check"></i> Aplicar Filtro
+          </button>
+          <!-- Inputs ocultos para mantener otros filtros -->
+          <input type="hidden" name="q" value="{{ search_query }}">
+          <input type="hidden" name="category" value="{{ category_filter }}">
+          <input type="hidden" name="sort" value="{{ sort_by }}">
+          <input type="hidden" name="view" value="{{ view_mode }}">
+        </form>
+        {% if price_range.min_price and price_range.max_price %}
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+          Precios desde ${{ price_range.min_price|floatformat:2 }} hasta ${{ price_range.max_price|floatformat:2 }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Contenedor de Productos -->
+    <div class="products-container" id="productos-section">
+      {% if productos %}
+        <div class="products-{% if view_mode == 'list' %}list{% else %}grid{% endif %}" id="products-container">
+          {% for product in productos %}
+            <div class="product-card {% if view_mode == 'list' %}list-view{% endif %}">
+              <div class="product-image">
+                {% if product.imagen_principal %}
+                  <img src="{{ product.imagen_principal }}" alt="{{ product.nombre }}" loading="lazy">
+                {% else %}
+                  <div class="product-placeholder">
+                    <i class="fas fa-image"></i>
+                  </div>
+                {% endif %}
+                
+                <div class="product-badge">{{ product.categoria|title }}</div>
+                
+                {% if product.stock > 20 %}
+                  <div class="stock-badge high">En Stock</div>
+                {% elif product.stock > 0 %}
+                  <div class="stock-badge low">Pocas Unidades</div>
+                {% else %}
+                  <div class="stock-badge out">Agotado</div>
+                {% endif %}
+              </div>
+              
+              <div class="product-info">
+                {% if view_mode == 'list' %}
+                  <div class="product-details">
+                    <h3 class="product-title">{{ product.nombre }}</h3>
+                    
+                    {% if product.descripcion %}
+                      <p class="product-description">{{ product.descripcion|truncatechars:120 }}</p>
+                    {% endif %}
+                    
+                    <div class="product-seller">
+                      <i class="fas fa-store"></i>
+                      {{ product.usuario.username|title }}
+                    </div>
+                  </div>
+                  
+                  <div class="product-actions">
+                    <div class="product-meta">
+                      <div class="product-price">${{ product.precio|floatformat:2 }}</div>
+                    </div>
+                    
+                    {% if product.stock > 0 %}
+                      <button 
+                        class="btn-cart" 
+                        data-add-to-cart="{{ product.pk }}" 
+                        data-product-id="{{ product.pk }}"
+                        title="Agregar al carrito"
+                      >
+                        <i class="fas fa-cart-plus"></i> Agregar
+                      </button>
+                    {% else %}
+                      <button class="btn-cart" disabled title="Sin stock disponible">
+                        <i class="fas fa-times"></i> Agotado
+                      </button>
+                    {% endif %}
+                    
+                    <a href="{% url 'products:detalle_producto' product.pk %}" class="btn-view">
+                      <i class="fas fa-eye"></i> Ver Detalles
+                    </a>
+                  </div>
+                {% else %}
+                  <h3 class="product-title">{{ product.nombre }}</h3>
+                  
+                  {% if product.descripcion %}
+                    <p class="product-description">{{ product.descripcion|truncatechars:100 }}</p>
+                  {% endif %}
+                  
+                  <div class="product-meta">
+                    <div class="product-price">${{ product.precio|floatformat:2 }}</div>
+                    <div class="product-seller">
+                      <i class="fas fa-store"></i>
+                      {{ product.usuario.username|title }}
+                    </div>
+                  </div>
+                  
+                  <div class="product-actions">
+                    <a href="{% url 'products:detalle_producto' product.pk %}" class="btn-view">
+                      <i class="fas fa-eye"></i> Ver Detalles
+                    </a>
+                    
+                    {% if product.stock > 0 %}
+                      <button 
+                        class="btn-cart" 
+                        data-add-to-cart="{{ product.pk }}" 
+                        data-product-id="{{ product.pk }}"
+                        title="Agregar al carrito"
+                      >
+                        <i class="fas fa-cart-plus"></i>
+                      </button>
+                    {% else %}
+                      <button class="btn-cart" disabled title="Sin stock disponible">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        {% if productos.has_other_pages %}
+        <div class="pagination-container">
+          <div class="pagination">
+            {% if productos.has_previous %}
+              <a href="?page=1&q={{ search_query }}&category={{ category_filter }}&min_price={{ min_price }}&max_price={{ max_price }}&sort={{ sort_by }}&view={{ view_mode }}" class="page-btn">
+                <i class="fas fa-angle-double-left"></i>
+              </a>
+              <a href="?page={{ productos.previous_page_number }}&q={{ search_query }}&category={{ category_filter }}&min_price={{ min_price }}&max_price={{ max_price }}&sort={{ sort_by }}&view={{ view_mode }}" class="page-btn">
+                <i class="fas fa-angle-left"></i>
+              </a>
+            {% else %}
+              <span class="page-btn disabled">
+                <i class="fas fa-angle-double-left"></i>
+              </span>
+              <span class="page-btn disabled">
+                <i class="fas fa-angle-left"></i>
+              </span>
+            {% endif %}
+
+            <span class="page-btn active">
+              {{ productos.number }} de {{ productos.paginator.num_pages }}
+            </span>
+
+            {% if productos.has_next %}
+              <a href="?page={{ productos.next_page_number }}&q={{ search_query }}&category={{ category_filter }}&min_price={{ min_price }}&max_price={{ max_price }}&sort={{ sort_by }}&view={{ view_mode }}" class="page-btn">
+                <i class="fas fa-angle-right"></i>
+              </a>
+              <a href="?page={{ productos.paginator.num_pages }}&q={{ search_query }}&category={{ category_filter }}&min_price={{ min_price }}&max_price={{ max_price }}&sort={{ sort_by }}&view={{ view_mode }}" class="page-btn">
+                <i class="fas fa-angle-double-right"></i>
+              </a>
+            {% else %}
+              <span class="page-btn disabled">
+                <i class="fas fa-angle-right"></i>
+              </span>
+              <span class="page-btn disabled">
+                <i class="fas fa-angle-double-right"></i>
+              </span>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+      {% else %}
+        <!-- Estado Vacío -->
+        <div class="empty-state">
+          <i class="fas fa-search"></i>
+          <h3>No se encontraron productos</h3>
+          <p>
+            {% if search_query or category_filter or min_price or max_price %}
+              Intenta ajustar tus filtros de búsqueda o 
+              <a href="?sort={{ sort_by }}&view={{ view_mode }}">ver todos los productos</a>
+            {% else %}
+              No hay productos disponibles en este momento.
+            {% endif %}
+          </p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Contenedor de Servicios -->
+    <div class="products-container" id="servicios-section" style="display: none;">
+      {% if servicios %}
+        <div class="products-{% if view_mode == 'list' %}list{% else %}grid{% endif %}" id="services-container">
+          {% for service in servicios %}
+            <div class="product-card service-card {% if view_mode == 'list' %}list-view{% endif %}">
+              <div class="product-image">
+                {% if service.imagen_principal %}
+                  <img src="{{ service.imagen_principal }}" alt="{{ service.nombre }}" loading="lazy">
+                {% else %}
+                  <div class="product-placeholder">
+                    <i class="fas fa-concierge-bell"></i>
+                  </div>
+                {% endif %}
+                
+                <div class="product-badge service-badge">{{ service.categoria|default:"Servicio"|title }}</div>
+                
+                <div class="service-duration-badge">
+                  <i class="fas fa-clock"></i> {{ service.duracion|default:"Consultar" }}
+                </div>
+              </div>
+              
+              <div class="product-info">
+                {% if view_mode == 'list' %}
+                  <div class="product-details">
+                    <h3 class="product-title">{{ service.nombre }}</h3>
+                    
+                    {% if service.descripcion %}
+                      <p class="product-description">{{ service.descripcion|truncatechars:120 }}</p>
+                    {% endif %}
+                    
+                    <div class="product-seller">
+                      <i class="fas fa-user-tie"></i>
+                      {{ service.usuario.username|title }}
+                    </div>
+                  </div>
+                  
+                  <div class="product-actions">
+                    <div class="product-meta">
+                      <div class="product-price">${{ service.precio|floatformat:2 }}</div>
+                    </div>
+                    
+                    <button 
+                      class="btn-cart btn-service" 
+                      data-service-id="{{ service.pk }}"
+                      title="Solicitar servicio"
+                    >
+                      <i class="fas fa-calendar-plus"></i> Solicitar
+                    </button>
+                    
+                    <a href="{% url 'products:detalle_servicio' service.pk %}" class="btn-view">
+                      <i class="fas fa-eye"></i> Ver Detalles
+                    </a>
+                  </div>
+                {% else %}
+                  <h3 class="product-title">{{ service.nombre }}</h3>
+                  
+                  {% if service.descripcion %}
+                    <p class="product-description">{{ service.descripcion|truncatechars:100 }}</p>
+                  {% endif %}
+                  
+                  <div class="product-meta">
+                    <div class="product-price">${{ service.precio|floatformat:2 }}</div>
+                    <div class="product-seller">
+                      <i class="fas fa-user-tie"></i>
+                      {{ service.usuario.username|title }}
+                    </div>
+                  </div>
+                  
+                  <div class="product-actions">
+                    <a href="{% url 'products:detalle_servicio' service.pk %}" class="btn-view">
+                      <i class="fas fa-eye"></i> Ver Detalles
+                    </a>
+                    
+                    <button 
+                      class="btn-cart btn-service" 
+                      data-service-id="{{ service.pk }}"
+                      title="Solicitar servicio"
+                    >
+                      <i class="fas fa-calendar-plus"></i>
+                    </button>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Paginación de Servicios -->
+        {% if servicios.has_other_pages %}
+        <div class="pagination-container">
+          <div class="pagination">
+            {% if servicios.has_previous %}
+              <a href="?page=1&tab=servicios&q={{ search_query }}&category={{ category_filter }}&min_price={{ min_price }}&max_price={{ max_price }}&sort={{ sort_by }}&view={{ view_mode }}" class="page-btn">
+                <i class="fas fa-angle-double-left"></i>
+              </a>
+              <a href="?page={{ servicios.previous_page_number }}&tab=servicios&q={{ search_query }}&category={{ category_filter }}&min_price={{ min_price }}&max_price={{ max_price }}&sort={{ sort_by }}&view={{ view_mode }}" class="page-btn">
+                <i class="fas fa-angle-left"></i>
+              </a>
+            {% else %}
+              <span class="page-btn disabled">
+                <i class="fas fa-angle-double-left"></i>
+              </span>
+              <span class="page-btn disabled">
+                <i class="fas fa-angle-left"></i>
+              </span>
+            {% endif %}
+
+            <span class="page-btn active">
+              {{ servicios.number }} de {{ servicios.paginator.num_pages }}
+            </span>
+
+            {% if servicios.has_next %}
+              <a href="?page={{ servicios.next_page_number }}&tab=servicios&q={{ search_query }}&category={{ category_filter }}&min_price={{ min_price }}&max_price={{ max_price }}&sort={{ sort_by }}&view={{ view_mode }}" class="page-btn">
+                <i class="fas fa-angle-right"></i>
+              </a>
+              <a href="?page={{ servicios.paginator.num_pages }}&tab=servicios&q={{ search_query }}&category={{ category_filter }}&min_price={{ min_price }}&max_price={{ max_price }}&sort={{ sort_by }}&view={{ view_mode }}" class="page-btn">
+                <i class="fas fa-angle-double-right"></i>
+              </a>
+            {% else %}
+              <span class="page-btn disabled">
+                <i class="fas fa-angle-right"></i>
+              </span>
+              <span class="page-btn disabled">
+                <i class="fas fa-angle-double-right"></i>
+              </span>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+      {% else %}
+        <!-- Estado Vacío para Servicios -->
+        <div class="empty-state">
+          <i class="fas fa-concierge-bell"></i>
+          <h3>No se encontraron servicios</h3>
+          <p>
+            {% if search_query or category_filter or min_price or max_price %}
+              Intenta ajustar tus filtros de búsqueda o 
+              <a href="?tab=servicios&sort={{ sort_by }}&view={{ view_mode }}">ver todos los servicios</a>
+            {% else %}
+              No hay servicios disponibles en este momento.
+            {% endif %}
+          </p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+// === FUNCIONES HERO === 
+function initHeroAnimations() {
+  // Animaciones pesadas eliminadas para mejorar rendimiento
+}
+
+// === FUNCIONES DE NAVEGACIÓN === 
+function initTabNavigation() {
+  const tabs = document.querySelectorAll('.nav-tab');
+  const filterToggle = document.getElementById('filter-toggle');
+  const filterssidebar = document.querySelector('.filters-sidebar');
+  const productosSection = document.getElementById('productos-section');
+  const serviciosSection = document.getElementById('servicios-section');
+  
+  // Función para cambiar entre tabs
+  function switchTab(tabType) {
+    // Remover clase active de todos los tabs
+    tabs.forEach(t => t.classList.remove('active'));
+    
+    // Agregar clase active al tab correspondiente
+    const activeTab = document.querySelector(`[data-tab="${tabType}"]`);
+    if (activeTab) {
+      activeTab.classList.add('active');
+    }
+    
+    // Mostrar/ocultar secciones con animación
+    if (tabType === 'productos') {
+      serviciosSection.style.opacity = '0';
+      setTimeout(() => {
+        serviciosSection.style.display = 'none';
+        productosSection.style.display = 'block';
+        productosSection.style.opacity = '0';
+        setTimeout(() => {
+          productosSection.style.opacity = '1';
+        }, 50);
+      }, 200);
+    } else if (tabType === 'servicios') {
+      productosSection.style.opacity = '0';
+      setTimeout(() => {
+        productosSection.style.display = 'none';
+        serviciosSection.style.display = 'block';
+        serviciosSection.style.opacity = '0';
+        setTimeout(() => {
+          serviciosSection.style.opacity = '1';
+        }, 50);
+      }, 200);
+    }
+    
+    // Actualizar URL sin recargar página
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabType);
+    window.history.pushState({}, '', url);
+    
+    // Actualizar contadores
+    updateTabCounters();
+    
+    console.log(`✨ Switched to ${tabType}`);
+  }
+  
+  // Event listeners para tabs
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabType = tab.dataset.tab;
+      switchTab(tabType);
+    });
+  });
+  
+  // Inicializar tab correcto basado en URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentTab = urlParams.get('tab') || 'productos';
+  switchTab(currentTab);
+  
+  // Toggle de filtros en móvil
+  if (filterToggle && filterssidebar) {
+    filterToggle.addEventListener('click', () => {
+      filterssidebar.classList.toggle('mobile-visible');
+    });
+  }
+}
+
+// === FUNCIONES DE CONTADOR === 
+function updateTabCounters() {
+  const productosCount = document.querySelectorAll('#productos-section .product-card').length;
+  const serviciosCount = document.querySelectorAll('#servicios-section .service-card').length;
+  
+  const productosTab = document.querySelector('[data-tab="productos"] .tab-count');
+  const serviciosTab = document.querySelector('[data-tab="servicios"] .tab-count');
+  
+  if (productosTab) productosTab.textContent = productosCount;
+  if (serviciosTab) serviciosTab.textContent = serviciosCount;
+}
+
+// === FUNCIONES DE BÚSQUEDA === 
+function initSearchEnhancements() {
+  const heroSearchInput = document.querySelector('.hero-search-input');
+  
+  // Efecto focus mejorado para búsqueda hero
+  if (heroSearchInput) {
+    heroSearchInput.addEventListener('focus', () => {
+      heroSearchInput.style.boxShadow = '0 0 20px rgba(255, 23, 68, 0.3)';
+    });
+    
+    heroSearchInput.addEventListener('blur', () => {
+      heroSearchInput.style.boxShadow = '';
+    });
+  }
+  
+  // Sincronizar selectores de ordenación
+  const heroSortSelect = document.getElementById('hero-sort-select');
+  const regularSortSelect = document.getElementById('sort-select');
+  
+  if (heroSortSelect && regularSortSelect) {
+    heroSortSelect.addEventListener('change', (e) => {
+      regularSortSelect.value = e.target.value;
+    });
+    
+    regularSortSelect.addEventListener('change', (e) => {
+      heroSortSelect.value = e.target.value;
+    });
+  }
+}
+
+// === FUNCIONES EXISTENTES === 
+function setView(mode) {
+  // Aplicar vista inmediatamente antes de recargar
+  const productCards = document.querySelectorAll('.product-card');
+  const serviceCards = document.querySelectorAll('.service-card');
+  
+  // Aplicar clases de vista a todas las cards
+  [...productCards, ...serviceCards].forEach(card => {
+    if (mode === 'list') {
+      card.classList.add('list-view');
+    } else {
+      card.classList.remove('list-view');
+    }
+  });
+  
+  // Actualizar estado de botones de vista
+  const viewButtons = document.querySelectorAll('.view-btn, .hero-view-btn');
+  viewButtons.forEach(btn => {
+    if (btn.onclick && btn.onclick.toString().includes(mode)) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  
+  // Actualizar URL
+  const url = new URL(window.location);
+  url.searchParams.set('view', mode);
+  window.location.href = url.toString();
+}
+
+function updateSort(value) {
+  const url = new URL(window.location);
+  url.searchParams.set('sort', value);
+  window.location.href = url.toString();
+}
+
+// === INICIALIZACIÓN === 
+document.addEventListener('DOMContentLoaded', function() {
+  // Inicializar todas las funcionalidades
+  initHeroAnimations();
+  initTabNavigation();
+  initSearchEnhancements();
+  
+  // Animar cards al cargar (productos y servicios)
+  const cards = document.querySelectorAll('.product-card, .service-card');
+  cards.forEach((card, index) => {
+    card.style.animationDelay = `${index * 0.1}s`;
+  });
+
+  // Mejorar búsqueda con enter en todos los inputs
+  document.querySelectorAll('input[type="text"]').forEach(input => {
+    input.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        this.closest('form').submit();
+      }
+    });
+  });
+  
+  // Efecto de carga suave
+  document.body.style.opacity = '0';
+  document.body.style.transition = 'opacity 0.3s ease';
+  setTimeout(() => {
+    document.body.style.opacity = '1';
+  }, 100);
+  
+  console.log('✨ Marketplace Enhanced initialized successfully!');
+});
+
+// === FUNCIONES ADICIONALES === 
+// Smooth scroll para elementos internos
+function smoothScrollTo(targetId) {
+  const target = document.getElementById(targetId);
+  if (target) {
+    target.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+}
+
+// Feedback visual para interacciones
+function showFeedback(message, type = 'success') {
+  // Crear elemento de notificación temporal
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${type === 'success' ? '#10b981' : '#ef4444'};
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Animar entrada
+  setTimeout(() => {
+    notification.style.opacity = '1';
+    notification.style.transform = 'translateX(0)';
+  }, 100);
+  
+  // Remover después de 3 segundos
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+}
+</script>
+{% endblock %}

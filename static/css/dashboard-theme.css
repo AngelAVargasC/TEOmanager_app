@@ -1,0 +1,95 @@
+:root {
+    --panel-bg: #fff;
+    --panel-shadow: 0 6px 32px rgba(30,64,175,0.10);
+    --panel-header-bg: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    --panel-header-border: #e0e7ff;
+    --panel-title-color: #1e293b;
+    --panel-title-bg: linear-gradient(90deg, #1e40af 60%, #1e3a8a 100%);
+    --panel-title-shadow: 0 2px 8px rgba(30,64,175,0.10);
+    --btn-main-bg: #1e40af;
+    --btn-main-color: #fff;
+    --btn-main-border: none;
+    --btn-main-hover-bg: #1e3a8a;
+    --btn-main-hover-shadow: 0 4px 16px rgba(30,64,175,0.18);
+    --profile-card-bg: #fff;
+    --profile-card-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    --profile-row-border: #f0f0f0;
+    --label-color: #666;
+    --badge-active-bg: #d1fae5;
+    --badge-active-color: #059669;
+    --badge-inactive-bg: #fee2e2;
+    --badge-inactive-color: #b91c1c;
+    --list-item-bg: #f8fafc;
+    --list-item-border: #e0e7ff;
+    --list-item-shadow: 0 2px 8px rgba(30,64,175,0.04);
+    --list-item-hover-bg: #e0e7ff;
+    --list-item-hover-shadow: 0 4px 16px rgba(30,64,175,0.10);
+    --list-item-h4-color: #1e40af;
+    --list-item-p-color: #64748b;
+    --producto-thumbnail-bg: #fff;
+    --producto-thumbnail-border: #1e40af22;
+    --producto-thumbnail-shadow: 0 2px 8px rgba(30,64,175,0.10);
+    --icono-dato-color: #1e40af;
+    --custom-table-th-color: #1e293b;
+    --custom-table-th-bg: #f8fafc;
+    --custom-table-td-color: inherit;
+    --custom-table-td-bg: inherit;
+    --empty-msg-color: #94a3b8;
+    --panel-body-bg: #ffffff;
+}
+
+body.dark-mode {
+    --panel-bg: #1e293b;
+    --panel-shadow: 0 6px 32px rgba(15,23,42,0.25);
+    --panel-header-bg: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    --panel-header-border: #334155;
+    --panel-title-color: #f1f5f9;
+    --panel-title-bg: none;
+    --panel-title-shadow: 0 2px 8px rgba(59,130,246,0.10);
+    --btn-main-bg: rgba(59,130,246,0.12);
+    --btn-main-color: #f1f5f9;
+    --btn-main-border: 1px solid rgba(59,130,246,0.18);
+    --btn-main-hover-bg: rgba(59,130,246,0.22);
+    --btn-main-hover-shadow: 0 4px 16px rgba(59,130,246,0.18);
+    --profile-card-bg: #1e293b;
+    --profile-card-shadow: 0 4px 24px rgba(15,23,42,0.18);
+    --profile-row-border: #33415579;
+    --label-color: #60a5fa;
+    --badge-active-bg: #134e4a;
+    --badge-active-color: #22d3ee;
+    --badge-inactive-bg: #7f1d1d;
+    --badge-inactive-color: #fca5a5;
+    --list-item-bg: #33415500;
+    --list-item-border: #0f172a;
+    --list-item-shadow: 0 2px 8px rgba(15, 23, 42, 0);
+    --list-item-hover-bg: #0f172a;
+    --list-item-hover-shadow: 0 4px 16px rgba(15, 23, 42, 0);
+    --list-item-h4-color: #60a5fa;
+    --list-item-p-color: #cbd5e1;
+    --producto-thumbnail-bg: #334155;
+    --producto-thumbnail-border: #3b82f644;
+    --producto-thumbnail-shadow: 0 2px 8px rgba(15,23,42,0.18);
+    --icono-dato-color: #60a5fa;
+    --custom-table-th-color: #60a5fa;
+    --custom-table-th-bg: #1e293b;
+    --custom-table-td-color: #f1f5f9;
+    --custom-table-td-bg: #334155;
+    --empty-msg-color: #64748b;
+    --panel-body-bg: #1e293b;
+}
+
+.panel-card {
+    background: var(--panel-body-bg);
+    box-shadow: var(--panel-shadow);
+}
+.panel-header {
+    background: var(--panel-header-bg);
+    border-bottom: 1px solid var(--panel-header-border);
+}
+.panel-header .panel-title,
+.panel-title {
+    color: var(--panel-title-color) !important;
+    background: var(--panel-title-bg);
+    box-shadow: var(--panel-title-shadow);
+}
+/* ...incluyo aquí el resto de reglas que solo usan variables y son globales a dashboard... */ 

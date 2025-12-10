@@ -1,0 +1,27 @@
+# Django Framework
+Django>=4.2.0
+
+# Base de datos
+psycopg2-binary>=2.9.9
+
+# Variables de entorno
+python-dotenv>=1.0.0
+
+# Procesamiento de imágenes
+Pillow>=10.0.0
+
+# Formularios
+django-crispy-forms>=2.0
+crispy-bootstrap5>=0.7
+django-widget-tweaks>=1.5.0
+
+# Autenticación
+django-allauth>=0.57.0
+
+# Archivos estáticos y producción
+whitenoise>=6.5.0
+gunicorn>=21.2.0
+
+# Desarrollo y debugging
+django-debug-toolbar>=4.2.0
+

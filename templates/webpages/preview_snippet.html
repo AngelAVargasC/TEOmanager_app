@@ -1,0 +1,14 @@
+{# Fragmento de vista previa para AJAX #}
+{% load webpages_extras %}
+{% if landing and landing.plantilla %}
+  {# Vista previa completa con landing guardada #}
+  <div style="transform: scale(0.7); transform-origin: top left; width: 142.857%;">
+    {% include 'plantillas/'|add:landing.plantilla|add:'.html' %}
+  </div>
+{% else %}
+  <p class="text-muted" style="text-align: center; padding: 2rem;">
+    <i class="fas fa-image" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+    Selecciona una plantilla y guarda la página para ver la vista previa aquí.
+  </p>
+{% endif %}
+

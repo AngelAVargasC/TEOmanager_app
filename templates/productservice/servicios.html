@@ -1,0 +1,1707 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Servicios - ERP{% endblock %}
+
+{% block content %}
+<style>
+    .erp-services-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+    
+    /* Header ejecutivo */
+    .erp-header {
+        background: var(--panel-header-bg);
+        color: var(--panel-title-color);
+        padding: 2rem;
+        border-radius: var(--erp-radius);
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--panel-header-border);
+    }
+    
+    .erp-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    
+    .erp-header-content h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .erp-header-content p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 1.5rem;
+    }
+    
+    .erp-metrics {
+        display: flex;
+        gap: 2rem;
+    }
+    
+    .metric {
+        text-align: center;
+    }
+    
+    .metric-value {
+        display: block;
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .metric-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+    
+    .erp-actions {
+        display: flex;
+        gap: 1rem;
+        z-index: 2;
+    }
+    
+    .erp-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+    
+    .erp-btn-primary {
+        background: var(--btn-main-bg);
+        color: var(--btn-main-color);
+        border: 1px solid var(--btn-main-bg);
+    }
+    
+    .erp-btn-primary:hover {
+        background: var(--btn-main-hover-bg);
+        border-color: var(--btn-main-hover-bg);
+        transform: translateY(-2px);
+    }
+    
+    .erp-btn-secondary {
+        background: transparent;
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    .erp-btn-secondary:hover {
+        background: rgba(255,255,255,0.1);
+    }
+    
+    /* Toolbar avanzado */
+    .erp-toolbar {
+        background: var(--erp-surface);
+        border: 1px solid var(--erp-border);
+        border-radius: var(--erp-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--erp-shadow);
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        grid-template-areas: "search filters view";
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .toolbar-search-section {
+        grid-area: search;
+    }
+    
+    .toolbar-filters-section {
+        grid-area: filters;
+    }
+    
+    .toolbar-view-section {
+        grid-area: view;
+    }
+    
+    .mobile-filter-toggle {
+        display: none;
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background 0.2s;
+    }
+    
+    .mobile-filter-toggle:hover {
+        background: #1d4ed8;
+    }
+    
+    .mobile-filter-toggle i {
+        font-size: 0.8rem;
+    }
+    
+    .filters-row {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    .search-advanced {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+    }
+    
+    .search-advanced input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 1px solid var(--erp-border);
+        border-radius: 6px;
+        font-size: 0.95rem;
+        background: var(--erp-surface);
+        color: var(--erp-text);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    .search-advanced input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+    
+    .search-advanced i {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--erp-gray-500);
+    }
+    
+    .erp-select {
+        padding: 0.6rem 1rem;
+        border: 1px solid var(--erp-border);
+        border-radius: 6px;
+        background: var(--erp-surface);
+        color: var(--erp-text);
+        font-size: 0.9rem;
+        min-width: 150px;
+    }
+    
+    .view-switcher {
+        display: flex;
+        border: 1px solid var(--erp-border);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    
+    .view-btn {
+        background: transparent;
+        border: none;
+        padding: 0.6rem 1rem;
+        cursor: pointer;
+        color: var(--erp-text);
+        transition: background 0.2s;
+    }
+    
+    .view-btn:hover,
+    .view-btn.active {
+        background: var(--btn-main-bg);
+        color: var(--btn-main-color);
+    }
+    
+    /* Grid de servicios */
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .service-card {
+        background: var(--erp-surface);
+        border: 1px solid var(--erp-border);
+        border-radius: var(--erp-radius);
+        box-shadow: var(--erp-shadow);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .service-image-container {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+    }
+    
+    .service-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+    
+    .service-card:hover .service-image {
+        transform: scale(1.05);
+    }
+    
+    .service-image-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--panel-header-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--panel-header-color);
+        font-size: 3rem;
+    }
+    
+    .service-status {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+    }
+    
+    .status-active {
+        background: rgba(34, 197, 94, 0.9);
+        color: white;
+    }
+    
+    .status-inactive {
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+    }
+    
+    .service-info {
+        padding: 1.5rem;
+    }
+    
+    .service-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--erp-text);
+    }
+    
+    .service-category {
+        color: var(--erp-gray-500);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .service-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat {
+        text-align: center;
+    }
+    
+    .stat-label {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--erp-gray-500);
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-value {
+        display: block;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .stat-value.price {
+        color: var(--btn-main-bg);
+    }
+    
+    .stat-value.duration {
+        color: #0891b2;
+    }
+    
+    .service-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .action-btn {
+        flex: 1;
+        padding: 0.6rem;
+        text-align: center;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+    
+    .action-view {
+        background: var(--erp-gray-100);
+        color: var(--erp-text);
+    }
+    
+    .action-edit {
+        background: var(--btn-main-bg);
+        color: var(--btn-main-color);
+    }
+    
+    .action-delete {
+        background: var(--erp-danger);
+        color: white;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    /* Tabla moderna */
+    .erp-table-container {
+        background: var(--erp-surface);
+        border: 1px solid var(--erp-border);
+        border-radius: var(--erp-radius);
+        box-shadow: var(--erp-shadow);
+        overflow: hidden;
+    }
+    
+    .table-wrapper {
+        overflow-x: auto;
+    }
+    
+    .erp-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .erp-table th {
+        background: var(--erp-gray-50);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--erp-text);
+        border-bottom: 1px solid var(--erp-border);
+        position: relative;
+    }
+    
+    .th-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+    
+    .sort-icon {
+        opacity: 0.5;
+        transition: opacity 0.2s;
+    }
+    
+    .sortable:hover .sort-icon {
+        opacity: 1;
+    }
+    
+    .erp-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--erp-border);
+        vertical-align: middle;
+    }
+    
+    .table-row:hover {
+        background: var(--erp-gray-50);
+    }
+    
+    .table-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 6px;
+        object-fit: cover;
+    }
+    
+    .table-image-placeholder {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+    
+    .service-cell {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .service-name {
+        color: var(--erp-text);
+        margin-bottom: 0.25rem;
+    }
+    
+    .service-code {
+        color: var(--erp-gray-500);
+    }
+    
+    .price-cell {
+        font-weight: 600;
+        color: #059669;
+    }
+    
+    .duration-cell {
+        font-weight: 500;
+        color: #0891b2;
+    }
+    
+    .category-tag {
+        background: var(--erp-gray-100);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+    
+    .table-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .table-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+    
+    .table-btn-view {
+        background: var(--erp-gray-100);
+        color: var(--erp-text);
+    }
+    
+    .table-btn-edit {
+        background: #059669;
+        color: white;
+    }
+    
+    .table-btn-delete {
+        background: var(--erp-danger);
+        color: white;
+    }
+    
+    .table-btn:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Estado vacío */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--erp-surface);
+        border: 1px solid var(--erp-border);
+        border-radius: var(--erp-radius);
+        box-shadow: var(--erp-shadow);
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--erp-gray-300);
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--erp-text);
+    }
+    
+    .empty-state p {
+        color: var(--erp-gray-500);
+        margin-bottom: 2rem;
+    }
+    
+    .empty-table-msg {
+        text-align: center;
+        padding: 3rem;
+    }
+    
+    .empty-table-content {
+        color: var(--erp-gray-500);
+    }
+    
+    .empty-table-content i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .erp-services-container {
+            padding: 1rem;
+        }
+        
+        .erp-header {
+            flex-direction: column;
+            gap: 1.5rem;
+            text-align: center;
+        }
+        
+        .erp-metrics {
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .erp-toolbar {
+            grid-template-columns: 1fr auto;
+            grid-template-areas: 
+                "search toggle"
+                "filters filters"
+                "view view";
+            padding: 1rem;
+        }
+        
+        .mobile-filter-toggle {
+            display: flex;
+            grid-area: toggle;
+        }
+        
+        .toolbar-filters-section {
+            grid-area: filters;
+            grid-column: 1 / -1;
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--erp-border);
+        }
+        
+        .toolbar-filters-section.show {
+            display: block;
+        }
+        
+        .toolbar-view-section {
+            grid-area: view;
+            grid-column: 1 / -1;
+            justify-self: center;
+            margin-top: 1rem;
+        }
+        
+        .filters-row {
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: stretch;
+        }
+        
+        .erp-select {
+            width: 100%;
+            min-width: auto;
+        }
+        
+        .search-advanced {
+            max-width: none;
+        }
+        
+        .search-advanced input {
+            font-size: 16px;
+        }
+        
+        .services-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .table-wrapper {
+            font-size: 0.85rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .erp-header-content h1 {
+            font-size: 1.5rem;
+        }
+        
+        .erp-header-content p {
+            font-size: 1rem;
+        }
+        
+        .erp-metrics {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+        }
+        
+        .erp-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .erp-btn {
+            justify-content: center;
+        }
+    }
+    
+    /* Dark Mode */
+    body.dark-mode .erp-header {
+        background: var(--panel-header-bg);
+        color: var(--panel-title-color);
+        border-color: var(--panel-header-border);
+    }
+    
+    body.dark-mode .erp-toolbar,
+    body.dark-mode .erp-table-container,
+    body.dark-mode .service-card,
+    body.dark-mode .empty-state {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    
+    body.dark-mode .erp-table th {
+        background: #334155;
+        color: #f1f5f9;
+    }
+    
+    body.dark-mode .table-row:hover {
+        background: #334155;
+    }
+    
+    body.dark-mode .service-image-placeholder,
+    body.dark-mode .table-image-placeholder {
+        background: var(--panel-header-bg);
+    }
+    
+    body.dark-mode .category-tag {
+        background: #334155;
+    }
+    
+    body.dark-mode .action-view,
+    body.dark-mode .table-btn-view {
+        background: #334155;
+        color: #f1f5f9;
+    }
+    
+    
+    
+    
+    </style>
+    
+    <style>
+    
+    /* Tabla moderna */
+    .erp-table-container {
+        background: var(--erp-surface);
+        border: 1px solid var(--erp-border);
+        border-radius: var(--erp-radius);
+        box-shadow: var(--erp-shadow);
+        overflow: hidden;
+    }
+    
+    .table-wrapper {
+        overflow-x: auto;
+    }
+    
+    .erp-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .erp-table th {
+        background: var(--erp-gray-50);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--erp-text);
+        border-bottom: 1px solid var(--erp-border);
+        position: relative;
+    }
+    
+    .th-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+    
+    .sort-icon {
+        opacity: 0.5;
+        transition: opacity 0.2s;
+    }
+    
+    .sortable:hover .sort-icon {
+        opacity: 1;
+    }
+    
+    .erp-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--erp-border);
+        vertical-align: middle;
+    }
+    
+    .table-row:hover {
+        background: var(--erp-gray-50);
+    }
+    
+    .table-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 6px;
+        object-fit: cover;
+    }
+    
+    .table-image-placeholder {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+    
+    .service-cell {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .service-name {
+        color: var(--erp-text);
+        margin-bottom: 0.25rem;
+    }
+    
+    .service-code {
+        color: var(--erp-gray-500);
+    }
+    
+    .price-cell {
+        font-weight: 600;
+        color: #059669;
+    }
+    
+    .duration-cell {
+        font-weight: 500;
+        color: #0891b2;
+    }
+    
+    .category-tag {
+        background: var(--erp-gray-100);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+    
+    .table-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .table-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+    
+    .table-btn-view {
+        background: var(--erp-gray-100);
+        color: var(--erp-text);
+    }
+    
+    .table-btn-edit {
+        background: #059669;
+        color: white;
+    }
+    
+    .table-btn-delete {
+        background: var(--erp-danger);
+        color: white;
+    }
+    
+    .table-btn:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Estado vacío */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--erp-surface);
+        border: 1px solid var(--erp-border);
+        border-radius: var(--erp-radius);
+        box-shadow: var(--erp-shadow);
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--erp-gray-300);
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--erp-text);
+    }
+    
+    .empty-state p {
+        color: var(--erp-gray-500);
+        margin-bottom: 2rem;
+    }
+    
+    .empty-table-msg {
+        text-align: center;
+        padding: 3rem;
+    }
+    
+    .empty-table-content {
+        color: var(--erp-gray-500);
+    }
+    
+    .empty-table-content i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .erp-services-container {
+            padding: 1rem;
+        }
+        
+        .erp-header {
+            flex-direction: column;
+            gap: 1.5rem;
+            text-align: center;
+        }
+        
+        .erp-metrics {
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .erp-toolbar {
+            grid-template-columns: 1fr auto;
+            grid-template-areas: 
+                "search toggle"
+                "filters filters"
+                "view view";
+            padding: 1rem;
+        }
+        
+        .mobile-filter-toggle {
+            display: flex;
+            grid-area: toggle;
+        }
+        
+        .toolbar-filters-section {
+            grid-area: filters;
+            grid-column: 1 / -1;
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--erp-border);
+        }
+        
+        .toolbar-filters-section.show {
+            display: block;
+        }
+        
+        .toolbar-view-section {
+            grid-area: view;
+            grid-column: 1 / -1;
+            justify-self: center;
+            margin-top: 1rem;
+        }
+        
+        .filters-row {
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: stretch;
+        }
+        
+        .erp-select {
+            width: 100%;
+            min-width: auto;
+        }
+        
+        .search-advanced {
+            max-width: none;
+        }
+        
+        .search-advanced input {
+            font-size: 16px;
+        }
+        
+        .services-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .table-wrapper {
+            font-size: 0.85rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .erp-header-content h1 {
+            font-size: 1.5rem;
+        }
+        
+        .erp-header-content p {
+            font-size: 1rem;
+        }
+        
+        .erp-metrics {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+        }
+        
+        .erp-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .erp-btn {
+            justify-content: center;
+        }
+    }
+    
+    /* Dark Mode */
+    body.dark-mode .erp-header {
+        background: linear-gradient(135deg, #047857 0%, #059669 100%);
+    }
+    
+    body.dark-mode .erp-toolbar,
+    body.dark-mode .erp-table-container,
+    body.dark-mode .service-card,
+    body.dark-mode .empty-state {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    
+    body.dark-mode .erp-table th {
+        background: #334155;
+        color: #f1f5f9;
+    }
+    
+    body.dark-mode .table-row:hover {
+        background: #334155;
+    }
+    
+    body.dark-mode .service-image-placeholder,
+    body.dark-mode .table-image-placeholder {
+        background: linear-gradient(135deg, #047857 0%, #059669 100%);
+    }
+    
+    body.dark-mode .category-tag {
+        background: #334155;
+    }
+    
+    body.dark-mode .action-view,
+    body.dark-mode .table-btn-view {
+        background: #334155;
+        color: #f1f5f9;
+    }
+    </style>
+<div class="erp-services-container">
+    <!-- Header ejecutivo -->
+    <div class="erp-header">
+        <div class="erp-header-content">
+            <h1><i class="fas fa-cogs"></i> Gestión de Servicios</h1>
+            <p>Control integral de servicios y soluciones empresariales</p>
+            <div class="erp-metrics">
+                <div class="metric">
+                    <span class="metric-value">{{ servicios.count }}</span>
+                    <span class="metric-label">Total Servicios</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">{{ servicios|length|add:"0" }}</span>
+                    <span class="metric-label">Activos</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">${{ servicios.0.precio|default:"0" }}</span>
+                    <span class="metric-label">Precio Promedio</span>
+                </div>
+            </div>
+        </div>
+        <div class="erp-actions">
+            <a href="{% url 'products:crear_servicio' %}" class="erp-btn erp-btn-primary">
+                <i class="fas fa-plus"></i> Nuevo Servicio
+            </a>
+            <button class="erp-btn erp-btn-secondary" onclick="exportData()">
+                <i class="fas fa-download"></i> Exportar
+            </button>
+        </div>
+    </div>
+
+    <!-- Barra de herramientas avanzada -->
+    <div class="erp-toolbar">
+        <!-- Sección de búsqueda -->
+        <div class="toolbar-search-section">
+            <div class="search-advanced">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Buscar servicios...">
+            </div>
+        </div>
+        
+        <!-- Botón de filtros móvil -->
+        <button class="mobile-filter-toggle" id="mobileFilterToggle">
+            <i class="fas fa-filter"></i>
+            <span>Filtros</span>
+        </button>
+        
+        <!-- Sección de filtros -->
+        <div class="toolbar-filters-section" id="filtersSection">
+            <div class="filters-row">
+                <select id="categoryFilter" class="erp-select">
+                    <option value="">🏷️ Todas las categorías</option>
+                    {% for categoria in servicios.values_list.categoria.distinct %}
+                        {% if categoria %}
+                            <option value="{{ categoria }}">{{ categoria }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <select id="durationFilter" class="erp-select">
+                    <option value="">⏱️ Todas las duraciones</option>
+                    <option value="short">Corta (&lt;2h)</option>
+                    <option value="medium">Media (2-8h)</option>
+                    <option value="long">Larga (&gt;8h)</option>
+                </select>
+                <select id="statusFilter" class="erp-select">
+                    <option value="">🔧 Todos los estados</option>
+                    <option value="active">Activos</option>
+                    <option value="inactive">Inactivos</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Sección de vista -->
+        <div class="toolbar-view-section">
+            <div class="view-switcher">
+                <button id="gridView" class="view-btn active" title="Vista cuadrícula">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button id="tableView" class="view-btn" title="Vista tabla">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vista en cuadrícula (por defecto) -->
+    <div id="gridContainer" class="services-grid">
+        {% for servicio in servicios %}
+            <div class="service-card" data-category="{{ servicio.categoria|default:'Sin categoría' }}" data-duration="{{ servicio.duracion }}" data-status="{% if servicio.activo %}active{% else %}inactive{% endif %}">
+                <div class="service-image-container">
+                    {% if servicio.imagen_principal %}
+                        <img src="{{ servicio.imagen_principal }}" alt="{{ servicio.nombre }}" class="service-image">
+                    {% else %}
+                        <div class="service-image-placeholder">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                    {% endif %}
+                    <div class="service-status">
+                        <span class="status-badge {% if servicio.activo %}status-active{% else %}status-inactive{% endif %}">
+                            {% if servicio.activo %}✓ Activo{% else %}⏸ Inactivo{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="service-info">
+                    <h3 class="service-title">{{ servicio.nombre }}</h3>
+                    <p class="service-category">{{ servicio.categoria|default:"Sin categoría" }}</p>
+                    <div class="service-stats">
+                        <div class="stat">
+                            <span class="stat-label">Precio</span>
+                            <span class="stat-value price">${{ servicio.precio }}</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Duración</span>
+                            <span class="stat-value duration">{{ servicio.duracion }}</span>
+                        </div>
+                    </div>
+                    <div class="service-actions">
+                        <a href="{% url 'products:detalle_servicio' servicio.pk %}" class="action-btn action-view">
+                            <i class="fas fa-eye"></i> Ver
+                        </a>
+                        <a href="{% url 'products:editar_servicio' servicio.pk %}" class="action-btn action-edit">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a href="{% url 'products:eliminar_servicio' servicio.pk %}" class="action-btn action-delete" onclick="return confirm('¿Eliminar este servicio?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h3>No hay servicios registrados</h3>
+                <p>Comienza agregando tu primer servicio al catálogo</p>
+                <a href="{% url 'products:crear_servicio' %}" class="erp-btn erp-btn-primary">
+                    <i class="fas fa-plus"></i> Crear Primer Servicio
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Vista de tabla moderna -->
+    <div id="tableContainer" class="erp-table-container" style="display: none;">
+        <div class="table-wrapper">
+            <table class="erp-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="imagen">
+                            <div class="th-content">
+                                <span>Imagen</span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="nombre">
+                            <div class="th-content">
+                                <span>Servicio</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="precio">
+                            <div class="th-content">
+                                <span>Precio</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="duracion">
+                            <div class="th-content">
+                                <span>Duración</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="categoria">
+                            <div class="th-content">
+                                <span>Categoría</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </div>
+                        </th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for servicio in servicios %}
+                        <tr class="table-row" data-category="{{ servicio.categoria|default:'Sin categoría' }}" data-duration="{{ servicio.duracion }}" data-status="{% if servicio.activo %}active{% else %}inactive{% endif %}">
+                            <td>
+                                {% if servicio.imagen_principal %}
+                                    <img src="{{ servicio.imagen_principal }}" alt="{{ servicio.nombre }}" class="table-image">
+                                {% else %}
+                                    <div class="table-image-placeholder">
+                                        <i class="fas fa-cogs"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="service-cell">
+                                    <strong class="service-name">{{ servicio.nombre }}</strong>
+                                    <small class="service-code">#{{ servicio.pk }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="price-cell">${{ servicio.precio }}</span>
+                            </td>
+                            <td>
+                                <span class="duration-cell">{{ servicio.duracion }}</span>
+                            </td>
+                            <td>
+                                <span class="category-tag">{{ servicio.categoria|default:"Sin categoría" }}</span>
+                            </td>
+                            <td>
+                                <span class="status-badge {% if servicio.activo %}status-active{% else %}status-inactive{% endif %}">
+                                    {% if servicio.activo %}✓ Activo{% else %}⏸ Inactivo{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <a href="{% url 'products:detalle_servicio' servicio.pk %}" class="table-btn table-btn-view" title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'products:editar_servicio' servicio.pk %}" class="table-btn table-btn-edit" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'products:eliminar_servicio' servicio.pk %}" class="table-btn table-btn-delete" title="Eliminar" onclick="return confirm('¿Eliminar este servicio?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="empty-table-msg">
+                                <div class="empty-table-content">
+                                    <i class="fas fa-cogs"></i>
+                                    <p>No hay servicios registrados</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+// Toggle de filtros móvil
+document.getElementById('mobileFilterToggle').addEventListener('click', function() {
+    const filtersSection = document.getElementById('filtersSection');
+    const isVisible = filtersSection.classList.contains('show');
+    
+    if (isVisible) {
+        filtersSection.classList.remove('show');
+        this.innerHTML = '<i class="fas fa-filter"></i><span>Filtros</span>';
+    } else {
+        filtersSection.classList.add('show');
+        this.innerHTML = '<i class="fas fa-times"></i><span>Cerrar</span>';
+    }
+});
+
+// Alternador de vistas
+document.getElementById('gridView').addEventListener('click', function() {
+    document.getElementById('gridContainer').style.display = 'grid';
+    document.getElementById('tableContainer').style.display = 'none';
+    this.classList.add('active');
+    document.getElementById('tableView').classList.remove('active');
+});
+
+document.getElementById('tableView').addEventListener('click', function() {
+    document.getElementById('gridContainer').style.display = 'none';
+    document.getElementById('tableContainer').style.display = 'block';
+    this.classList.add('active');
+    document.getElementById('gridView').classList.remove('active');
+});
+
+// Sistema de filtrado avanzado
+function filterServices() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const categoryFilter = document.getElementById('categoryFilter').value.toLowerCase();
+    const durationFilter = document.getElementById('durationFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    // Filtrar cards
+    const cards = document.querySelectorAll('.service-card');
+    cards.forEach(card => {
+        const title = card.querySelector('.service-title').textContent.toLowerCase();
+        const category = card.getAttribute('data-category').toLowerCase();
+        const duration = card.getAttribute('data-duration').toLowerCase();
+        const status = card.getAttribute('data-status');
+        
+        let showCard = true;
+        
+        // Filtro de búsqueda
+        if (searchTerm && !title.includes(searchTerm) && !category.includes(searchTerm)) {
+            showCard = false;
+        }
+        
+        // Filtro de categoría
+        if (categoryFilter && category !== categoryFilter) {
+            showCard = false;
+        }
+        
+        // Filtro de duración
+        if (durationFilter) {
+            const durationHours = parseDuration(duration);
+            if (durationFilter === 'short' && durationHours >= 2) showCard = false;
+            if (durationFilter === 'medium' && (durationHours < 2 || durationHours > 8)) showCard = false;
+            if (durationFilter === 'long' && durationHours <= 8) showCard = false;
+        }
+        
+        // Filtro de estado
+        if (statusFilter && status !== statusFilter) {
+            showCard = false;
+        }
+        
+        card.style.display = showCard ? 'block' : 'none';
+    });
+    
+    // Filtrar filas de tabla
+    const rows = document.querySelectorAll('.table-row');
+    rows.forEach(row => {
+        const title = row.querySelector('.service-name') ? row.querySelector('.service-name').textContent.toLowerCase() : '';
+        const category = row.getAttribute('data-category') ? row.getAttribute('data-category').toLowerCase() : '';
+        const duration = row.getAttribute('data-duration') ? row.getAttribute('data-duration').toLowerCase() : '';
+        const status = row.getAttribute('data-status') || '';
+        
+        let showRow = true;
+        
+        // Filtro de búsqueda
+        if (searchTerm && !title.includes(searchTerm) && !category.includes(searchTerm)) {
+            showRow = false;
+        }
+        
+        // Filtro de categoría
+        if (categoryFilter && category !== categoryFilter) {
+            showRow = false;
+        }
+        
+        // Filtro de duración
+        if (durationFilter) {
+            const durationHours = parseDuration(duration);
+            if (durationFilter === 'short' && durationHours >= 2) showRow = false;
+            if (durationFilter === 'medium' && (durationHours < 2 || durationHours > 8)) showRow = false;
+            if (durationFilter === 'long' && durationHours <= 8) showRow = false;
+        }
+        
+        // Filtro de estado
+        if (statusFilter && status !== statusFilter) {
+            showRow = false;
+        }
+        
+        row.style.display = showRow ? '' : 'none';
+    });
+}
+
+// Función auxiliar para parsear duración
+function parseDuration(duration) {
+    const match = duration.match(/(\d+)/);
+    return match ? parseInt(match[1]) : 0;
+}
+
+// Event listeners para filtros
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const durationFilter = document.getElementById('durationFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    
+    if (searchInput) searchInput.addEventListener('input', filterServices);
+    if (categoryFilter) categoryFilter.addEventListener('change', filterServices);
+    if (durationFilter) durationFilter.addEventListener('change', filterServices);
+    if (statusFilter) statusFilter.addEventListener('change', filterServices);
+});
+
+// Ordenamiento de tabla
+let sortOrder = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', function() {
+            const sortBy = this.getAttribute('data-sort');
+            if (!sortBy) return;
+            
+            sortOrder[sortBy] = sortOrder[sortBy] === 'asc' ? 'desc' : 'asc';
+            
+            // Actualizar iconos
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.className = 'fas fa-sort sort-icon';
+            });
+            this.querySelector('.sort-icon').className = `fas fa-sort-${sortOrder[sortBy] === 'asc' ? 'up' : 'down'} sort-icon`;
+            
+            // Ordenar filas
+            const tbody = document.querySelector('.erp-table tbody');
+            if (!tbody) return;
+            
+            const rows = Array.from(tbody.querySelectorAll('.table-row'));
+            
+            rows.sort((a, b) => {
+                let aVal, bVal;
+                
+                switch(sortBy) {
+                    case 'nombre':
+                        aVal = a.querySelector('.service-name') ? a.querySelector('.service-name').textContent.toLowerCase() : '';
+                        bVal = b.querySelector('.service-name') ? b.querySelector('.service-name').textContent.toLowerCase() : '';
+                        break;
+                    case 'precio':
+                        aVal = parseFloat(a.querySelector('.price-cell') ? a.querySelector('.price-cell').textContent.replace('$', '') : '0');
+                        bVal = parseFloat(b.querySelector('.price-cell') ? b.querySelector('.price-cell').textContent.replace('$', '') : '0');
+                        break;
+                    case 'duracion':
+                        aVal = a.getAttribute('data-duration') ? a.getAttribute('data-duration').toLowerCase() : '';
+                        bVal = b.getAttribute('data-duration') ? b.getAttribute('data-duration').toLowerCase() : '';
+                        break;
+                    case 'categoria':
+                        aVal = a.getAttribute('data-category') ? a.getAttribute('data-category').toLowerCase() : '';
+                        bVal = b.getAttribute('data-category') ? b.getAttribute('data-category').toLowerCase() : '';
+                        break;
+                }
+                
+                if (aVal < bVal) return sortOrder[sortBy] === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortOrder[sortBy] === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
+});
+
+// Función de exportación (placeholder)
+function exportData() {
+    alert('Función de exportación en desarrollo');
+}
+
+// Animaciones de entrada
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.service-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 50);
+    });
+});
+</script>
+<script>
+// Toggle de filtros móvil
+document.getElementById('mobileFilterToggle').addEventListener('click', function() {
+    const filtersSection = document.getElementById('filtersSection');
+    const isVisible = filtersSection.classList.contains('show');
+    
+    if (isVisible) {
+        filtersSection.classList.remove('show');
+        this.innerHTML = '<i class="fas fa-filter"></i><span>Filtros</span>';
+    } else {
+        filtersSection.classList.add('show');
+        this.innerHTML = '<i class="fas fa-times"></i><span>Cerrar</span>';
+    }
+});
+
+// Alternador de vistas
+document.getElementById('gridView').addEventListener('click', function() {
+    document.getElementById('gridContainer').style.display = 'grid';
+    document.getElementById('tableContainer').style.display = 'none';
+    this.classList.add('active');
+    document.getElementById('tableView').classList.remove('active');
+});
+
+document.getElementById('tableView').addEventListener('click', function() {
+    document.getElementById('gridContainer').style.display = 'none';
+    document.getElementById('tableContainer').style.display = 'block';
+    this.classList.add('active');
+    document.getElementById('gridView').classList.remove('active');
+});
+
+// Sistema de filtrado avanzado
+function filterServices() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const categoryFilter = document.getElementById('categoryFilter').value.toLowerCase();
+    const durationFilter = document.getElementById('durationFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    // Filtrar cards
+    const cards = document.querySelectorAll('.service-card');
+    cards.forEach(card => {
+        const title = card.querySelector('.service-title').textContent.toLowerCase();
+        const category = card.getAttribute('data-category').toLowerCase();
+        const duration = card.getAttribute('data-duration').toLowerCase();
+        const status = card.getAttribute('data-status');
+        
+        let showCard = true;
+        
+        // Filtro de búsqueda
+        if (searchTerm && !title.includes(searchTerm) && !category.includes(searchTerm)) {
+            showCard = false;
+        }
+        
+        // Filtro de categoría
+        if (categoryFilter && category !== categoryFilter) {
+            showCard = false;
+        }
+        
+        // Filtro de duración
+        if (durationFilter) {
+            const durationHours = parseDuration(duration);
+            if (durationFilter === 'short' && durationHours >= 2) showCard = false;
+            if (durationFilter === 'medium' && (durationHours < 2 || durationHours > 8)) showCard = false;
+            if (durationFilter === 'long' && durationHours <= 8) showCard = false;
+        }
+        
+        // Filtro de estado
+        if (statusFilter && status !== statusFilter) {
+            showCard = false;
+        }
+        
+        card.style.display = showCard ? 'block' : 'none';
+    });
+    
+    // Filtrar filas de tabla
+    const rows = document.querySelectorAll('.table-row');
+    rows.forEach(row => {
+        const title = row.querySelector('.service-name') ? row.querySelector('.service-name').textContent.toLowerCase() : '';
+        const category = row.getAttribute('data-category') ? row.getAttribute('data-category').toLowerCase() : '';
+        const duration = row.getAttribute('data-duration') ? row.getAttribute('data-duration').toLowerCase() : '';
+        const status = row.getAttribute('data-status') || '';
+        
+        let showRow = true;
+        
+        // Filtro de búsqueda
+        if (searchTerm && !title.includes(searchTerm) && !category.includes(searchTerm)) {
+            showRow = false;
+        }
+        
+        // Filtro de categoría
+        if (categoryFilter && category !== categoryFilter) {
+            showRow = false;
+        }
+        
+        // Filtro de duración
+        if (durationFilter) {
+            const durationHours = parseDuration(duration);
+            if (durationFilter === 'short' && durationHours >= 2) showRow = false;
+            if (durationFilter === 'medium' && (durationHours < 2 || durationHours > 8)) showRow = false;
+            if (durationFilter === 'long' && durationHours <= 8) showRow = false;
+        }
+        
+        // Filtro de estado
+        if (statusFilter && status !== statusFilter) {
+            showRow = false;
+        }
+        
+        row.style.display = showRow ? '' : 'none';
+    });
+}
+
+// Función auxiliar para parsear duración
+function parseDuration(duration) {
+    const match = duration.match(/(\d+)/);
+    return match ? parseInt(match[1]) : 0;
+}
+
+// Event listeners para filtros
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const durationFilter = document.getElementById('durationFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    
+    if (searchInput) searchInput.addEventListener('input', filterServices);
+    if (categoryFilter) categoryFilter.addEventListener('change', filterServices);
+    if (durationFilter) durationFilter.addEventListener('change', filterServices);
+    if (statusFilter) statusFilter.addEventListener('change', filterServices);
+});
+
+// Ordenamiento de tabla
+let sortOrder = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', function() {
+            const sortBy = this.getAttribute('data-sort');
+            if (!sortBy) return;
+            
+            sortOrder[sortBy] = sortOrder[sortBy] === 'asc' ? 'desc' : 'asc';
+            
+            // Actualizar iconos
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.className = 'fas fa-sort sort-icon';
+            });
+            this.querySelector('.sort-icon').className = `fas fa-sort-${sortOrder[sortBy] === 'asc' ? 'up' : 'down'} sort-icon`;
+            
+            // Ordenar filas
+            const tbody = document.querySelector('.erp-table tbody');
+            if (!tbody) return;
+            
+            const rows = Array.from(tbody.querySelectorAll('.table-row'));
+            
+            rows.sort((a, b) => {
+                let aVal, bVal;
+                
+                switch(sortBy) {
+                    case 'nombre':
+                        aVal = a.querySelector('.service-name') ? a.querySelector('.service-name').textContent.toLowerCase() : '';
+                        bVal = b.querySelector('.service-name') ? b.querySelector('.service-name').textContent.toLowerCase() : '';
+                        break;
+                    case 'precio':
+                        aVal = parseFloat(a.querySelector('.price-cell') ? a.querySelector('.price-cell').textContent.replace('$', '') : '0');
+                        bVal = parseFloat(b.querySelector('.price-cell') ? b.querySelector('.price-cell').textContent.replace('$', '') : '0');
+                        break;
+                    case 'duracion':
+                        aVal = a.getAttribute('data-duration') ? a.getAttribute('data-duration').toLowerCase() : '';
+                        bVal = b.getAttribute('data-duration') ? b.getAttribute('data-duration').toLowerCase() : '';
+                        break;
+                    case 'categoria':
+                        aVal = a.getAttribute('data-category') ? a.getAttribute('data-category').toLowerCase() : '';
+                        bVal = b.getAttribute('data-category') ? b.getAttribute('data-category').toLowerCase() : '';
+                        break;
+                }
+                
+                if (aVal < bVal) return sortOrder[sortBy] === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortOrder[sortBy] === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
+});
+
+// Función de exportación (placeholder)
+function exportData() {
+    alert('Función de exportación en desarrollo');
+}
+
+// Animaciones de entrada
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.service-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 50);
+    });
+});
+</script>
+{% endblock %} 

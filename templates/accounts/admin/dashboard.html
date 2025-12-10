@@ -1,0 +1,966 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Administración | Admin ERP{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% load static %}{% static 'css/admin-buttons.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% load static %}{% static 'js/admin-functions.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Header Ejecutivo del Dashboard -->
+<div class="executive-header">
+    <div class="header-content">
+        <div class="title-section">
+            <div class="title-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="title-text">
+                <h1>Panel de Administración</h1>
+                <p class="subtitle">Centro de control y análisis del sistema ERP</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="last-update">
+                <i class="fas fa-clock"></i>
+                <span>Última actualización: {{ current_time|date:"d/m/Y H:i" }}</span>
+            </div>
+            <button class="btn-refresh" onclick="location.reload()">
+                <i class="fas fa-sync-alt"></i>
+                Actualizar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Grid Principal del Dashboard -->
+<div class="dashboard-grid">
+    <!-- Panel de Métricas Principales -->
+    <div class="panel metrics-panel">
+        <div class="panel-header">
+            <h2>
+                <i class="fas fa-chart-pie"></i>
+                Métricas Principales
+            </h2>
+            <div class="panel-actions">
+                <button class="btn-icon" title="Exportar métricas">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="btn-icon" title="Configurar alertas">
+                    <i class="fas fa-bell"></i>
+                </button>
+            </div>
+        </div>
+        <div class="panel-content">
+            <div class="metrics-grid">
+                <div class="metric-card users">
+                    <div class="metric-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">{{ total_users|default:0 }}</div>
+                        <div class="metric-label">Usuarios Totales</div>
+                        <div class="metric-trend positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+12% este mes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card companies">
+                    <div class="metric-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">{{ total_companies|default:0 }}</div>
+                        <div class="metric-label">Empresas</div>
+                        <div class="metric-trend positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+8% este mes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card products">
+                    <div class="metric-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">{{ total_products|default:0 }}</div>
+                        <div class="metric-label">Productos</div>
+                        <div class="metric-trend positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+15% este mes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card services">
+                    <div class="metric-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">{{ total_services|default:0 }}</div>
+                        <div class="metric-label">Servicios</div>
+                        <div class="metric-trend positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+22% este mes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card orders">
+                    <div class="metric-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">{{ total_orders|default:0 }}</div>
+                        <div class="metric-label">Pedidos</div>
+                        <div class="metric-trend neutral">
+                            <i class="fas fa-minus"></i>
+                            <span>Sin cambios</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card admins">
+                    <div class="metric-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">{{ total_admins|default:0 }}</div>
+                        <div class="metric-label">Administradores</div>
+                        <div class="metric-trend stable">
+                            <i class="fas fa-check"></i>
+                            <span>Estable</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Acciones Rápidas -->
+    <div class="panel quick-actions-panel">
+        <div class="panel-header">
+            <h2>
+                <i class="fas fa-bolt"></i>
+                Acciones Rápidas
+            </h2>
+        </div>
+        <div class="panel-content">
+            <div class="quick-actions-grid">
+                <a href="{% url 'manage_users' %}" class="action-card users-action">
+                    <div class="action-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="action-content">
+                        <h3>Gestionar Usuarios</h3>
+                        <p>Administrar cuentas y permisos</p>
+                        <span class="action-count">{{ total_users }} usuarios</span>
+                    </div>
+                    <div class="action-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+
+                <a href="{% url 'products:productos' %}" class="action-card products-action">
+                    <div class="action-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="action-content">
+                        <h3>Ver Productos</h3>
+                        <p>Revisar catálogo completo</p>
+                        <span class="action-count">{{ total_products|default:0 }} productos</span>
+                    </div>
+                    <div class="action-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+
+                <a href="{% url 'products:servicios' %}" class="action-card services-action">
+                    <div class="action-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="action-content">
+                        <h3>Ver Servicios</h3>
+                        <p>Administrar servicios activos</p>
+                        <span class="action-count">{{ total_services|default:0 }} servicios</span>
+                    </div>
+                    <div class="action-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+
+                <a href="{% url 'products:pedidos' %}" class="action-card orders-action">
+                    <div class="action-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="action-content">
+                        <h3>Ver Pedidos</h3>
+                        <p>Monitorear transacciones</p>
+                        <span class="action-count">{{ total_orders|default:0 }} pedidos</span>
+                    </div>
+                    <div class="action-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+
+                <a href="#" class="action-card settings-action">
+                    <div class="action-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="action-content">
+                        <h3>Configuración</h3>
+                        <p>Ajustes del sistema</p>
+                        <span class="action-count">Sistema</span>
+                    </div>
+                    <div class="action-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+
+                <a href="#" class="action-card reports-action">
+                    <div class="action-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="action-content">
+                        <h3>Reportes</h3>
+                        <p>Análisis y estadísticas</p>
+                        <span class="action-count">Generar</span>
+                    </div>
+                    <div class="action-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Actividad Reciente -->
+    <div class="panel activity-panel">
+        <div class="panel-header">
+            <h2>
+                <i class="fas fa-clock"></i>
+                Actividad Reciente
+            </h2>
+            <div class="panel-actions">
+                <select class="filter-select">
+                    <option value="today">Hoy</option>
+                    <option value="week">Esta semana</option>
+                    <option value="month">Este mes</option>
+                </select>
+            </div>
+        </div>
+        <div class="panel-content">
+            <div class="activity-list">
+                {% for activity in recent_activities|slice:":5" %}
+                <div class="activity-item">
+                    <div class="activity-icon {{ activity.type }}">
+                        {% if activity.type == 'user_registered' %}
+                            <i class="fas fa-user-plus"></i>
+                        {% elif activity.type == 'product_created' %}
+                            <i class="fas fa-box"></i>
+                        {% elif activity.type == 'service_created' %}
+                            <i class="fas fa-cogs"></i>
+                        {% elif activity.type == 'order_placed' %}
+                            <i class="fas fa-shopping-cart"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">{{ activity.description }}</div>
+                        <div class="activity-time">{{ activity.created_at|timesince }} ago</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-clock"></i>
+                    <p>No hay actividad reciente</p>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="panel-footer">
+                <a href="#" class="view-all-link">
+                    Ver toda la actividad
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Estado del Sistema -->
+    <div class="panel system-status-panel">
+        <div class="panel-header">
+            <h2>
+                <i class="fas fa-server"></i>
+                Estado del Sistema
+            </h2>
+        </div>
+        <div class="panel-content">
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-icon online">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <div class="status-info">
+                        <div class="status-label">Base de Datos</div>
+                        <div class="status-value">Conectada</div>
+                    </div>
+                </div>
+
+                <div class="status-item">
+                    <div class="status-icon online">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <div class="status-info">
+                        <div class="status-label">Email</div>
+                        <div class="status-value">Funcionando</div>
+                    </div>
+                </div>
+
+                <div class="status-item">
+                    <div class="status-icon warning">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <div class="status-info">
+                        <div class="status-label">Espacio en Disco</div>
+                        <div class="status-value">85% usado</div>
+                    </div>
+                </div>
+
+                <div class="status-item">
+                    <div class="status-icon online">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <div class="status-info">
+                        <div class="status-label">Respaldo</div>
+                        <div class="status-value">Último: {{ last_backup|date:"d/m H:i"|default:"No disponible" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* === EXECUTIVE HEADER === */
+.executive-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    color: #1e293b;
+    padding: 2rem 1rem;
+    margin: 0 0 2rem 0;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.title-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.title-icon {
+    background: rgba(59, 130, 246, 0.1);
+    padding: 1rem;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+}
+
+.title-icon i {
+    font-size: 2rem;
+    color: #3b82f6;
+}
+
+.title-text {
+    min-width: 0;
+    flex: 1;
+}
+
+.title-text h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.subtitle {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+    line-height: 1.3;
+}
+
+.header-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.stat-card {
+    background: rgba(59, 130, 246, 0.08);
+    backdrop-filter: blur(10px);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    min-width: 100px;
+    border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+/* === DASHBOARD GRID === */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.metrics-panel {
+    grid-column: 1 / -1;
+}
+
+.quick-actions-panel {
+    grid-column: 1 / -1;
+}
+
+/* === METRICS PANEL === */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.metric-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--accent-color);
+}
+
+.metric-card.users::before { background: #3b82f6; }
+.metric-card.companies::before { background: #10b981; }
+.metric-card.products::before { background: #f59e0b; }
+.metric-card.services::before { background: #8b5cf6; }
+.metric-card.orders::before { background: #ef4444; }
+.metric-card.admins::before { background: #6366f1; }
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.metric-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.users .metric-icon { background: #3b82f6; }
+.companies .metric-icon { background: #10b981; }
+.products .metric-icon { background: #f59e0b; }
+.services .metric-icon { background: #8b5cf6; }
+.orders .metric-icon { background: #ef4444; }
+.admins .metric-icon { background: #6366f1; }
+
+.metric-data {
+    flex: 1;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.metric-label {
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0.5rem 0;
+}
+
+.metric-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.metric-trend.positive { color: #10b981; }
+.metric-trend.negative { color: #ef4444; }
+.metric-trend.neutral { color: #6b7280; }
+.metric-trend.stable { color: #3b82f6; }
+
+/* === QUICK ACTIONS PANEL === */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.action-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+}
+
+.users-action::before { background: #3b82f6; }
+.products-action::before { background: #f59e0b; }
+.services-action::before { background: #8b5cf6; }
+.orders-action::before { background: #ef4444; }
+.settings-action::before { background: #6b7280; }
+.reports-action::before { background: #10b981; }
+
+.action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.action-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+}
+
+.users-action .action-icon { background: #3b82f6; }
+.products-action .action-icon { background: #f59e0b; }
+.services-action .action-icon { background: #8b5cf6; }
+.orders-action .action-icon { background: #ef4444; }
+.settings-action .action-icon { background: #6b7280; }
+.reports-action .action-icon { background: #10b981; }
+
+.action-content {
+    flex: 1;
+}
+
+.action-content h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.action-content p {
+    margin: 0 0 0.5rem 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.action-count {
+    font-size: 0.8rem;
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.action-arrow {
+    color: #cbd5e1;
+    transition: all 0.3s ease;
+}
+
+.action-card:hover .action-arrow {
+    color: #3b82f6;
+    transform: translateX(3px);
+}
+
+/* === ACTIVITY PANEL === */
+.activity-list {
+    padding: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.activity-icon.user_registered { background: #3b82f6; }
+.activity-icon.product_created { background: #f59e0b; }
+.activity-icon.service_created { background: #8b5cf6; }
+.activity-icon.order_placed { background: #ef4444; }
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-text {
+    font-size: 0.9rem;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.activity-time {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 0.2rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #64748b;
+}
+
+.empty-state i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.view-all-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.view-all-link:hover {
+    background: #f8fafc;
+}
+
+/* === SYSTEM STATUS PANEL === */
+.status-grid {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.status-icon i {
+    font-size: 0.8rem;
+}
+
+.status-icon.online i { color: #10b981; }
+.status-icon.warning i { color: #f59e0b; }
+.status-icon.error i { color: #ef4444; }
+
+.status-info {
+    flex: 1;
+}
+
+.status-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.status-value {
+    font-size: 0.8rem;
+    color: #1e293b;
+    margin-top: 0.2rem;
+}
+
+/* === PANEL ACTIONS === */
+.panel-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    color: #64748b;
+    padding: 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    background: #f1f5f9;
+    color: #3b82f6;
+}
+
+.filter-select {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    background: white;
+    outline: none;
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 1200px) {
+    .title-text h1 {
+        font-size: 2rem;
+    }
+    
+    .header-stats {
+        gap: 0.5rem;
+    }
+    
+    .stat-card {
+        padding: 0.8rem 1rem;
+        min-width: 80px;
+    }
+}
+
+@media (max-width: 768px) {
+    .executive-header {
+        padding: 1.5rem 1rem;
+        margin: 0 0 1.5rem 0;
+        border-radius: 12px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .title-section {
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .title-text h1 {
+        font-size: 1.8rem;
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+    }
+    
+    .header-stats {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .stat-card {
+        flex: 1;
+        max-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .executive-header {
+        padding: 1rem;
+        border-radius: 10px;
+    }
+    
+    .title-icon {
+        padding: 0.8rem;
+    }
+    
+    .title-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .title-text h1 {
+        font-size: 1.5rem;
+    }
+    
+    .stat-card {
+        padding: 0.6rem 0.8rem;
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+    }
+}
+
+/* === DARK MODE === */
+body.dark-mode .metric-card,
+body.dark-mode .action-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-mode .metric-value,
+body.dark-mode .action-content h3 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .metric-label,
+body.dark-mode .action-content p {
+    color: #cbd5e1;
+}
+
+body.dark-mode .activity-item {
+    border-color: #334155;
+}
+
+body.dark-mode .activity-text {
+    color: #f1f5f9;
+}
+
+body.dark-mode .status-item {
+    background: #334155;
+}
+
+body.dark-mode .status-label {
+    color: #cbd5e1;
+}
+
+body.dark-mode .status-value {
+    color: #f1f5f9;
+}
+
+body.dark-mode .view-all-link:hover {
+    background: #334155;
+}
+
+body.dark-mode .filter-select {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+</style>
+
+<script>
+// Refresh automático cada 5 minutos
+setInterval(() => {
+    // Solo actualizar métricas sin recargar toda la página
+    fetch(window.location.href)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Actualizar valores de métricas
+            document.querySelectorAll('.metric-value').forEach((element, index) => {
+                const newValue = doc.querySelectorAll('.metric-value')[index];
+                if (newValue) {
+                    element.textContent = newValue.textContent;
+                }
+            });
+            
+            // Actualizar última actualización
+            const lastUpdate = document.querySelector('.last-update span');
+            const newLastUpdate = doc.querySelector('.last-update span');
+            if (lastUpdate && newLastUpdate) {
+                lastUpdate.textContent = newLastUpdate.textContent;
+            }
+        })
+        .catch(console.error);
+}, 300000); // 5 minutos
+
+// Animación de entrada para las métricas
+document.addEventListener('DOMContentLoaded', () => {
+    const metricCards = document.querySelectorAll('.metric-card');
+    metricCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %} 

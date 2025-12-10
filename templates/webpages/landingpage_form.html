@@ -1,0 +1,750 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Control{% endblock %}
+
+{% block body_attrs %} data-dashboard="true"{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --panel-bg: #fff;
+    --panel-shadow: 0 6px 32px rgba(37,99,235,0.10);
+    --panel-header-bg: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+    --panel-header-border: #e0e7ff;
+    --panel-title-color: #fff;
+    --panel-title-shadow: 0 2px 8px rgba(37,99,235,0.10);
+    --panel-body-bg: #ffffff;
+
+    --btn-main-bg: #2563eb;
+    --btn-main-color: #fff;
+    --btn-main-border: none;
+    --btn-main-hover-bg: #1746a2;
+    --btn-main-hover-shadow: 0 4px 16px rgba(37,99,235,0.18);
+
+    --label-color: #666;
+    --helper-color: #94a3b8;
+    --input-bg: #f6faff;
+    --input-border: #e0e7ff;
+  }
+  body.dark-mode {
+    --panel-bg: #1e293b;
+    --panel-shadow: 0 6px 32px rgba(15,23,42,0.25);
+    --panel-header-bg: #0f172a;
+    --panel-header-border: #334155;
+    --panel-title-color: #60a5fa;
+    --panel-title-shadow: 0 2px 8px rgba(96,165,250,0.10);
+    --panel-body-bg: #1e293b;
+
+    --btn-main-bg: rgba(96,165,250,0.12);
+    --btn-main-color: #f1f5f9;
+    --btn-main-border: 1px solid rgba(96,165,250,0.18);
+    --btn-main-hover-bg: rgba(96,165,250,0.22);
+    --btn-main-hover-shadow: 0 4px 16px rgba(96,165,250,0.18);
+
+    --label-color: #60a5fa;
+    --helper-color: #64748b;
+    --input-bg: #334155;
+    --input-border: #475569;
+  }
+
+  /* Grid principal */
+  .panel-grid {
+    margin-top:0px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 1.5rem;
+    background: var(--panel-body-bg);
+  }
+
+  /* Tarjetas */
+  .panel-card {
+    background: var(--panel-bg);
+    box-shadow: var(--panel-shadow);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-header {
+    background: var(--panel-header-bg);
+    border-bottom: 1px solid var(--panel-header-border);
+    padding: 1rem 1.5rem;
+  }
+  .panel-header h2 {
+    margin: 0;
+    color: var(--panel-title-color);
+    text-shadow: var(--panel-title-shadow);
+    font-size: 1.25rem;
+  }
+  .panel-content {
+    background: var(--panel-body-bg);
+    padding: 1.5rem;
+    flex: 1;
+  }
+
+  /* Formulario */
+  .panel-content .form-group {
+    margin-bottom: 1.25rem;
+  }
+  .panel-content label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--label-color);
+  }
+  .panel-content input,
+  .panel-content select,
+  .panel-content textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    background: var(--input-bg);
+    color: var(--label-color);
+    transition: border-color 0.2s;
+  }
+  .panel-content input:focus,
+  .panel-content textarea:focus,
+  .panel-content select:focus {
+    outline: none;
+    border-color: var(--btn-main-bg);
+  }
+  .panel-content small.form-text {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--helper-color);
+    font-size: 0.875rem;
+  }
+
+  /* Contenedor de subida de imágenes */
+  .image-upload-container {
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background: var(--input-bg);
+  }
+  .upload-option {
+    margin-bottom: 1rem;
+  }
+  .upload-option:last-child {
+    margin-bottom: 0;
+  }
+  .upload-option strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--label-color);
+    font-size: 0.9rem;
+  }
+  .upload-option input[type="file"] {
+    margin-bottom: 0.25rem;
+  }
+  .upload-option .form-text {
+    margin-top: 0.25rem;
+  }
+
+  /* Botones */
+  .btn-panel {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.5rem;
+    background: var(--btn-main-bg);
+    color: var(--btn-main-color);
+    border: var(--btn-main-border);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+  .btn-panel:hover {
+    background: var(--btn-main-hover-bg);
+    box-shadow: var(--btn-main-hover-shadow);
+    transform: translateY(-2px);
+  }
+  .btn-panel + .btn-panel {
+    margin-left: 0.75rem;
+  }
+
+  /* Preview */
+  .preview-container {
+    background: var(--panel-body-bg);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    height: 100%;
+    overflow: auto;
+  }
+
+  /* Acordeón colapsable */
+  .accordion-section {
+    border-top: 2px solid var(--input-border);
+    margin-top: 1.5rem;
+    padding-top: 0;
+  }
+  .accordion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 0;
+  }
+  .accordion-header:hover {
+    background: var(--btn-main-bg);
+    color: #fff;
+    border-color: var(--btn-main-bg);
+  }
+  .accordion-header:hover h3 {
+    color: #fff;
+  }
+  .accordion-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--label-color);
+    transition: color 0.3s;
+  }
+  .accordion-icon {
+    transition: transform 0.3s ease;
+    color: var(--label-color);
+    font-size: 1rem;
+  }
+  .accordion-header:hover .accordion-icon {
+    color: #fff;
+  }
+  .accordion-header.active .accordion-icon {
+    transform: rotate(180deg);
+  }
+  .accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 1.25rem;
+  }
+  .accordion-content.active {
+    max-height: 5000px;
+    padding: 1.5rem 1.25rem;
+  }
+
+  /* Responsividad */
+  @media (max-width: 1024px) {
+    .panel-grid {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+      gap: 1.5rem;
+    }
+    .panel-card {
+      margin-bottom: 1rem;
+    }
+  }
+  @media (max-width: 600px) {
+    .panel-header h2 { font-size: 1rem; }
+    .panel-content { padding: 1rem; }
+    .btn-panel {
+      width: 100%;
+      justify-content: center;
+    }
+    .preview-container { padding: 0.75rem; }
+    .accordion-header {
+      padding: 0.75rem 1rem;
+    }
+    .accordion-header h3 {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<div class="panel-grid">
+
+  <!-- Panel de configuración -->
+  <section class="panel-card">
+    <div class="panel-header">
+      <h2>Configuración de Página</h2>
+    </div>
+    <div class="panel-content">
+      <!-- Botones de acción fijos en la parte superior -->
+      <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--input-border); flex-wrap: wrap;">
+        <button type="submit" form="lpForm" class="btn-panel">
+          <i class="fas fa-save"></i> Guardar Página
+        </button>
+        {% if landing and landing.id %}
+        <a href="{% url 'webpages:landingpage_view' %}" target="_blank" class="btn-panel">
+          <i class="fas fa-eye"></i> Ver Preview Final
+        </a>
+        {% endif %}
+      </div>
+      
+      <form id="lpForm" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+          {{ form.titulo.label_tag }}
+          {{ form.titulo }}
+          <small class="form-text">
+            Escribe el título que aparecerá en la cabecera de tu página.
+          </small>
+        </div>
+
+        <div class="form-group">
+          {{ form.descripcion.label_tag }}
+          {{ form.descripcion }}
+          <small class="form-text">
+            Una breve frase o subtítulo descriptivo para tu página.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Imagen Principal (Hero)</label>
+          <div class="image-upload-container">
+            <div class="upload-option">
+              <strong>🖼️ Opción 1: Subir archivo</strong>
+              {{ form.hero_image_file }}
+              <small class="form-text">
+                Sube una imagen desde tu dispositivo (JPG, PNG, WebP, etc.)
+              </small>
+            </div>
+            <div class="upload-option">
+              <strong>🔗 Opción 2: URL externa</strong>
+              {{ form.hero_image }}
+              <small class="form-text">
+                O ingresa la URL de una imagen externa (debe incluir "http://" o "https://")
+              </small>
+            </div>
+            <small class="form-text" style="margin-top: 0.5rem; font-style: italic;">
+              💡 Puedes usar cualquiera de las dos opciones. Si subes un archivo, tendrá prioridad sobre la URL.
+            </small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          {{ form.plantilla.label_tag }}
+          {{ form.plantilla }}
+          <small class="form-text">
+            Selecciona el diseño de plantilla que prefieras. La vista previa se actualizará automáticamente.
+          </small>
+          {# Vista previa de plantillas disponibles #}
+          <div style="
+          display: grid; 
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+          gap: 1rem; 
+          margin-top: 1rem; 
+          max-height: 300px; 
+          overflow-y: auto;">
+            {% for value, label in form.plantilla.field.choices %}
+              {% if value %}
+              <div class="template-preview-card" data-template="{{ value }}" style="
+                border: 2px solid var(--input-border);
+                border-radius: 0.5rem;
+                padding: 1rem;
+                cursor: pointer;
+                transition: all 0.3s;
+                background: var(--input-bg);
+              " onclick="document.getElementById('id_plantilla').value='{{ value }}'; updatePreview();">
+                <div style="height: 120px; background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%); border-radius: 0.25rem; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem;">
+                  {{ label }}
+                </div>
+                <p style="text-align: center; margin: 0; font-size: 0.85rem; color: var(--label-color);">{{ label }}</p>
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Hero Section Adicional -->
+        <div class="accordion-section">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3>⚡ Hero Section Avanzado</h3>
+            <i class="fas fa-chevron-down accordion-icon"></i>
+          </div>
+          <div class="accordion-content">
+            <div class="form-group">
+              {{ form.subtitulo_hero.label_tag }}
+              {{ form.subtitulo_hero }}
+              <small class="form-text">Subtítulo adicional que aparecerá en el hero (opcional)</small>
+            </div>
+
+            <div class="form-group">
+              {{ form.texto_boton_hero.label_tag }}
+              {{ form.texto_boton_hero }}
+              <small class="form-text">Texto del botón de llamada a la acción en el hero</small>
+            </div>
+
+            <div class="form-group">
+              {{ form.url_boton_hero.label_tag }}
+              {{ form.url_boton_hero }}
+              <small class="form-text">URL a la que llevará el botón (ej: /products/productos/)</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección Sobre Nosotros -->
+        <div class="accordion-section">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3>📖 Sección Sobre Nosotros</h3>
+            <i class="fas fa-chevron-down accordion-icon"></i>
+          </div>
+          <div class="accordion-content">
+            <div class="form-group">
+              {{ form.seccion_sobre_nosotros_titulo.label_tag }}
+              {{ form.seccion_sobre_nosotros_titulo }}
+            </div>
+
+            <div class="form-group">
+              {{ form.seccion_sobre_nosotros_texto.label_tag }}
+              {{ form.seccion_sobre_nosotros_texto }}
+              <small class="form-text">Texto descriptivo sobre tu empresa (acepta HTML básico)</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección Productos -->
+        <div class="accordion-section">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3>📦 Sección Productos</h3>
+            <i class="fas fa-chevron-down accordion-icon"></i>
+          </div>
+          <div class="accordion-content">
+            <div class="form-group">
+              {{ form.seccion_productos_titulo.label_tag }}
+              {{ form.seccion_productos_titulo }}
+            </div>
+
+            <div class="form-group">
+              {{ form.seccion_productos_subtitulo.label_tag }}
+              {{ form.seccion_productos_subtitulo }}
+              <small class="form-text">Subtítulo o descripción para la sección de productos</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección Servicios -->
+        <div class="accordion-section">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3>🔧 Sección Servicios</h3>
+            <i class="fas fa-chevron-down accordion-icon"></i>
+          </div>
+          <div class="accordion-content">
+            <div class="form-group">
+              {{ form.seccion_servicios_titulo.label_tag }}
+              {{ form.seccion_servicios_titulo }}
+            </div>
+
+            <div class="form-group">
+              {{ form.seccion_servicios_subtitulo.label_tag }}
+              {{ form.seccion_servicios_subtitulo }}
+              <small class="form-text">Subtítulo o descripción para la sección de servicios</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección Testimonios -->
+        <div class="accordion-section">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3>⭐ Testimonios</h3>
+            <i class="fas fa-chevron-down accordion-icon"></i>
+          </div>
+          <div class="accordion-content">
+            <div class="form-group">
+              {{ form.seccion_testimonios_titulo.label_tag }}
+              {{ form.seccion_testimonios_titulo }}
+            </div>
+
+            <div class="form-group">
+              {{ form.seccion_testimonios_texto.label_tag }}
+              {{ form.seccion_testimonios_texto }}
+              <small class="form-text">Testimonios de clientes (puedes usar HTML para formato)</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección Contacto/CTA Final -->
+        <div class="accordion-section">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3>📞 Sección Contacto / CTA Final</h3>
+            <i class="fas fa-chevron-down accordion-icon"></i>
+          </div>
+          <div class="accordion-content">
+            <div class="form-group">
+              {{ form.seccion_contacto_titulo.label_tag }}
+              {{ form.seccion_contacto_titulo }}
+            </div>
+
+            <div class="form-group">
+              {{ form.seccion_contacto_texto.label_tag }}
+              {{ form.seccion_contacto_texto }}
+              <small class="form-text">Texto de llamada a la acción final</small>
+            </div>
+
+            <div class="form-group">
+              {{ form.seccion_contacto_boton_texto.label_tag }}
+              {{ form.seccion_contacto_boton_texto }}
+            </div>
+
+            <div class="form-group">
+              {{ form.seccion_contacto_boton_url.label_tag }}
+              {{ form.seccion_contacto_boton_url }}
+              <small class="form-text">URL del botón de contacto</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colores Personalizados -->
+        <div class="accordion-section">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3>🎨 Colores Personalizados</h3>
+            <i class="fas fa-chevron-down accordion-icon"></i>
+          </div>
+          <div class="accordion-content">
+            <div class="form-group">
+              {{ form.color_primario.label_tag }}
+              {{ form.color_primario }}
+              <small class="form-text">Color primario de tu marca (formato HEX)</small>
+            </div>
+
+            <div class="form-group">
+              {{ form.color_secundario.label_tag }}
+              {{ form.color_secundario }}
+              <small class="form-text">Color secundario de tu marca (formato HEX)</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenido General (mantener para compatibilidad) -->
+        <div class="accordion-section">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3>📝 Contenido General</h3>
+            <i class="fas fa-chevron-down accordion-icon"></i>
+          </div>
+          <div class="accordion-content">
+            <div class="form-group">
+              {{ form.contenido.label_tag }}
+              {{ form.contenido }}
+              <small class="form-text">Contenido HTML o texto enriquecido adicional (opcional)</small>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Panel de vista previa -->
+  <section class="panel-card">
+    <div class="panel-header">
+      <h2>Vista Previa</h2>
+    </div>
+    <div class="panel-content preview-container" id="preview-container">
+      {% if landing and landing.plantilla %}
+        {# Vista previa completa con landing guardada #}
+        <div style="transform: scale(0.7); transform-origin: top left; width: 142.857%;">
+          {% include 'plantillas/'|add:landing.plantilla|add:'.html' %}
+        </div>
+      {% elif form.plantilla.value %}
+        {# Vista previa básica con datos del formulario #}
+        <div class="preview-placeholder" style="padding: 1rem;">
+          <div style="border: 2px solid var(--input-border); border-radius: 0.5rem; padding: 1.5rem; background: var(--input-bg);">
+            <p style="text-align: center; color: var(--label-color); margin-bottom: 1rem;">
+              <i class="fas fa-info-circle" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; color: var(--btn-main-bg);"></i>
+              <strong>Vista previa de: {{ form.plantilla.value|title }}</strong>
+            </p>
+            <p style="text-align: center; color: var(--helper-color); font-size: 0.9rem; margin: 0;">
+              Guarda la página para ver la vista previa completa con tus productos y servicios.
+            </p>
+          </div>
+        </div>
+      {% else %}
+        <p class="text-muted" style="text-align: center; padding: 2rem;">
+          <i class="fas fa-image" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+          Selecciona una plantilla y guarda la página para ver la vista previa aquí.
+        </p>
+      {% endif %}
+    </div>
+  </section>
+
+</div>
+
+<script>
+// Actualizar vista previa cuando cambia la plantilla
+document.addEventListener('DOMContentLoaded', function() {
+    const plantillaSelect = document.getElementById('id_plantilla');
+    if (plantillaSelect) {
+        plantillaSelect.addEventListener('change', updatePreview);
+    }
+    
+    // Resaltar la plantilla seleccionada
+    updateTemplateCards();
+    
+    // Preview de imagen cuando se selecciona archivo
+    const imageFileInput = document.getElementById('id_hero_image_file');
+    if (imageFileInput) {
+        imageFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Mostrar preview de la imagen seleccionada
+                    showImagePreview(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+
+function updatePreview() {
+    const plantillaSelect = document.getElementById('id_plantilla');
+    const previewContainer = document.getElementById('preview-container');
+    
+    if (plantillaSelect && previewContainer) {
+        const selectedTemplate = plantillaSelect.value;
+        updateTemplateCards();
+        
+        // Si hay una landing guardada, guardar automáticamente el cambio de plantilla
+        {% if landing and landing.id %}
+            // Guardar automáticamente el cambio de plantilla usando AJAX
+            saveTemplateChange(selectedTemplate);
+        {% else %}
+            // Si no hay landing guardada, solo mostrar mensaje de que debe guardar
+            showPreviewMessage(selectedTemplate);
+        {% endif %}
+    }
+}
+
+function saveTemplateChange(templateValue) {
+    // Crear un FormData con el cambio de plantilla
+    const formData = new FormData();
+    formData.append('plantilla', templateValue);
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+    // Mostrar indicador de carga
+    const previewContainer = document.getElementById('preview-container');
+    previewContainer.innerHTML = '<div style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--btn-main-bg);"></i><p style="margin-top: 1rem; color: var(--label-color);">Actualizando vista previa...</p></div>';
+    
+    // Enviar petición AJAX
+    fetch('{% url "webpages:create_landing_page" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar la vista previa con el HTML recibido
+            previewContainer.innerHTML = data.preview_html;
+            // Actualizar las tarjetas visuales para reflejar el cambio
+            updateTemplateCards();
+        } else {
+            throw new Error(data.error || 'Error al guardar');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        previewContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: #dc2626;"><i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><p>Error al actualizar la plantilla. Por favor, guarda manualmente.</p></div>';
+    });
+}
+
+function showPreviewMessage(templateValue) {
+    const previewContainer = document.getElementById('preview-container');
+    const templateLabel = document.querySelector(`[data-template="${templateValue}"] p`).textContent;
+    previewContainer.innerHTML = `
+        <div style="padding: 1rem;">
+            <div style="border: 2px solid var(--input-border); border-radius: 0.5rem; padding: 1.5rem; background: var(--input-bg);">
+                <p style="text-align: center; color: var(--label-color); margin-bottom: 1rem;">
+                    <i class="fas fa-info-circle" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; color: var(--btn-main-bg);"></i>
+                    <strong>Vista previa de: ${templateLabel}</strong>
+                </p>
+                <p style="text-align: center; color: var(--helper-color); font-size: 0.9rem; margin: 0;">
+                    Guarda la página para ver la vista previa completa con tus productos y servicios.
+                </p>
+            </div>
+        </div>
+    `;
+}
+
+function updateTemplateCards() {
+    const plantillaSelect = document.getElementById('id_plantilla');
+    const cards = document.querySelectorAll('.template-preview-card');
+    const selectedValue = plantillaSelect ? plantillaSelect.value : '';
+    
+    cards.forEach(card => {
+        const templateValue = card.getAttribute('data-template');
+        if (templateValue === selectedValue) {
+            card.style.borderColor = 'var(--btn-main-bg)';
+            card.style.background = 'var(--btn-main-bg)';
+            card.style.color = '#fff';
+            card.querySelector('p').style.color = '#fff';
+        } else {
+            card.style.borderColor = 'var(--input-border)';
+            card.style.background = 'var(--input-bg)';
+            card.style.color = '';
+            card.querySelector('p').style.color = 'var(--label-color)';
+        }
+    });
+}
+
+function showImagePreview(imageSrc) {
+    // Crear o actualizar preview de imagen
+    let previewDiv = document.getElementById('image-preview');
+    if (!previewDiv) {
+        previewDiv = document.createElement('div');
+        previewDiv.id = 'image-preview';
+        previewDiv.style.cssText = 'margin-top: 1rem; padding: 1rem; border: 2px dashed var(--input-border); border-radius: 0.5rem; text-align: center;';
+        const imageUploadContainer = document.querySelector('.image-upload-container');
+        if (imageUploadContainer) {
+            imageUploadContainer.appendChild(previewDiv);
+        }
+    }
+    previewDiv.innerHTML = `
+        <p style="margin-bottom: 0.5rem; color: var(--label-color); font-weight: 500;">Vista previa:</p>
+        <img src="${imageSrc}" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 0.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    `;
+}
+
+// Función para toggle de acordeón
+function toggleAccordion(header) {
+    const content = header.nextElementSibling;
+    const isActive = header.classList.contains('active');
+    
+    // Cerrar todos los acordeones primero (opcional - comentar si quieres que varios estén abiertos)
+    // document.querySelectorAll('.accordion-header').forEach(h => {
+    //     h.classList.remove('active');
+    //     h.nextElementSibling.classList.remove('active');
+    // });
+    
+    // Toggle del acordeón actual
+    if (isActive) {
+        header.classList.remove('active');
+        content.classList.remove('active');
+    } else {
+        header.classList.add('active');
+        content.classList.add('active');
+    }
+}
+</script>
+
+<style>
+.template-preview-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--panel-shadow);
+    border-color: var(--btn-main-bg) !important;
+}
+
+#image-preview img {
+    transition: transform 0.3s;
+}
+
+#image-preview img:hover {
+    transform: scale(1.05);
+}
+</style>
+{% endblock %}
+
