@@ -3,6 +3,7 @@ Django>=4.2.0
 
 # Base de datos
 psycopg2-binary>=2.9.9
+dj-database-url>=2.1.0
 
 # Variables de entorno
 python-dotenv>=1.0.0
