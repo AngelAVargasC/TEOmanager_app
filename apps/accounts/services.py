@@ -44,7 +44,6 @@ class UserService:
     """
     
     @staticmethod
-    @transaction.atomic
     def create_user_profile(user, tipo_cuenta, empresa='', telefono='', direccion='', **kwargs):
         """
         Crea un perfil de usuario con validaciones de negocio.
@@ -73,8 +72,9 @@ class UserService:
         if not direccion:
             raise ValueError("La dirección es requerida")
         
+        # Crear perfil PRIMERO - esto es lo más importante
+        # El email es completamente opcional y no debe afectar la creación del perfil
         try:
-            # Crear perfil con transacción atómica
             perfil = PerfilUsuario.objects.create(
                 usuario=user,
                 tipo_cuenta=tipo_cuenta,
@@ -83,17 +83,31 @@ class UserService:
                 direccion=direccion,
                 **kwargs
             )
-            
             logger.info(f"Perfil creado exitosamente para usuario {user.username}")
-            
-            # Enviar email de bienvenida de forma asíncrona
-            UserService.send_welcome_email(user)
-            
-            return perfil
-            
         except Exception as e:
             logger.error(f"Error creando perfil para usuario {user.username}: {str(e)}")
-            raise
+            raise  # Si falla la creación del perfil, SÍ debe fallar
+        
+        # El perfil ya está creado, ahora intentar enviar email (completamente opcional)
+        # Hacerlo en un thread separado para que NO bloquee ni afecte el registro
+        try:
+            import threading
+            def send_email_async():
+                try:
+                    UserService.send_welcome_email(user)
+                except Exception as email_error:
+                    # Si falla el email, solo loguear, NO afectar el registro
+                    logger.warning(f"Error enviando email de bienvenida a {user.email}: {email_error}")
+            
+            email_thread = threading.Thread(target=send_email_async, daemon=True)
+            email_thread.start()
+        except Exception as e:
+            # Si ni siquiera se puede crear el thread, solo loguear
+            logger.warning(f"No se pudo iniciar thread para email: {e}")
+            # NO intentar enviar de forma síncrona para evitar timeouts
+        
+        # Retornar el perfil creado (el email es opcional y no afecta)
+        return perfil
     
     @staticmethod
     def send_welcome_email(user):
@@ -189,10 +203,15 @@ El equipo de TEOmanager
                 to=[user.email],
             )
             email.attach_alternative(html_message, "text/html")
-            email.send(fail_silently=True)
-            
-            logger.info(f"Email de bienvenida HTML enviado a {user.email}")
-            return True
+            # Enviar email con manejo de errores para evitar timeouts
+            try:
+                email.send(fail_silently=True)
+                logger.info(f"Email de bienvenida HTML enviado a {user.email}")
+                return True
+            except Exception as email_error:
+                # Si falla el envío, solo loguear, no fallar
+                logger.warning(f"Error enviando email a {user.email}: {email_error}")
+                return False
             
         except Exception as e:
             logger.error(f"Error enviando email de bienvenida a {user.email}: {str(e)}")

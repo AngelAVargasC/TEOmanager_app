@@ -1,5 +1,5 @@
 from django.contrib.auth.signals import user_logged_in
-from django.db.models.signals import post_migrate
+from django.db.models.signals import post_migrate, post_save
 from django.dispatch import receiver
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -77,4 +77,35 @@ def crear_admin_por_defecto(sender, app_config, **kwargs):
     except Exception as e:
         # No fallar si hay un error, solo loguear
         if os.getenv('DEBUG', 'False').lower() == 'true':
-            print(f'⚠️  No se pudo crear el admin por defecto: {e}') 
+            print(f'⚠️  No se pudo crear el admin por defecto: {e}')
+
+
+@receiver(post_save, sender=User)
+def crear_perfil_automatico(sender, instance, created, **kwargs):
+    """
+    Crea automáticamente un PerfilUsuario cuando se crea un nuevo User.
+    
+    Esto asegura que todos los usuarios tengan un perfil, incluso si se crean
+    fuera del flujo normal de registro.
+    """
+    # Solo crear si es un usuario nuevo
+    if created:
+        # Verificar si ya tiene perfil (no debería, pero por seguridad)
+        if not hasattr(instance, 'userprofile'):
+            try:
+                # Crear perfil por defecto
+                fecha_vencimiento = timezone.now() + timedelta(days=365)
+                PerfilUsuario.objects.create(
+                    usuario=instance,
+                    tipo_cuenta='usuario',
+                    empresa='',
+                    telefono='0000000000',
+                    direccion='Sin dirección',
+                    permisos='Usuario',
+                    estado_suscripcion='inactiva',
+                    fecha_vencimiento=fecha_vencimiento
+                )
+            except Exception as e:
+                # No fallar si hay un error, solo loguear
+                if os.getenv('DEBUG', 'False').lower() == 'true':
+                    print(f'⚠️  No se pudo crear perfil automático para {instance.username}: {e}') 

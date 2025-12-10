@@ -57,9 +57,19 @@ def register(request):
     if request.method == 'POST':
         form = RegistroUsuarioForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, '¡Tu cuenta ha sido creada exitosamente! Ahora puedes iniciar sesión.')
-            return redirect('login')
+            try:
+                user = form.save()
+                # Verificar que el perfil se creó correctamente
+                if not hasattr(user, 'userprofile'):
+                    logger.error(f"Usuario {user.username} creado pero sin perfil")
+                    messages.error(request, 'Hubo un error al crear tu perfil. Por favor, contacta al soporte.')
+                    return redirect('register')
+                messages.success(request, '¡Tu cuenta ha sido creada exitosamente! Ahora puedes iniciar sesión.')
+                return redirect('login')
+            except Exception as e:
+                logger.error(f"Error en registro: {str(e)}")
+                messages.error(request, 'Hubo un error al crear tu cuenta. Por favor, intenta nuevamente.')
+                return render(request, 'accounts/register.html', {'form': form})
     else:
         form = RegistroUsuarioForm()
     return render(request, 'accounts/register.html', {'form': form})
@@ -73,7 +83,24 @@ def home(request):
     from apps.productservice.models import Producto, Servicio, Pedido, ImagenProducto
     from decimal import Decimal
     
-    perfil = PerfilUsuario.objects.select_related('usuario').get(usuario=request.user)
+    # Obtener o crear perfil si no existe (por seguridad)
+    try:
+        perfil = PerfilUsuario.objects.select_related('usuario').get(usuario=request.user)
+    except PerfilUsuario.DoesNotExist:
+        # Si no tiene perfil, crear uno por defecto
+        from django.utils import timezone
+        from datetime import timedelta
+        fecha_vencimiento = timezone.now() + timedelta(days=365)
+        perfil = PerfilUsuario.objects.create(
+            usuario=request.user,
+            tipo_cuenta='usuario',
+            empresa='',
+            telefono='0000000000',
+            direccion='Sin dirección',
+            permisos='Usuario',
+            estado_suscripcion='inactiva',
+            fecha_vencimiento=fecha_vencimiento
+        )
     
     # Mostrar vista según tipo de usuario
     if perfil.tipo_cuenta == 'empresa':
