@@ -101,9 +101,17 @@ class RegistroUsuarioForm(UserCreationForm):
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if User.objects.filter(email__iexact=email).exists():
+        # Solo verificar usuarios activos (los eliminados no deberían existir, pero por seguridad)
+        if User.objects.filter(email__iexact=email, is_active=True).exists():
             raise ValidationError('Ya existe un usuario registrado con este correo electrónico.')
         return email
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Solo verificar usuarios activos
+        if User.objects.filter(username__iexact=username, is_active=True).exists():
+            raise ValidationError('Este nombre de usuario ya está en uso.')
+        return username
 
     def clean_password1(self):
         password = self.cleaned_data.get('password1') or ''
@@ -246,13 +254,15 @@ class EditarPerfilForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if self.user and User.objects.filter(email__iexact=email).exclude(pk=self.user.pk).exists():
+        # Solo verificar usuarios activos (excluyendo el usuario actual)
+        if self.user and User.objects.filter(email__iexact=email, is_active=True).exclude(pk=self.user.pk).exists():
             raise ValidationError('Ya existe otro usuario registrado con este correo electrónico.')
         return email
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        if self.user and User.objects.filter(username__iexact=username).exclude(pk=self.user.pk).exists():
+        # Solo verificar usuarios activos (excluyendo el usuario actual)
+        if self.user and User.objects.filter(username__iexact=username, is_active=True).exclude(pk=self.user.pk).exists():
             raise ValidationError('Ya existe otro usuario con este nombre de usuario.')
         return username
 

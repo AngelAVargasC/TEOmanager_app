@@ -347,84 +347,74 @@ El equipo de TEOmanager
         }
         
         try:
-            # 1. Eliminar imágenes de productos y archivos físicos
+            # IMPORTANTE: Primero eliminar objetos de BD, luego archivos físicos
+            # Esto evita problemas si hay errores al eliminar archivos
+            
+            # 1. Contar objetos antes de eliminar (para el resumen)
             productos = Producto.objects.filter(usuario=user)
-            for producto in productos:
-                # Eliminar todas las imágenes del producto
-                imagenes = ImagenProducto.objects.filter(producto=producto)
-                for img in imagenes:
-                    if img.imagen and img.imagen.path and os.path.isfile(img.imagen.path):
-                        try:
-                            os.remove(img.imagen.path)
-                            deleted_summary['archivos_eliminados'] += 1
-                        except Exception as e:
-                            logger.warning(f"No se pudo eliminar imagen de producto {img.id}: {e}")
-                    deleted_summary['imagenes_productos'] += 1
-                
-                deleted_summary['productos'] += 1
-            
-            # 2. Eliminar imágenes de servicios y archivos físicos
             servicios = Servicio.objects.filter(usuario=user)
-            for servicio in servicios:
-                # Eliminar todas las imágenes del servicio
-                imagenes = ImagenServicio.objects.filter(servicio=servicio)
-                for img in imagenes:
-                    if img.imagen and img.imagen.path and os.path.isfile(img.imagen.path):
-                        try:
-                            os.remove(img.imagen.path)
-                            deleted_summary['archivos_eliminados'] += 1
-                        except Exception as e:
-                            logger.warning(f"No se pudo eliminar imagen de servicio {img.id}: {e}")
-                    deleted_summary['imagenes_servicios'] += 1
-                
-                # Eliminar imagen principal del servicio si existe
-                if servicio.imagen and servicio.imagen.path and os.path.isfile(servicio.imagen.path):
-                    try:
-                        os.remove(servicio.imagen.path)
-                        deleted_summary['archivos_eliminados'] += 1
-                    except Exception as e:
-                        logger.warning(f"No se pudo eliminar imagen principal de servicio {servicio.id}: {e}")
-                
-                deleted_summary['servicios'] += 1
-            
-            # 3. Eliminar pedidos (esto eliminará automáticamente detalles y mensajes por CASCADE)
-            # Primero eliminar archivos adjuntos de mensajes
             pedidos = Pedido.objects.filter(Q(usuario=user) | Q(empresa=user))
-            for pedido in pedidos:
-                # Eliminar archivos adjuntos de mensajes
-                mensajes = MensajePedido.objects.filter(pedido=pedido)
-                for mensaje in mensajes:
-                    if mensaje.archivo_adjunto and mensaje.archivo_adjunto.path and os.path.isfile(mensaje.archivo_adjunto.path):
-                        try:
-                            os.remove(mensaje.archivo_adjunto.path)
-                            deleted_summary['archivos_eliminados'] += 1
-                        except Exception as e:
-                            logger.warning(f"No se pudo eliminar archivo adjunto de mensaje {mensaje.id}: {e}")
-                
-                deleted_summary['pedidos'] += 1
-            
-            # 4. Eliminar landing pages y sus imágenes hero
             from apps.webpages.models import LandingPage
             landing_pages = LandingPage.objects.filter(usuario=user)
-            for landing in landing_pages:
-                if landing.hero_image_file and landing.hero_image_file.path and os.path.isfile(landing.hero_image_file.path):
-                    try:
-                        os.remove(landing.hero_image_file.path)
-                        deleted_summary['archivos_eliminados'] += 1
-                    except Exception as e:
-                        logger.warning(f"No se pudo eliminar imagen hero de landing page {landing.id}: {e}")
-                
-                deleted_summary['landing_pages'] += 1
-            
-            # 5. Eliminar suscripciones
             suscripciones = Suscripcion.objects.filter(usuario=user)
+            
+            deleted_summary['productos'] = productos.count()
+            deleted_summary['servicios'] = servicios.count()
+            deleted_summary['pedidos'] = pedidos.count()
+            deleted_summary['landing_pages'] = landing_pages.count()
             deleted_summary['suscripciones'] = suscripciones.count()
             
-            # 6. Eliminar perfil de usuario (esto eliminará automáticamente por CASCADE)
-            # El perfil se eliminará cuando se elimine el User
+            # 2. Obtener rutas de archivos ANTES de eliminar objetos de BD
+            archivos_a_eliminar = []
             
-            # 7. Finalmente, eliminar el usuario (esto eliminará todo lo demás por CASCADE)
+            # Imágenes de productos
+            for producto in productos:
+                imagenes = ImagenProducto.objects.filter(producto=producto)
+                for img in imagenes:
+                    if img.imagen:
+                        archivos_a_eliminar.append(img.imagen.path)
+                    deleted_summary['imagenes_productos'] += 1
+            
+            # Imágenes de servicios
+            for servicio in servicios:
+                imagenes = ImagenServicio.objects.filter(servicio=servicio)
+                for img in imagenes:
+                    if img.imagen:
+                        archivos_a_eliminar.append(img.imagen.path)
+                    deleted_summary['imagenes_servicios'] += 1
+                if servicio.imagen:
+                    archivos_a_eliminar.append(servicio.imagen.path)
+            
+            # Archivos adjuntos de mensajes de pedidos
+            for pedido in pedidos:
+                mensajes = MensajePedido.objects.filter(pedido=pedido)
+                for mensaje in mensajes:
+                    if mensaje.archivo_adjunto:
+                        archivos_a_eliminar.append(mensaje.archivo_adjunto.path)
+            
+            # Imágenes hero de landing pages
+            for landing in landing_pages:
+                if landing.hero_image_file:
+                    archivos_a_eliminar.append(landing.hero_image_file.path)
+            
+            # 3. ELIMINAR EL USUARIO PRIMERO (esto eliminará todo por CASCADE)
+            # Esto es lo más importante - eliminar el usuario de la BD
+            user_pk = user.pk  # Guardar PK antes de eliminar
             user.delete()
+            
+            # Verificar que el usuario fue eliminado
+            if User.objects.filter(pk=user_pk).exists():
+                raise Exception(f"El usuario {username} no fue eliminado correctamente de la base de datos")
+            
+            # 4. Eliminar archivos físicos DESPUÉS de eliminar de BD
+            # Si falla la eliminación de archivos, no es crítico (ya se eliminó de BD)
+            for archivo_path in archivos_a_eliminar:
+                if archivo_path and os.path.isfile(archivo_path):
+                    try:
+                        os.remove(archivo_path)
+                        deleted_summary['archivos_eliminados'] += 1
+                    except Exception as e:
+                        logger.warning(f"No se pudo eliminar archivo {archivo_path}: {e}")
             
             logger.info(f"Usuario {username} eliminado completamente. Resumen: {deleted_summary}")
             
