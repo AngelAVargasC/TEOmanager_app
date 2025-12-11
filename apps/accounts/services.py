@@ -228,14 +228,25 @@ El equipo de TEOmanager
             )
             email.attach_alternative(html_message, "text/html")
             
+            # Verificar si estamos usando Gmail en Railway (no funciona)
+            if settings.EMAIL_HOST == 'smtp.gmail.com' and settings.IS_RAILWAY:
+                logger.error(f"❌ Gmail SMTP no funciona en Railway. Configura SENDGRID_API_KEY en Railway.")
+                logger.error(f"   Ve a: https://signup.sendgrid.com/ y crea una API Key")
+                logger.error(f"   Luego agrega SENDGRID_API_KEY en Railway Variables")
+                return False  # No intentar enviar si sabemos que fallará
+            
             # Enviar email con manejo de errores detallado
             try:
-                result = email.send(fail_silently=False)
-                logger.info(f"✅ Email de bienvenida enviado exitosamente a {user.email} (resultado: {result})")
-                return True
+                result = email.send(fail_silently=True)  # Cambiar a True para que no falle la app
+                if result:
+                    logger.info(f"✅ Email de bienvenida enviado exitosamente a {user.email}")
+                    return True
+                else:
+                    logger.warning(f"⚠️ Email de bienvenida no se pudo enviar a {user.email} (fail_silently=True)")
+                    return False
             except Exception as email_error:
                 # Log detallado del error
-                logger.error(f"❌ Error enviando email de bienvenida a {user.email}: {str(email_error)}", exc_info=True)
+                logger.error(f"❌ Error enviando email de bienvenida a {user.email}: {str(email_error)}")
                 logger.error(f"   Tipo de error: {type(email_error).__name__}")
                 return False
             

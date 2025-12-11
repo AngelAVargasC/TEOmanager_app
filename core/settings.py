@@ -366,7 +366,7 @@ if USE_SENDGRID:
     DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TEOmanager <noreply@teomanager.com>')
     print("✅ Configurado SendGrid para envío de emails")
 else:
-    # Usar Gmail SMTP (fallback)
+    # Usar Gmail SMTP (fallback - NO FUNCIONA EN RAILWAY)
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
     EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
@@ -374,7 +374,12 @@ else:
     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'vctechmx@gmail.com')
     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'vycyysxlyrildgot')
     DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TEOmanager <vctechmx@gmail.com>')
-    print("✅ Configurado Gmail SMTP para envío de emails")
+    if IS_RAILWAY:
+        print("⚠️  Configurado Gmail SMTP, pero NO FUNCIONA en Railway.")
+        print("⚠️  CONFIGURA SENDGRID_API_KEY en Railway para que los emails funcionen.")
+        print("⚠️  Ve a: https://signup.sendgrid.com/ y crea una API Key gratuita.")
+    else:
+        print("✅ Configurado Gmail SMTP para envío de emails")
 
 # Timeout para conexiones SMTP (aumentado para Railway)
 EMAIL_TIMEOUT = 30

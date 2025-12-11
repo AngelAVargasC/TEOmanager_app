@@ -84,6 +84,13 @@ def send_password_reset_email_async(user, request=None):
                 'site_name': site_name,
             })
             
+            # Verificar si estamos usando Gmail en Railway (no funciona)
+            if settings.EMAIL_HOST == 'smtp.gmail.com' and settings.IS_RAILWAY:
+                logger.error(f"❌ Gmail SMTP no funciona en Railway. Configura SENDGRID_API_KEY en Railway.")
+                logger.error(f"   Ve a: https://signup.sendgrid.com/ y crea una API Key")
+                logger.error(f"   Luego agrega SENDGRID_API_KEY en Railway Variables")
+                return  # No intentar enviar si sabemos que fallará
+            
             # Enviar email
             try:
                 result = send_mail(
@@ -91,12 +98,16 @@ def send_password_reset_email_async(user, request=None):
                     message=message,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email],
-                    fail_silently=False,
+                    fail_silently=True,  # Cambiar a True para que no falle la app
                 )
-                logger.info(f"✅ Email de restablecimiento enviado exitosamente a {user.email} (resultado: {result})")
+                if result:
+                    logger.info(f"✅ Email de restablecimiento enviado exitosamente a {user.email}")
+                else:
+                    logger.warning(f"⚠️ Email de restablecimiento no se pudo enviar a {user.email} (fail_silently=True)")
             except Exception as send_error:
-                logger.error(f"❌ Error en send_mail para {user.email}: {str(send_error)}", exc_info=True)
-                raise  # Re-lanzar para que se capture en el except externo
+                logger.error(f"❌ Error en send_mail para {user.email}: {str(send_error)}")
+                logger.error(f"   Tipo: {type(send_error).__name__}")
+                # No re-lanzar para que no falle la aplicación
             
         except Exception as e:
             logger.error(f"❌ Error enviando email de restablecimiento a {user.email}: {str(e)}", exc_info=True)
