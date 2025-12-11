@@ -66,7 +66,22 @@ Agrega esta variable de entorno en Railway:
    ```
    RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    ```
-   (Reemplaza con tu API key real)
+   **⚠️ IMPORTANTE:**
+   - **NO** pongas comillas alrededor de la key
+   - **NO** dejes espacios al inicio o final
+   - Debe empezar con `re_`
+   - Copia la key completa desde Resend
+   
+   **❌ INCORRECTO:**
+   ```
+   RESEND_API_KEY="re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   RESEND_API_KEY= re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
+   ```
+   
+   **✅ CORRECTO:**
+   ```
+   RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   ```
 
 6. Opcional, también agrega:
    ```
@@ -135,11 +150,42 @@ send_mail(
 3. Verifica que el API Key tenga permisos de "Sending access"
 4. Si usas dominio personalizado, verifica que esté verificado en Resend
 
-### Error: "Invalid API Key"
+### Error: "API key is invalid" o "Invalid API Key"
 
-1. Verifica que copiaste la API key completa (empieza con `re_`)
-2. Asegúrate de que no haya espacios al inicio o final
-3. Regenera la API key si es necesario
+Este error significa que Resend no reconoce tu API key. Sigue estos pasos:
+
+1. **Verifica en Railway:**
+   - Ve a Railway Dashboard → Tu proyecto → Variables
+   - Busca `RESEND_API_KEY`
+   - Verifica que:
+     - ✅ No tenga comillas alrededor (`re_xxxxx` NO `"re_xxxxx"`)
+     - ✅ No tenga espacios al inicio o final
+     - ✅ Empiece con `re_`
+     - ✅ Esté completa (no truncada)
+
+2. **Verifica en Resend:**
+   - Ve a https://resend.com/api-keys
+   - Verifica que la key exista y esté activa
+   - Si no estás seguro, crea una nueva key
+
+3. **Regenera la API key (si es necesario):**
+   - Ve a Resend Dashboard → API Keys
+   - Click en la key existente → **"Revoke"** (revocar)
+   - Click **"Create API Key"** → Crea una nueva
+   - Copia la nueva key completa
+   - Actualiza en Railway con la nueva key
+
+4. **Redeploy en Railway:**
+   - Después de actualizar la variable, Railway debería redeployar automáticamente
+   - O haz click en **"Redeploy"** manualmente
+
+5. **Verifica los logs:**
+   - En los logs de Railway deberías ver:
+     ```
+     🔑 Resend API Key detectada: re_xxxxx...xxxxx (longitud: XX)
+     ✅ Configurado Resend (API REST) para envío de emails
+     ```
+   - Si ves un warning sobre el formato, la key está mal configurada
 
 ### Los emails van a spam
 

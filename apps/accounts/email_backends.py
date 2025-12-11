@@ -20,8 +20,23 @@ class ResendBackend(BaseEmailBackend):
     
     def __init__(self, fail_silently=False, **kwargs):
         super().__init__(fail_silently=fail_silently, **kwargs)
-        self.api_key = os.getenv('RESEND_API_KEY', '')
+        # Leer y limpiar la API key (quitar espacios y comillas)
+        raw_key = os.getenv('RESEND_API_KEY', '')
+        self.api_key = raw_key.strip().strip('"').strip("'")
         self.api_url = 'https://api.resend.com/emails'
+        
+        # Validar formato de API key (debe empezar con "re_")
+        if self.api_key and not self.api_key.startswith('re_'):
+            logger.warning(f"⚠️ RESEND_API_KEY no tiene el formato esperado (debe empezar con 're_')")
+            logger.warning(f"   Longitud: {len(self.api_key)} caracteres")
+            logger.warning(f"   Primeros 5 caracteres: {self.api_key[:5] if len(self.api_key) >= 5 else 'N/A'}")
+        
+        # Logging de diagnóstico (sin mostrar la key completa)
+        if self.api_key:
+            masked_key = f"{self.api_key[:5]}...{self.api_key[-4:]}" if len(self.api_key) > 9 else "***"
+            logger.info(f"🔑 Resend API Key detectada: {masked_key} (longitud: {len(self.api_key)})")
+        else:
+            logger.error("❌ RESEND_API_KEY no está configurada o está vacía")
     
     def send_messages(self, email_messages):
         """
@@ -101,8 +116,22 @@ class ResendBackend(BaseEmailBackend):
                     except:
                         error_msg = str(e)
                     
+                    # Manejar error específico de API key inválida
+                    if 'api key is invalid' in error_msg.lower() or 'invalid api key' in error_msg.lower():
+                        logger.error(f"❌ Resend API Key inválida o incorrecta")
+                        logger.error(f"   Verifica en Railway que RESEND_API_KEY esté configurada correctamente:")
+                        logger.error(f"   1. Ve a Railway Dashboard → Tu proyecto → Variables")
+                        logger.error(f"   2. Busca RESEND_API_KEY")
+                        logger.error(f"   3. Asegúrate de que:")
+                        logger.error(f"      - No tenga comillas alrededor (debe ser: re_xxxxx, NO: \"re_xxxxx\")")
+                        logger.error(f"      - No tenga espacios al inicio o final")
+                        logger.error(f"      - Empiece con 're_'")
+                        logger.error(f"   4. Obtén una nueva API key en: https://resend.com/api-keys")
+                        logger.error(f"   5. Copia la key completa y pégala en Railway")
+                        if not self.fail_silently:
+                            raise Exception(f"Resend API HTTP error: {error_msg}")
                     # Manejar error específico de Resend sobre dominio no verificado
-                    if 'only send testing emails to your own email address' in error_msg.lower():
+                    elif 'only send testing emails to your own email address' in error_msg.lower():
                         logger.error(f"❌ Resend: Solo puedes enviar emails de prueba a tu propia dirección.")
                         logger.error(f"   Para enviar a otros destinatarios, verifica tu dominio en Resend:")
                         logger.error(f"   1. Ve a: https://resend.com/domains")
@@ -115,6 +144,8 @@ class ResendBackend(BaseEmailBackend):
                             logger.warning(f"⚠️ Email no enviado a {to_emails} - Dominio no verificado en Resend")
                     else:
                         logger.error(f"❌ Error HTTP enviando email a {to_emails}: {error_msg}")
+                        logger.error(f"   Código HTTP: {e.code}")
+                        logger.error(f"   Respuesta completa: {error_body[:200]}")
                         if not self.fail_silently:
                             raise Exception(f"Resend API HTTP error: {error_msg}")
                 except Exception as e:
