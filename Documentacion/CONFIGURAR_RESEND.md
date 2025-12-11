@@ -31,21 +31,28 @@ Resend es un servicio de email moderno y fácil de usar:
 6. Click **"Add"**
 7. **COPIA LA API KEY** (empieza con `re_` y solo se muestra una vez)
 
-### Paso 3: Verificar Dominio (Opcional pero Recomendado)
+### Paso 3: Verificar Dominio (OBLIGATORIO para Producción)
 
-Para usar `noreply@teomanager.com`:
+⚠️ **IMPORTANTE:** Sin dominio verificado, Resend solo permite enviar emails a tu propia dirección de email (la que usaste para registrarte).
+
+Para enviar a cualquier destinatario:
 
 1. En Resend Dashboard, ve a **Domains**
 2. Click **"Add Domain"**
 3. Ingresa: `teomanager.com`
 4. Resend te dará registros DNS para agregar en Cloudflare:
-   - `TXT` record para verificación
+   - `TXT` record para verificación (SPF)
    - `CNAME` record para DKIM
-5. Agrega los registros en Cloudflare
-6. Espera a que se verifique (puede tomar unos minutos)
-7. Una vez verificado, puedes usar cualquier email del dominio
+   - `TXT` record para DMARC (opcional pero recomendado)
+5. Agrega los registros en Cloudflare:
+   - Ve a Cloudflare → Tu dominio → DNS
+   - Agrega cada registro exactamente como Resend lo indica
+6. Espera a que se verifique (puede tomar 5-30 minutos)
+7. Una vez verificado (verás un check verde en Resend), puedes usar cualquier email del dominio
 
-**Nota:** Puedes empezar a enviar emails sin verificar dominio, pero usarás el dominio de Resend (`onboarding@resend.dev`)
+**Después de verificar:**
+- Actualiza en Railway: `DEFAULT_FROM_EMAIL=TEOmanager <noreply@teomanager.com>`
+- Ahora podrás enviar a cualquier destinatario
 
 ### Paso 4: Configurar en Railway
 

@@ -100,9 +100,23 @@ class ResendBackend(BaseEmailBackend):
                         error_msg = error_data.get('message', str(e))
                     except:
                         error_msg = str(e)
-                    logger.error(f"❌ Error HTTP enviando email a {to_emails}: {error_msg}")
-                    if not self.fail_silently:
-                        raise Exception(f"Resend API HTTP error: {error_msg}")
+                    
+                    # Manejar error específico de Resend sobre dominio no verificado
+                    if 'only send testing emails to your own email address' in error_msg.lower():
+                        logger.error(f"❌ Resend: Solo puedes enviar emails de prueba a tu propia dirección.")
+                        logger.error(f"   Para enviar a otros destinatarios, verifica tu dominio en Resend:")
+                        logger.error(f"   1. Ve a: https://resend.com/domains")
+                        logger.error(f"   2. Click 'Add Domain' y agrega 'teomanager.com'")
+                        logger.error(f"   3. Agrega los registros DNS en Cloudflare")
+                        logger.error(f"   4. Una vez verificado, actualiza DEFAULT_FROM_EMAIL en Railway")
+                        logger.error(f"   5. Temporalmente, solo puedes enviar a: ariadna.pamela01@gmail.com")
+                        # No lanzar excepción para que la app no falle, pero loguear el problema
+                        if not self.fail_silently:
+                            logger.warning(f"⚠️ Email no enviado a {to_emails} - Dominio no verificado en Resend")
+                    else:
+                        logger.error(f"❌ Error HTTP enviando email a {to_emails}: {error_msg}")
+                        if not self.fail_silently:
+                            raise Exception(f"Resend API HTTP error: {error_msg}")
                 except Exception as e:
                     logger.error(f"❌ Error enviando email a {to_emails}: {str(e)}", exc_info=True)
                     if not self.fail_silently:
