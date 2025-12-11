@@ -111,20 +111,21 @@ class UserService:
             def send_email_async():
                 try:
                     # Pequeña espera para asegurar que el registro se complete
-                    time.sleep(0.5)
+                    time.sleep(1.0)  # Aumentar delay para asegurar que el proceso principal no termine
+                    logger.info(f"🔄 Iniciando envío de email de bienvenida a {user.email}...")
                     result = UserService.send_welcome_email(user)
                     if result:
                         logger.info(f"✅ Email de bienvenida enviado exitosamente a {user.email}")
                     else:
-                        logger.warning(f"⚠️ Email de bienvenida no se pudo enviar a {user.email}")
+                        logger.warning(f"⚠️ Email de bienvenida retornó False para {user.email}")
                 except Exception as email_error:
                     # Si falla el email, solo loguear, NO afectar el registro
-                    logger.error(f"❌ Error enviando email de bienvenida a {user.email}: {email_error}")
+                    logger.error(f"❌ Error enviando email de bienvenida a {user.email}: {email_error}", exc_info=True)
             
             # NO usar daemon=True para que el thread pueda completar el envío
-            email_thread = threading.Thread(target=send_email_async)
+            email_thread = threading.Thread(target=send_email_async, name=f"email-welcome-{user.id}")
             email_thread.start()
-            logger.info(f"📧 Thread de email de bienvenida iniciado para {user.email}")
+            logger.info(f"📧 Thread de email de bienvenida iniciado para {user.email} (thread: {email_thread.name})")
         except Exception as e:
             # Si ni siquiera se puede crear el thread, solo loguear
             logger.error(f"❌ No se pudo iniciar thread para email: {e}")
@@ -144,6 +145,15 @@ class UserService:
         Returns:
             bool: True si el email se envió correctamente
         """
+        # Verificar configuración de email antes de continuar
+        if not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD:
+            logger.error(f"❌ Configuración de email incompleta. EMAIL_HOST_USER o EMAIL_HOST_PASSWORD no están configurados.")
+            return False
+        
+        if not user.email:
+            logger.error(f"❌ Usuario {user.username} no tiene email configurado.")
+            return False
+        
         try:
             # Intentar obtener el perfil (puede no existir aún si se llama antes de crear el perfil)
             perfil = None
@@ -203,6 +213,12 @@ Saludos,
 El equipo de TEOmanager
 """
             
+            # Verificar configuración de email antes de enviar
+            logger.info(f"📧 Intentando enviar email de bienvenida a {user.email}")
+            logger.info(f"   From: {settings.DEFAULT_FROM_EMAIL}")
+            logger.info(f"   Host: {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+            logger.info(f"   User: {settings.EMAIL_HOST_USER}")
+            
             # Enviar email con HTML y texto plano
             email = EmailMultiAlternatives(
                 subject=subject,
@@ -211,14 +227,16 @@ El equipo de TEOmanager
                 to=[user.email],
             )
             email.attach_alternative(html_message, "text/html")
-            # Enviar email con manejo de errores para evitar timeouts
+            
+            # Enviar email con manejo de errores detallado
             try:
-                email.send(fail_silently=True)
-                logger.info(f"Email de bienvenida HTML enviado a {user.email}")
+                result = email.send(fail_silently=False)
+                logger.info(f"✅ Email de bienvenida enviado exitosamente a {user.email} (resultado: {result})")
                 return True
             except Exception as email_error:
-                # Si falla el envío, solo loguear, no fallar
-                logger.warning(f"Error enviando email a {user.email}: {email_error}")
+                # Log detallado del error
+                logger.error(f"❌ Error enviando email de bienvenida a {user.email}: {str(email_error)}", exc_info=True)
+                logger.error(f"   Tipo de error: {type(email_error).__name__}")
                 return False
             
         except Exception as e:

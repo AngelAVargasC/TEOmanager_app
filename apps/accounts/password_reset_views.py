@@ -33,6 +33,15 @@ def send_password_reset_email_async(user, request=None):
     
     def _send_email():
         try:
+            # Verificar configuración de email antes de continuar
+            if not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD:
+                logger.error(f"❌ Configuración de email incompleta. EMAIL_HOST_USER o EMAIL_HOST_PASSWORD no están configurados.")
+                return
+            
+            if not user.email:
+                logger.error(f"❌ Usuario {user.username} no tiene email configurado.")
+                return
+            
             # Obtener el dominio del sitio usando el método helper
             # Esto funciona incluso si el request no está disponible en el thread
             base_url = UserService.get_site_base_url()
@@ -57,6 +66,13 @@ def send_password_reset_email_async(user, request=None):
             from django.urls import reverse
             reset_url = f"{base_url}{reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})}"
             
+            # Verificar configuración de email antes de enviar
+            logger.info(f"📧 Intentando enviar email de restablecimiento a {user.email}")
+            logger.info(f"   From: {settings.DEFAULT_FROM_EMAIL}")
+            logger.info(f"   Host: {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+            logger.info(f"   User: {settings.EMAIL_HOST_USER}")
+            logger.info(f"   Domain: {domain}, Protocol: {protocol}")
+            
             # Renderizar template de email
             subject = f'Restablecimiento de contraseña en {site_name}'
             message = render_to_string('registration/password_reset_email.html', {
@@ -69,31 +85,35 @@ def send_password_reset_email_async(user, request=None):
             })
             
             # Enviar email
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=False,  # Cambiar a False para ver errores
-            )
-            
-            logger.info(f"✅ Email de restablecimiento de contraseña enviado a {user.email}")
+            try:
+                result = send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+                logger.info(f"✅ Email de restablecimiento enviado exitosamente a {user.email} (resultado: {result})")
+            except Exception as send_error:
+                logger.error(f"❌ Error en send_mail para {user.email}: {str(send_error)}", exc_info=True)
+                raise  # Re-lanzar para que se capture en el except externo
             
         except Exception as e:
             logger.error(f"❌ Error enviando email de restablecimiento a {user.email}: {str(e)}", exc_info=True)
     
     # Pequeña espera para asegurar que la respuesta se envíe primero
-    time.sleep(0.3)
+    time.sleep(0.5)
     
     # Enviar en un thread separado (NO daemon para que complete el envío)
     try:
-        thread = threading.Thread(target=_send_email)
+        thread = threading.Thread(target=_send_email, name=f"email-reset-{user.id}")
         thread.start()
-        logger.info(f"📧 Thread de email de restablecimiento iniciado para {user.email}")
+        logger.info(f"📧 Thread de email de restablecimiento iniciado para {user.email} (thread: {thread.name})")
     except Exception as e:
-        logger.error(f"❌ Error creando thread para email de restablecimiento: {str(e)}")
+        logger.error(f"❌ Error creando thread para email de restablecimiento: {str(e)}", exc_info=True)
         # Fallback: intentar enviar de forma síncrona
         try:
+            logger.warning(f"⚠️ Intentando envío síncrono como fallback para {user.email}")
             _send_email()
         except Exception as sync_error:
             logger.error(f"❌ Error enviando email de forma síncrona: {str(sync_error)}", exc_info=True)

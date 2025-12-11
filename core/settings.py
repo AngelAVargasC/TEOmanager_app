@@ -350,13 +350,34 @@ LOGOUT_REDIRECT_URL = 'login'  # Redirección después del logout
 
 # Configuración de correo electrónico
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Solo para desarrollo
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Backend SMTP para producción
-EMAIL_HOST = 'smtp.gmail.com'  # Servidor SMTP
-EMAIL_PORT = 587  # Puerto SMTP
-EMAIL_USE_TLS = True  # Usar TLS para seguridad
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'vctechmx@gmail.com')  # Usuario SMTP
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'vycyysxlyrildgot')  # Contraseña SMTP
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TEOmanager <vctechmx@gmail.com>')  # Remitente por defecto
+
+# Detectar qué servicio de email usar (SendGrid tiene prioridad si está configurado)
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '')
+USE_SENDGRID = bool(SENDGRID_API_KEY)
+
+if USE_SENDGRID:
+    # Usar SendGrid (recomendado para Railway/producción)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.sendgrid.net'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = 'apikey'  # SendGrid siempre usa 'apikey' como usuario
+    EMAIL_HOST_PASSWORD = SENDGRID_API_KEY  # La API key de SendGrid
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TEOmanager <noreply@teomanager.com>')
+    print("✅ Configurado SendGrid para envío de emails")
+else:
+    # Usar Gmail SMTP (fallback)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'vctechmx@gmail.com')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'vycyysxlyrildgot')
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TEOmanager <vctechmx@gmail.com>')
+    print("✅ Configurado Gmail SMTP para envío de emails")
+
+# Timeout para conexiones SMTP (aumentado para Railway)
+EMAIL_TIMEOUT = 30
 
 # Configuración de dominio del sitio para emails y enlaces
 # Django Sites Framework - ID del sitio (por defecto 1)
