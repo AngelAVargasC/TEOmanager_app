@@ -359,13 +359,8 @@ SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '')
 USE_SENDGRID = bool(SENDGRID_API_KEY)
 
 if USE_RESEND:
-    # Usar Resend (moderno, fácil de usar, funciona perfectamente en Railway)
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.resend.com'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = 'resend'  # Resend siempre usa 'resend' como usuario
-    EMAIL_HOST_PASSWORD = RESEND_API_KEY  # La API key de Resend
+    # Usar Resend con API REST (Railway bloquea SMTP, así que usamos API directamente)
+    EMAIL_BACKEND = 'apps.accounts.email_backends.ResendBackend'
     # Resend requiere usar onboarding@resend.dev si no hay dominio verificado
     # O el email del dominio verificado si está configurado
     default_from = os.getenv('DEFAULT_FROM_EMAIL', '')
@@ -374,7 +369,7 @@ if USE_RESEND:
         DEFAULT_FROM_EMAIL = 'TEOmanager <onboarding@resend.dev>'
     else:
         DEFAULT_FROM_EMAIL = default_from
-    print("✅ Configurado Resend para envío de emails")
+    print("✅ Configurado Resend (API REST) para envío de emails")
     print(f"   From Email: {DEFAULT_FROM_EMAIL}")
 elif USE_SENDGRID:
     # Usar SendGrid (recomendado para Railway/producción)
