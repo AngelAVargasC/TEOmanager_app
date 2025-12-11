@@ -351,11 +351,24 @@ LOGOUT_REDIRECT_URL = 'login'  # Redirección después del logout
 # Configuración de correo electrónico
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Solo para desarrollo
 
-# Detectar qué servicio de email usar (SendGrid tiene prioridad si está configurado)
+# Detectar qué servicio de email usar (Resend tiene prioridad, luego SendGrid)
+RESEND_API_KEY = os.getenv('RESEND_API_KEY', '')
+USE_RESEND = bool(RESEND_API_KEY)
+
 SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '')
 USE_SENDGRID = bool(SENDGRID_API_KEY)
 
-if USE_SENDGRID:
+if USE_RESEND:
+    # Usar Resend (moderno, fácil de usar, funciona perfectamente en Railway)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.resend.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = 'resend'  # Resend siempre usa 'resend' como usuario
+    EMAIL_HOST_PASSWORD = RESEND_API_KEY  # La API key de Resend
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TEOmanager <noreply@teomanager.com>')
+    print("✅ Configurado Resend para envío de emails")
+elif USE_SENDGRID:
     # Usar SendGrid (recomendado para Railway/producción)
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'smtp.sendgrid.net'
@@ -376,8 +389,9 @@ else:
     DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TEOmanager <vctechmx@gmail.com>')
     if IS_RAILWAY:
         print("⚠️  Configurado Gmail SMTP, pero NO FUNCIONA en Railway.")
-        print("⚠️  CONFIGURA SENDGRID_API_KEY en Railway para que los emails funcionen.")
-        print("⚠️  Ve a: https://signup.sendgrid.com/ y crea una API Key gratuita.")
+        print("⚠️  CONFIGURA UN SERVICIO DE EMAIL en Railway:")
+        print("⚠️  - Resend (RECOMENDADO): https://resend.com/ - 100 emails/día gratis")
+        print("⚠️  - SendGrid: https://signup.sendgrid.com/ - 100 emails/día gratis")
     else:
         print("✅ Configurado Gmail SMTP para envío de emails")
 
