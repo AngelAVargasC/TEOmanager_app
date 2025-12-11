@@ -152,25 +152,9 @@ class UserService:
             else:
                 subject = 'Bienvenido a TEOmanager'
             
-            # Obtener URL de login
-            # Intentar obtener el dominio del sitio, si no usar configuración por defecto
-            try:
-                from django.contrib.sites.models import Site
-                current_site = Site.objects.get_current()
-                domain = current_site.domain
-                # Asegurar que tenga protocolo
-                if not domain.startswith('http'):
-                    protocol = 'https' if not settings.DEBUG else 'http'
-                    login_url = f"{protocol}://{domain}{reverse('login')}"
-                else:
-                    login_url = f"{domain}{reverse('login')}"
-            except:
-                # Fallback: usar configuración de settings o localhost
-                if hasattr(settings, 'SITE_URL'):
-                    base_url = settings.SITE_URL
-                else:
-                    base_url = 'http://localhost:5490' if settings.DEBUG else 'https://teomanager.com'
-                login_url = f"{base_url}{reverse('login')}"
+            # Obtener URL de login usando el dominio correcto
+            base_url = UserService.get_site_base_url()
+            login_url = f"{base_url}{reverse('login')}"
             
             # Renderizar template HTML
             html_message = render_to_string('emails/welcome_email.html', {
@@ -231,6 +215,61 @@ El equipo de TEOmanager
             logger.error(f"Error enviando email de bienvenida a {user.email}: {str(e)}")
             # No lanzar excepción para que el registro no falle si hay problema con el email
             return False
+    
+    @staticmethod
+    def get_site_base_url():
+        """
+        Obtiene la URL base del sitio para usar en emails y enlaces.
+        
+        Prioridad:
+        1. SITE_URL de settings (variable de entorno)
+        2. Django Sites Framework (si está configurado)
+        3. Dominio personalizado de Railway
+        4. Dominio de Railway por defecto
+        5. Localhost (solo desarrollo)
+        
+        Returns:
+            str: URL base del sitio (ej: https://teomanager.com)
+        """
+        from django.conf import settings
+        
+        # Prioridad 1: SITE_URL de settings (variable de entorno)
+        if hasattr(settings, 'SITE_URL') and settings.SITE_URL:
+            return settings.SITE_URL.rstrip('/')
+        
+        # Prioridad 2: Django Sites Framework
+        try:
+            from django.contrib.sites.models import Site
+            current_site = Site.objects.get_current()
+            domain = current_site.domain
+            
+            # Asegurar que tenga protocolo
+            if not domain.startswith('http'):
+                protocol = 'https' if (settings.IS_PRODUCTION or settings.IS_STAGING) else 'http'
+                return f"{protocol}://{domain}"
+            else:
+                return domain.rstrip('/')
+        except Exception as e:
+            logger.debug(f"Sites Framework no disponible: {e}")
+        
+        # Prioridad 3: Dominio personalizado de Railway
+        railway_custom = os.getenv('RAILWAY_PUBLIC_DOMAIN', '')
+        if railway_custom:
+            domain_clean = railway_custom.replace('https://', '').replace('http://', '')
+            return f"https://{domain_clean}"
+        
+        # Prioridad 4: Dominio de Railway por defecto
+        if settings.IS_RAILWAY:
+            railway_domain = os.getenv('RAILWAY_DOMAIN', 'web-production-8666.up.railway.app')
+            return f"https://{railway_domain}"
+        
+        # Prioridad 5: Fallback según entorno
+        if settings.IS_PRODUCTION:
+            return 'https://teomanager.com'
+        elif settings.IS_STAGING:
+            return 'https://teomanager.com'  # Usar dominio real incluso en staging
+        else:
+            return 'http://localhost:5490'
     
     @staticmethod
     def update_user_profile(user, **kwargs):

@@ -127,6 +127,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',  # Framework de sesiones
     'django.contrib.messages',  # Framework de mensajes
     'django.contrib.staticfiles',  # Manejo de archivos estáticos
+    'django.contrib.sites',  # Framework de Sites para dominios múltiples
     'apps.accounts',  # Aplicación de cuentas de usuario
     'apps.productservice',  # Aplicación de productos y servicios
     'apps.webpages',  # Aplicación de landing pages y plantillas web
@@ -309,4 +310,25 @@ EMAIL_PORT = 587  # Puerto SMTP
 EMAIL_USE_TLS = True  # Usar TLS para seguridad
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'vctechmx@gmail.com')  # Usuario SMTP
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'vycyysxlyrildgot')  # Contraseña SMTP
-DEFAULT_FROM_EMAIL = 'Admin Panel <vctechmx@gmail.com>'  # Remitente por defecto
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TEOmanager <vctechmx@gmail.com>')  # Remitente por defecto
+
+# Configuración de dominio del sitio para emails y enlaces
+# Django Sites Framework - ID del sitio (por defecto 1)
+SITE_ID = 1
+
+# URL base del sitio para emails (sin barra final)
+# Se usa como fallback si Sites Framework no está configurado
+SITE_URL = os.getenv('SITE_URL', None)
+if not SITE_URL:
+    if IS_PRODUCTION:
+        SITE_URL = 'https://teomanager.com'
+    elif IS_STAGING or IS_RAILWAY:
+        # En Railway, usar el dominio personalizado si existe, sino el de Railway
+        custom_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN', '')
+        if custom_domain:
+            SITE_URL = f"https://{custom_domain.replace('https://', '').replace('http://', '')}"
+        else:
+            railway_domain = os.getenv('RAILWAY_DOMAIN', 'web-production-8666.up.railway.app')
+            SITE_URL = f"https://{railway_domain}"
+    else:
+        SITE_URL = 'http://localhost:5490'
