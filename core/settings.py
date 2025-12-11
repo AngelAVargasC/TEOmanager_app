@@ -88,15 +88,21 @@ else:
 # NOTA: Django NO acepta wildcards, necesita dominios exactos
 def normalize_csrf_origin(origin):
     """Normaliza un origen CSRF para asegurar que tenga el formato correcto."""
+    if not origin:
+        return origin
+    
     origin = origin.strip()
-    # Remover barras finales
-    origin = origin.rstrip('/')
-    # Asegurar que tenga protocolo
-    if not origin.startswith('http://') and not origin.startswith('https://'):
-        # Si no tiene protocolo, agregar https://
-        origin = f'https://{origin}'
-    # Corregir errores comunes como https:/ (una sola barra)
-    origin = origin.replace('https:/', 'https://').replace('http:/', 'http://')
+    
+    # Remover todas las ocurrencias de protocolos para empezar limpio
+    origin = origin.replace('https://', '').replace('http://', '')
+    origin = origin.replace('https:/', '').replace('http:/', '')
+    
+    # Remover barras iniciales y finales
+    origin = origin.lstrip('/').rstrip('/')
+    
+    # Agregar https:// al inicio (siempre usar https en producción)
+    origin = f'https://{origin}'
+    
     return origin
 
 if IS_STAGING or IS_PRODUCTION:
@@ -125,8 +131,8 @@ if IS_STAGING or IS_PRODUCTION:
     # Agregar dominio de Railway desde RAILWAY_DOMAIN si está disponible
     railway_specific = os.getenv('RAILWAY_DOMAIN', '')
     if railway_specific:
-        # Construir URL completa
-        railway_url = normalize_csrf_origin(f'https://{railway_specific}')
+        # Construir URL completa (normalize_csrf_origin ya agrega https://)
+        railway_url = normalize_csrf_origin(railway_specific)
         if railway_url not in CSRF_TRUSTED_ORIGINS:
             CSRF_TRUSTED_ORIGINS.append(railway_url)
     
@@ -141,9 +147,7 @@ if IS_STAGING or IS_PRODUCTION:
                 if normalized not in CSRF_TRUSTED_ORIGINS:
                     CSRF_TRUSTED_ORIGINS.append(normalized)
     
-    # Validación final: asegurar que todos los orígenes tengan el formato correcto
-    CSRF_TRUSTED_ORIGINS = [normalize_csrf_origin(origin) for origin in CSRF_TRUSTED_ORIGINS]
-    # Remover duplicados manteniendo el orden
+    # Remover duplicados manteniendo el orden (ya están normalizados)
     CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
     
     # Debug: imprimir orígenes configurados (solo en staging para debugging)
