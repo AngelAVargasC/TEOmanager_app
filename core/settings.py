@@ -84,7 +84,8 @@ else:
 # NOTA: Django NO acepta wildcards, necesita dominios exactos
 if IS_STAGING or IS_PRODUCTION:
     CSRF_TRUSTED_ORIGINS = []
-    # Agregar dominio de Railway si está disponible
+    
+    # Agregar dominio de Railway si está disponible (desde variable automática)
     railway_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN', '')
     if railway_domain:
         # Asegurarse de que tenga https://
@@ -92,20 +93,22 @@ if IS_STAGING or IS_PRODUCTION:
             CSRF_TRUSTED_ORIGINS.append(f'https://{railway_domain}')
         else:
             CSRF_TRUSTED_ORIGINS.append(railway_domain)
+    
     # Agregar dominio desde variable de entorno personalizada si existe
     # Formato: CSRF_TRUSTED_ORIGINS=https://dominio1.com,https://dominio2.com
     custom_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
     if custom_origins:
         CSRF_TRUSTED_ORIGINS.extend([d.strip() for d in custom_origins.split(',') if d.strip()])
-    # Si no hay dominios configurados, usar el dominio actual de Railway
-    # Para testeo: agregar el dominio específico aquí temporalmente
-    # En producción, configurar CSRF_TRUSTED_ORIGINS en Railway Variables
+    
+    # Agregar dominio de Railway específico como fallback (siempre incluirlo)
+    # Esto asegura que el dominio de Railway funcione incluso si no está en las variables
+    railway_fallback = 'https://web-production-8666.up.railway.app'
+    if railway_fallback not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(railway_fallback)
+    
+    # Si no hay dominios configurados, usar solo el dominio de Railway
     if not CSRF_TRUSTED_ORIGINS:
-        # Agregar dominio específico de Railway (actualizar con tu dominio real)
-        # O mejor: agregar en Railway Variables: CSRF_TRUSTED_ORIGINS=https://web-production-8666.up.railway.app
-        CSRF_TRUSTED_ORIGINS = [
-            'https://web-production-8666.up.railway.app',  # Dominio actual - actualizar si cambia
-        ]
+        CSRF_TRUSTED_ORIGINS = [railway_fallback]
 else:
     # En desarrollo, permitir localhost
     CSRF_TRUSTED_ORIGINS = [
