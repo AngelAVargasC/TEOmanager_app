@@ -32,4 +32,10 @@ urlpatterns = [
     path('mensajes/conteo/', views.conteo_mensajes_no_leidos, name='conteo_mensajes_no_leidos'),
     path('mensajes/notificaciones/', views.notificaciones_mensajes, name='notificaciones_mensajes'),
     path('mensajes/chats-actualizados/', views.obtener_chats_actualizados, name='obtener_chats_actualizados'),
+    # URLs para reservas de servicios
+    path('servicio/<int:servicio_id>/reservar/', views.crear_reserva, name='crear_reserva'),
+    path('reservas/', views.mis_reservas, name='mis_reservas'),
+    path('reserva/<int:reserva_id>/', views.detalle_reserva, name='detalle_reserva'),
+    path('reserva/<int:reserva_id>/actualizar-estado/', views.actualizar_estado_reserva, name='actualizar_estado_reserva'),
+    path('reserva/<int:reserva_id>/cancelar/', views.cancelar_reserva, name='cancelar_reserva'),
 ] 

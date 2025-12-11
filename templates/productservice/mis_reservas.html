@@ -1,0 +1,646 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Reservas - TeoManager{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* === VARIABLES CSS PROFESIONALES === */
+    :root {
+        --amazon-orange: #ff9900;
+        --primary-blue: #3b82f6;
+        --primary-blue-dark: #2563eb;
+        --amazon-blue: #232f3e;
+        --amazon-light-blue: #37475a;
+        --amazon-gray: #eaeded;
+        --amazon-text: #0f1111;
+        --amazon-secondary: #565959;
+        --success-green: #007600;
+        --warning-orange: #b12704;
+        --border-color: #d5d9d9;
+        --hover-bg: #f7fafa;
+        --spacing-unit: 1rem;
+    }
+
+    /* === LAYOUT PRINCIPAL === */
+    body {
+        font-family: "Amazon Ember", Arial, sans-serif;
+        background-color: white;
+        color: var(--amazon-text);
+        line-height: 1.4;
+    }
+
+    .consumer-dashboard {
+        background: white;
+        min-height: 100vh;
+        padding: 0;
+    }
+
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    /* === HEADER PROFESIONAL === */
+    .professional-header {
+        background: white;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .breadcrumb {
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--amazon-secondary);
+    }
+
+    .breadcrumb a {
+        color: #007185;
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        color: #c7511f;
+        text-decoration: underline;
+    }
+
+    .breadcrumb i {
+        margin: 0 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 400;
+        margin: 0;
+        color: var(--amazon-text);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn-primary, .btn-secondary {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: white;
+        color: var(--amazon-text);
+        text-decoration: none;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+        background: var(--primary-blue);
+        border-color: var(--primary-blue);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-blue-dark);
+        border-color: var(--primary-blue-dark);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+        background: var(--hover-bg);
+        border-color: #999;
+        color: var(--amazon-text);
+        text-decoration: none;
+    }
+
+    /* === FILTROS PROFESIONALES === */
+    .filters-professional {
+        background: white;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 0;
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1rem;
+    }
+
+    .filter-tab {
+        color: #007185;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 400;
+        padding: 0.5rem 0;
+        border-bottom: 2px solid transparent;
+        transition: all 0.15s ease;
+    }
+
+    .filter-tab:hover {
+        color: #c7511f;
+        text-decoration: none;
+    }
+
+    .filter-tab.active {
+        color: var(--amazon-text);
+        border-bottom-color: var(--primary-blue);
+        font-weight: 500;
+    }
+
+    /* === LISTA DE RESERVAS PROFESIONAL === */
+    .reservas-list-professional {
+        padding: 1rem 0;
+    }
+
+    .results-header {
+        margin-bottom: 1rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .results-header p {
+        margin: 0;
+        font-size: 0.875rem;
+        color: var(--amazon-secondary);
+    }
+
+    .reserva-item-pro {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        background: white;
+        overflow: hidden;
+        transition: box-shadow 0.15s ease;
+    }
+
+    .reserva-item-pro:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Header de la reserva */
+    .reserva-header-pro {
+        background: var(--amazon-gray);
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .reserva-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .reserva-number {
+        font-weight: 500;
+        color: var(--amazon-text);
+        font-size: 1rem;
+    }
+
+    .reserva-date {
+        font-size: 0.875rem;
+        color: var(--amazon-secondary);
+    }
+
+    .reserva-status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .status-pendiente {
+        background: #fff3cd;
+        color: #664d03;
+        border: 1px solid #ffecb3;
+    }
+
+    .status-confirmada {
+        background: #d1e7dd;
+        color: #0a3622;
+        border: 1px solid #a3cfbb;
+    }
+
+    .status-en_proceso {
+        background: #ffe4cc;
+        color: #994c00;
+        border: 1px solid #ffcc99;
+    }
+
+    .status-completada {
+        background: #d1e7dd;
+        color: #0a3622;
+        border: 1px solid #a3cfbb;
+    }
+
+    .status-cancelada {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f1aeb5;
+    }
+
+    /* Body de la reserva */
+    .reserva-body-pro {
+        padding: 1rem;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .reserva-service-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    .reserva-service-image-placeholder {
+        width: 80px;
+        height: 80px;
+        background: var(--amazon-gray);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--amazon-secondary);
+        font-size: 1.5rem;
+    }
+
+    .reserva-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .reserva-service-name {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--amazon-text);
+        margin-bottom: 0.5rem;
+    }
+
+    .reserva-service-name a {
+        color: #007185;
+        text-decoration: none;
+    }
+
+    .reserva-service-name a:hover {
+        color: #c7511f;
+        text-decoration: underline;
+    }
+
+    .reserva-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.875rem;
+        color: var(--amazon-secondary);
+    }
+
+    .reserva-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .reserva-detail-item i {
+        width: 16px;
+        color: var(--amazon-secondary);
+    }
+
+    .reserva-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-end;
+    }
+
+    .reserva-price {
+        text-align: right;
+    }
+
+    .reserva-price-amount {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--amazon-text);
+    }
+
+    .reserva-price-label {
+        font-size: 0.75rem;
+        color: var(--amazon-secondary);
+    }
+
+    .reserva-action-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: white;
+        color: var(--amazon-text);
+        text-decoration: none;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        white-space: nowrap;
+    }
+
+    .reserva-action-btn:hover {
+        background: var(--hover-bg);
+        border-color: #999;
+        color: var(--amazon-text);
+        text-decoration: none;
+    }
+
+    .reserva-action-btn-primary {
+        background: var(--primary-blue);
+        border-color: var(--primary-blue);
+        color: white;
+    }
+
+    .reserva-action-btn-primary:hover {
+        background: var(--primary-blue-dark);
+        border-color: var(--primary-blue-dark);
+        color: white;
+    }
+
+    /* Estado vacío */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--amazon-secondary);
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        color: var(--border-color);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state-title {
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--amazon-text);
+    }
+
+    .empty-state-text {
+        font-size: 0.875rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Paginación */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        padding: 1rem 0;
+    }
+
+    .pagination a, .pagination span {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        text-decoration: none;
+        color: var(--amazon-text);
+        font-size: 0.875rem;
+    }
+
+    .pagination a:hover {
+        background: var(--hover-bg);
+        border-color: #999;
+    }
+
+    .pagination .current {
+        background: var(--primary-blue);
+        border-color: var(--primary-blue);
+        color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .reserva-body-pro {
+            grid-template-columns: 1fr;
+        }
+
+        .reserva-actions {
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .reserva-price {
+            text-align: left;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="consumer-dashboard">
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="professional-header">
+            <div class="breadcrumb">
+                <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Mis Reservas</span>
+            </div>
+            <div class="page-header">
+                <h1><i class="fas fa-calendar-check"></i> Mis Reservas</h1>
+                <div class="header-actions">
+                    <a href="{% url 'marketplace' %}" class="btn-secondary">
+                        <i class="fas fa-store"></i> Explorar Servicios
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-professional">
+            <div class="filter-tabs">
+                <a href="{% url 'products:mis_reservas' %}" class="filter-tab {% if not estado_filter %}active{% endif %}">
+                    Todas
+                </a>
+                <a href="{% url 'products:mis_reservas' %}?estado=pendiente" class="filter-tab {% if estado_filter == 'pendiente' %}active{% endif %}">
+                    Pendientes
+                </a>
+                <a href="{% url 'products:mis_reservas' %}?estado=confirmada" class="filter-tab {% if estado_filter == 'confirmada' %}active{% endif %}">
+                    Confirmadas
+                </a>
+                <a href="{% url 'products:mis_reservas' %}?estado=en_proceso" class="filter-tab {% if estado_filter == 'en_proceso' %}active{% endif %}">
+                    En Proceso
+                </a>
+                <a href="{% url 'products:mis_reservas' %}?estado=completada" class="filter-tab {% if estado_filter == 'completada' %}active{% endif %}">
+                    Completadas
+                </a>
+                <a href="{% url 'products:mis_reservas' %}?estado=cancelada" class="filter-tab {% if estado_filter == 'cancelada' %}active{% endif %}">
+                    Canceladas
+                </a>
+            </div>
+        </div>
+
+        <!-- Lista de Reservas -->
+        <div class="reservas-list-professional">
+            <div class="results-header">
+                <p>Mostrando {{ reservas|length }} reserva{{ reservas|length|pluralize }}</p>
+            </div>
+
+            {% if reservas %}
+                {% for reserva in reservas %}
+                <div class="reserva-item-pro">
+                    <!-- Header -->
+                    <div class="reserva-header-pro">
+                        <div class="reserva-header-left">
+                            <div>
+                                <div class="reserva-number">Reserva #{{ reserva.id }}</div>
+                                <div class="reserva-date">{{ reserva.fecha_creacion|date:"d M Y, H:i" }}</div>
+                            </div>
+                        </div>
+                        <div class="reserva-status-badge status-{{ reserva.estado }}">
+                            {% if reserva.estado == 'pendiente' %}
+                                <i class="fas fa-clock"></i>
+                            {% elif reserva.estado == 'confirmada' %}
+                                <i class="fas fa-check-circle"></i>
+                            {% elif reserva.estado == 'en_proceso' %}
+                                <i class="fas fa-spinner fa-spin"></i>
+                            {% elif reserva.estado == 'completada' %}
+                                <i class="fas fa-check-double"></i>
+                            {% elif reserva.estado == 'cancelada' %}
+                                <i class="fas fa-times-circle"></i>
+                            {% endif %}
+                            {{ reserva.get_estado_display }}
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="reserva-body-pro">
+                        <!-- Imagen del servicio -->
+                        <div>
+                            {% if reserva.servicio.imagen_principal %}
+                                <img src="{{ reserva.servicio.imagen_principal }}" alt="{{ reserva.servicio.nombre }}" class="reserva-service-image">
+                            {% else %}
+                                <div class="reserva-service-image-placeholder">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Información -->
+                        <div class="reserva-info">
+                            <div class="reserva-service-name">
+                                <a href="{% url 'products:detalle_servicio' reserva.servicio.pk %}">{{ reserva.servicio.nombre }}</a>
+                            </div>
+                            <div class="reserva-details">
+                                <div class="reserva-detail-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Fecha: {{ reserva.fecha_reserva|date:"d M Y, H:i" }}</span>
+                                </div>
+                                {% if es_empresa %}
+                                <div class="reserva-detail-item">
+                                    <i class="fas fa-user"></i>
+                                    <span>Cliente: {{ reserva.usuario.username }}</span>
+                                </div>
+                                {% else %}
+                                <div class="reserva-detail-item">
+                                    <i class="fas fa-store"></i>
+                                    <span>Empresa: {{ reserva.empresa_info }}</span>
+                                </div>
+                                {% endif %}
+                                {% if reserva.telefono_contacto %}
+                                <div class="reserva-detail-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span>{{ reserva.telefono_contacto }}</span>
+                                </div>
+                                {% endif %}
+                                {% if reserva.direccion_servicio %}
+                                <div class="reserva-detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>{{ reserva.direccion_servicio|truncatewords:10 }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Acciones -->
+                        <div class="reserva-actions">
+                            <div class="reserva-price">
+                                <div class="reserva-price-amount">${{ reserva.precio_total|floatformat:2 }}</div>
+                                <div class="reserva-price-label">Total</div>
+                            </div>
+                            <a href="{% url 'products:detalle_reserva' reserva.id %}" class="reserva-action-btn reserva-action-btn-primary">
+                                <i class="fas fa-eye"></i> Ver Detalle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Paginación -->
+                {% if reservas.has_other_pages %}
+                <div class="pagination">
+                    {% if reservas.has_previous %}
+                        <a href="?page={{ reservas.previous_page_number }}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}">
+                            <i class="fas fa-chevron-left"></i> Anterior
+                        </a>
+                    {% endif %}
+
+                    {% for num in reservas.paginator.page_range %}
+                        {% if reservas.number == num %}
+                            <span class="current">{{ num }}</span>
+                        {% elif num > reservas.number|add:'-3' and num < reservas.number|add:'3' %}
+                            <a href="?page={{ num }}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if reservas.has_next %}
+                        <a href="?page={{ reservas.next_page_number }}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}">
+                            Siguiente <i class="fas fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-calendar-times"></i>
+                    </div>
+                    <div class="empty-state-title">No tienes reservas</div>
+                    <div class="empty-state-text">
+                        {% if es_empresa %}
+                            Aún no has recibido ninguna reserva de servicios.
+                        {% else %}
+                            Aún no has realizado ninguna reserva. Explora nuestros servicios disponibles.
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'marketplace' %}" class="btn-primary">
+                        <i class="fas fa-store"></i> Explorar Servicios
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

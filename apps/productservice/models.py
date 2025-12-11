@@ -1091,3 +1091,237 @@ class MensajePedido(models.Model):
             if os.path.isfile(self.archivo_adjunto.path):
                 os.remove(self.archivo_adjunto.path)
         super().delete(*args, **kwargs)
+
+
+class ReservaServicio(models.Model):
+    """
+    Modelo que representa una reserva de servicio realizada por un usuario.
+    
+    Gestiona el sistema de reservaciones de servicios, permitiendo a los usuarios
+    reservar servicios con fecha y hora específica.
+    
+    Funcionalidades:
+    - Estados de reserva (pendiente, confirmada, en_proceso, completada, cancelada)
+    - Fecha y hora de la reserva
+    - Información de contacto y ubicación
+    - Notas y observaciones especiales
+    - Integración con sistema de servicios
+    - Cálculo automático de totales
+    
+    Relaciones:
+    - ForeignKey con User (cliente que realiza la reserva)
+    - ForeignKey con Servicio (servicio reservado)
+    - Relacionado con Pedido (puede generar un pedido asociado)
+    """
+    
+    # Estados posibles de la reserva
+    ESTADO_RESERVA = [
+        ('pendiente', 'Pendiente'),         # Reserva recién creada, esperando confirmación
+        ('confirmada', 'Confirmada'),       # Reserva confirmada por la empresa
+        ('en_proceso', 'En Proceso'),       # Servicio siendo ejecutado
+        ('completada', 'Completada'),       # Servicio finalizado exitosamente
+        ('cancelada', 'Cancelada'),         # Reserva cancelada por cliente o empresa
+    ]
+    
+    # Usuario que realiza la reserva
+    usuario = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='reservas_servicios',
+        help_text="Usuario que realizó la reserva",
+        verbose_name="Cliente"
+    )
+    
+    # Servicio reservado
+    servicio = models.ForeignKey(
+        Servicio,
+        on_delete=models.CASCADE,
+        related_name='reservas',
+        help_text="Servicio que se está reservando",
+        verbose_name="Servicio"
+    )
+    
+    # Empresa que ofrece el servicio (derivado del servicio)
+    empresa = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reservas_recibidas',
+        help_text="Empresa que debe ejecutar este servicio",
+        verbose_name="Empresa Proveedora"
+    )
+    
+    # Información temporal de la reserva
+    fecha_reserva = models.DateTimeField(
+        help_text="Fecha y hora programada para la ejecución del servicio",
+        verbose_name="Fecha y Hora de la Reserva"
+    )
+    
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Fecha y hora de creación de la reserva",
+        verbose_name="Fecha de Creación"
+    )
+    
+    # Estado actual de la reserva
+    estado = models.CharField(
+        max_length=20, 
+        choices=ESTADO_RESERVA, 
+        default='pendiente',
+        help_text="Estado actual de la reserva",
+        verbose_name="Estado"
+    )
+    
+    # Información financiera
+    precio_total = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        null=True,
+        blank=True,
+        help_text="Precio total de la reserva (se establece automáticamente desde el servicio)",
+        verbose_name="Precio Total"
+    )
+    
+    # Información de contacto y ubicación
+    telefono_contacto = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="Teléfono de contacto para la reserva",
+        verbose_name="Teléfono de Contacto"
+    )
+    
+    direccion_servicio = models.TextField(
+        blank=True,
+        help_text="Dirección donde se ejecutará el servicio (si aplica)",
+        verbose_name="Dirección del Servicio"
+    )
+    
+    # Información adicional
+    notas = models.TextField(
+        blank=True,
+        help_text="Notas adicionales, instrucciones especiales o requisitos",
+        verbose_name="Notas"
+    )
+    
+    # Relación opcional con pedido (si la reserva genera un pedido)
+    pedido_asociado = models.ForeignKey(
+        Pedido,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reservas_asociadas',
+        help_text="Pedido asociado a esta reserva (si aplica)",
+        verbose_name="Pedido Asociado"
+    )
+
+    class Meta:
+        verbose_name = "Reserva de Servicio"
+        verbose_name_plural = "Reservas de Servicios"
+        ordering = ['-fecha_creacion']  # Más recientes primero
+        indexes = [
+            models.Index(fields=['usuario', 'estado']),
+            models.Index(fields=['empresa', 'estado']),  # Para empresas viendo sus reservas
+            models.Index(fields=['servicio', 'fecha_reserva']),  # Para verificar disponibilidad
+            models.Index(fields=['fecha_reserva']),
+            models.Index(fields=['estado']),
+        ]
+
+    def __str__(self):
+        """Representación string del modelo."""
+        return f"Reserva #{self.id} - {self.servicio.nombre} - {self.usuario.username} ({self.get_estado_display()})"
+    
+    @property
+    def empresa_info(self):
+        """
+        Obtiene información legible de la empresa proveedora.
+        
+        Returns:
+            str: Nombre de la empresa o username si no tiene perfil
+        """
+        try:
+            perfil = self.empresa.userprofile
+            return perfil.empresa if perfil.empresa else self.empresa.username
+        except:
+            return self.empresa.username
+    
+    @property
+    def esta_activa(self):
+        """
+        Determina si la reserva está en un estado activo.
+        
+        Returns:
+            bool: True si la reserva está pendiente, confirmada o en proceso
+        """
+        return self.estado in ['pendiente', 'confirmada', 'en_proceso']
+    
+    @property
+    def puede_cancelarse(self):
+        """
+        Determina si la reserva puede ser cancelada.
+        
+        Returns:
+            bool: True si la reserva puede cancelarse
+        """
+        return self.estado in ['pendiente', 'confirmada', 'en_proceso']
+    
+    @property
+    def esta_proxima(self):
+        """
+        Determina si la reserva está próxima (dentro de las próximas 24 horas).
+        
+        Returns:
+            bool: True si la reserva está próxima
+        """
+        from django.utils import timezone
+        from datetime import timedelta
+        ahora = timezone.now()
+        proximas_24h = ahora + timedelta(hours=24)
+        return self.esta_activa and self.fecha_reserva <= proximas_24h and self.fecha_reserva >= ahora
+    
+    def clean(self):
+        """Validaciones personalizadas del modelo."""
+        super().clean()
+        
+        # Validar que la fecha de reserva no sea en el pasado
+        from django.utils import timezone
+        if self.fecha_reserva and self.fecha_reserva < timezone.now():
+            raise ValidationError({
+                'fecha_reserva': 'La fecha y hora de la reserva no puede ser en el pasado.'
+            })
+        
+        # Validar que el precio total sea positivo (solo si está establecido)
+        # Si no está establecido, el método save() lo establecerá automáticamente
+        if self.precio_total is not None and self.precio_total < 0:
+            raise ValidationError({
+                'precio_total': 'El precio total no puede ser negativo.'
+            })
+    
+    def save(self, *args, **kwargs):
+        """
+        Override del método save para establecer empresa y precio automáticamente.
+        """
+        # Si no se estableció la empresa, obtenerla del servicio
+        if not self.empresa_id and self.servicio_id:
+            if hasattr(self, 'servicio') and self.servicio:
+                self.empresa = self.servicio.usuario
+            else:
+                # Si solo tenemos el ID, cargar el servicio
+                try:
+                    servicio = Servicio.objects.get(pk=self.servicio_id)
+                    self.empresa = servicio.usuario
+                except Servicio.DoesNotExist:
+                    pass
+        
+        # Si no se estableció el precio total, usar el precio del servicio
+        if (self.precio_total is None or self.precio_total == 0) and self.servicio_id:
+            if hasattr(self, 'servicio') and self.servicio:
+                self.precio_total = self.servicio.precio
+            else:
+                # Si solo tenemos el ID, cargar el servicio
+                try:
+                    servicio = Servicio.objects.get(pk=self.servicio_id)
+                    self.precio_total = servicio.precio
+                except Servicio.DoesNotExist:
+                    pass
+        
+        super().save(*args, **kwargs)

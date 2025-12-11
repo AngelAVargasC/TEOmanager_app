@@ -863,13 +863,13 @@
       {% if user_type == 'usuario' %}
         <!-- Action Buttons for Consumers -->
         <div class="action-buttons">
-          <a href="#" class="btn-primary">
+          <a href="{% url 'products:crear_reserva' servicio.pk %}" class="btn-primary">
             <i class="fas fa-bookmark"></i>
             Reservar servicio
           </a>
-          <a href="#" class="btn-secondary">
-            <i class="fas fa-comments"></i>
-            Consultar disponibilidad
+          <a href="{% url 'products:detalle_servicio' servicio.pk %}#booking" class="btn-secondary">
+            <i class="fas fa-info-circle"></i>
+            Ver políticas de reserva
           </a>
         </div>
 

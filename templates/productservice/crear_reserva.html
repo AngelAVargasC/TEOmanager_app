@@ -1,0 +1,624 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reservar Servicio - TeoManager{% endblock %}
+
+{% block content %}
+<div class="erp-form-container">
+    <!-- Header ejecutivo -->
+    <div class="erp-form-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="header-text">
+                <h1>Reservar Servicio</h1>
+                <p>Completa el formulario para reservar el servicio</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'products:detalle_servicio' servicio.pk %}" class="erp-btn erp-btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al servicio
+            </a>
+        </div>
+    </div>
+
+    <!-- Información del servicio -->
+    <div class="reserva-service-info">
+        <div class="service-card">
+            {% if servicio.imagen_principal %}
+                <img src="{{ servicio.imagen_principal }}" alt="{{ servicio.nombre }}" class="service-image">
+            {% else %}
+                <div class="service-image-placeholder">
+                    <i class="fas fa-image"></i>
+                </div>
+            {% endif %}
+            <div class="service-details">
+                <h3>{{ servicio.nombre }}</h3>
+                <p class="service-price">${{ servicio.precio|floatformat:2 }}</p>
+                <p class="service-duration"><i class="fas fa-clock"></i> {{ servicio.duracion }}</p>
+                <p class="service-provider"><i class="fas fa-store"></i> {{ servicio.empresa_info }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario principal -->
+    <div class="erp-form-content">
+        <form method="post" class="erp-form">
+            {% csrf_token %}
+            
+            <!-- Alertas de error -->
+            {% if form.errors %}
+                <div class="erp-alert erp-alert-error">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <h4>Errores en el formulario</h4>
+                        <p>Por favor, revisa y corrige los campos marcados en rojo.</p>
+                    </div>
+                </div>
+            {% endif %}
+            {{ form.non_field_errors }}
+
+            <!-- Grid de campos -->
+            <div class="form-grid">
+                <!-- Información de la reserva -->
+                <div class="form-section full-width">
+                    <div class="section-header">
+                        <h3><i class="fas fa-calendar-alt"></i> Información de la Reserva</h3>
+                        <p>Selecciona la fecha y hora para el servicio</p>
+                    </div>
+                    
+                    <div class="erp-field-group {% if form.fecha_reserva.errors %}has-error{% endif %}">
+                        <label class="erp-label" for="{{ form.fecha_reserva.id_for_label }}">
+                            {{ form.fecha_reserva.label }}
+                            <span class="required">*</span>
+                        </label>
+                        <div class="erp-input-wrapper">
+                            {{ form.fecha_reserva }}
+                            <i class="fas fa-calendar input-icon"></i>
+                        </div>
+                        {% if form.fecha_reserva.errors %}
+                            <div class="field-errors">
+                                {% for error in form.fecha_reserva.errors %}
+                                    <span class="error-message"><i class="fas fa-exclamation-circle"></i> {{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text">La reserva debe realizarse con al menos 24 horas de anticipación</small>
+                    </div>
+                </div>
+
+                <!-- Información de contacto -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-phone"></i> Información de Contacto</h3>
+                        <p>Datos para coordinar el servicio</p>
+                    </div>
+                    
+                    <div class="erp-field-group {% if form.telefono_contacto.errors %}has-error{% endif %}">
+                        <label class="erp-label" for="{{ form.telefono_contacto.id_for_label }}">
+                            {{ form.telefono_contacto.label }}
+                        </label>
+                        <div class="erp-input-wrapper">
+                            {{ form.telefono_contacto }}
+                            <i class="fas fa-phone input-icon"></i>
+                        </div>
+                        {% if form.telefono_contacto.errors %}
+                            <div class="field-errors">
+                                {% for error in form.telefono_contacto.errors %}
+                                    <span class="error-message"><i class="fas fa-exclamation-circle"></i> {{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text">Teléfono donde la empresa puede contactarte</small>
+                    </div>
+                </div>
+
+                <!-- Información de ubicación -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-map-marker-alt"></i> Ubicación del Servicio</h3>
+                        <p>Dirección donde se ejecutará el servicio</p>
+                    </div>
+                    
+                    <div class="erp-field-group {% if form.direccion_servicio.errors %}has-error{% endif %}">
+                        <label class="erp-label" for="{{ form.direccion_servicio.id_for_label }}">
+                            {{ form.direccion_servicio.label }}
+                        </label>
+                        <div class="erp-input-wrapper">
+                            {{ form.direccion_servicio }}
+                            <i class="fas fa-map-marker-alt input-icon"></i>
+                        </div>
+                        {% if form.direccion_servicio.errors %}
+                            <div class="field-errors">
+                                {% for error in form.direccion_servicio.errors %}
+                                    <span class="error-message"><i class="fas fa-exclamation-circle"></i> {{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text">Opcional si el servicio es a domicilio</small>
+                    </div>
+                </div>
+
+                <!-- Notas adicionales -->
+                <div class="form-section full-width">
+                    <div class="section-header">
+                        <h3><i class="fas fa-sticky-note"></i> Notas Adicionales</h3>
+                        <p>Instrucciones especiales o requisitos</p>
+                    </div>
+                    
+                    <div class="erp-field-group {% if form.notas.errors %}has-error{% endif %}">
+                        <label class="erp-label" for="{{ form.notas.id_for_label }}">
+                            {{ form.notas.label }}
+                        </label>
+                        <div class="erp-input-wrapper">
+                            {{ form.notas }}
+                        </div>
+                        {% if form.notas.errors %}
+                            <div class="field-errors">
+                                {% for error in form.notas.errors %}
+                                    <span class="error-message"><i class="fas fa-exclamation-circle"></i> {{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text">Información adicional que la empresa debe conocer</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="form-actions">
+                <button type="submit" class="erp-btn erp-btn-primary">
+                    <i class="fas fa-check"></i> Confirmar Reserva
+                </button>
+                <a href="{% url 'products:detalle_servicio' servicio.pk %}" class="erp-btn erp-btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    /* === VARIABLES CSS === */
+    :root {
+        --primary-blue: #3b82f6;
+        --primary-blue-dark: #2563eb;
+        --amazon-gray: #eaeded;
+        --amazon-text: #0f1111;
+        --amazon-secondary: #565959;
+        --border-color: #d5d9d9;
+        --hover-bg: #f7fafa;
+        --erp-surface: #ffffff;
+        --erp-border: #d5d9d9;
+        --erp-text: #0f1111;
+        --erp-gray-50: #f9fafb;
+        --erp-gray-100: #f3f4f6;
+        --erp-gray-400: #9ca3af;
+        --erp-gray-500: #6b7280;
+        --erp-gray-600: #4b5563;
+        --btn-main-bg: #3b82f6;
+        --btn-main-color: #ffffff;
+        --btn-main-hover-bg: #2563eb;
+        --panel-header-bg: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+        --panel-header-border: #e0e7ff;
+        --panel-title-color: #fff;
+        --erp-radius: 12px;
+        --erp-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    body {
+        font-family: "Amazon Ember", Arial, sans-serif;
+        background-color: #f9fafb;
+        color: var(--erp-text);
+        line-height: 1.4;
+    }
+
+    /* === CONTENEDOR PRINCIPAL === */
+    .erp-form-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    /* === HEADER EJECUTIVO === */
+    .erp-form-header {
+        background: var(--panel-header-bg);
+        color: var(--panel-title-color);
+        padding: 2rem;
+        border-radius: var(--erp-radius);
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--panel-header-border);
+    }
+
+    .erp-form-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        z-index: 2;
+    }
+
+    .header-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: white;
+    }
+
+    .header-text h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: white;
+    }
+
+    .header-text p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        color: white;
+        margin: 0;
+    }
+
+    .header-actions {
+        z-index: 2;
+    }
+
+    /* === BOTONES === */
+    .erp-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .erp-btn-primary {
+        background: var(--btn-main-bg);
+        color: var(--btn-main-color);
+    }
+
+    .erp-btn-primary:hover {
+        background: var(--btn-main-hover-bg);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .erp-btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .erp-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* === INFORMACIÓN DEL SERVICIO === */
+    .reserva-service-info {
+        margin-bottom: 2rem;
+    }
+
+    .service-card {
+        display: flex;
+        gap: 1.5rem;
+        background: var(--erp-surface);
+        border: 1px solid var(--erp-border);
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: var(--erp-shadow);
+    }
+
+    .service-image {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid var(--erp-border);
+        flex-shrink: 0;
+    }
+
+    .service-image-placeholder {
+        width: 120px;
+        height: 120px;
+        background: var(--erp-gray-100);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--erp-gray-400);
+        font-size: 2rem;
+        flex-shrink: 0;
+    }
+
+    .service-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .service-details h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--erp-text);
+        font-size: 1.25rem;
+        font-weight: 500;
+    }
+
+    .service-price {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--btn-main-bg);
+        margin: 0.5rem 0;
+    }
+
+    .service-duration,
+    .service-provider {
+        margin: 0.5rem 0;
+        color: var(--erp-gray-600);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .service-duration i,
+    .service-provider i {
+        color: var(--erp-gray-500);
+    }
+
+    /* === CONTENIDO DEL FORMULARIO === */
+    .erp-form-content {
+        background: var(--erp-surface);
+        border: 1px solid var(--erp-border);
+        border-radius: var(--erp-radius);
+        box-shadow: var(--erp-shadow);
+        overflow: hidden;
+    }
+
+    .erp-form {
+        padding: 2rem;
+    }
+
+    /* === ALERTAS === */
+    .erp-alert {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+
+    .erp-alert-error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+    }
+
+    .alert-icon {
+        font-size: 1.2rem;
+        margin-top: 0.1rem;
+    }
+
+    .alert-content h4 {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    /* === GRID DE FORMULARIO === */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-section {
+        background: var(--erp-gray-50);
+        border-radius: 8px;
+        padding: 1.5rem;
+        border: 1px solid var(--erp-border);
+    }
+
+    .form-section.full-width {
+        grid-column: 1 / -1;
+        background: var(--erp-surface);
+    }
+
+    .section-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--erp-border);
+    }
+
+    .section-header h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--erp-text);
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-header p {
+        color: var(--erp-gray-500);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    /* === CAMPOS DEL FORMULARIO === */
+    .erp-field-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .erp-field-group.has-error .erp-input-wrapper input,
+    .erp-field-group.has-error .erp-input-wrapper textarea,
+    .erp-field-group.has-error .erp-input-wrapper select {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .erp-label {
+        display: block;
+        font-weight: 600;
+        color: var(--erp-text);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .required {
+        color: #ef4444;
+        margin-left: 0.25rem;
+    }
+
+    .erp-input-wrapper {
+        position: relative;
+    }
+
+    .erp-input-wrapper input,
+    .erp-input-wrapper textarea,
+    .erp-input-wrapper select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--erp-border);
+        border-radius: 6px;
+        font-size: 0.95rem;
+        background: var(--erp-surface);
+        color: var(--erp-text);
+        transition: all 0.2s;
+    }
+
+    .erp-input-wrapper input:focus,
+    .erp-input-wrapper textarea:focus,
+    .erp-input-wrapper select:focus {
+        border-color: var(--btn-main-bg);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .erp-input-wrapper input[type="datetime-local"] {
+        padding-right: 2.5rem;
+    }
+
+    .erp-input-wrapper textarea {
+        min-height: 100px;
+        resize: vertical;
+        padding-right: 1rem;
+    }
+
+    .input-icon {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--erp-gray-400);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .field-errors {
+        margin-top: 0.5rem;
+    }
+
+    .error-message {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .error-message i {
+        font-size: 0.75rem;
+    }
+
+    .form-text {
+        display: block;
+        margin-top: 0.5rem;
+        color: var(--erp-gray-500);
+        font-size: 0.85rem;
+    }
+
+    /* === ACCIONES DEL FORMULARIO === */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--erp-border);
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+        .erp-form-container {
+            padding: 1rem;
+        }
+
+        .erp-form-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .header-content {
+            width: 100%;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .service-card {
+            flex-direction: column;
+        }
+
+        .service-image,
+        .service-image-placeholder {
+            width: 100%;
+            height: 200px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .erp-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %}
+

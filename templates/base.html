@@ -426,6 +426,15 @@
                         </a>
                     </li>
                     <p class="section-sidebar">
+                        Reservas
+                    </p>
+                    <li class="sidebar-item">
+                        <a href="{% url 'products:mis_reservas' %}" class="sidebar-link {% if 'reservas' in request.path or 'reserva' in request.path %}active{% endif %}">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Mis Reservas</span>
+                        </a>
+                    </li>
+                    <p class="section-sidebar">
                         Landing Page
                     </p>
                     <li class="sidebar-item">
@@ -454,6 +463,12 @@
                         <a href="{% url 'mis_pedidos' %}" class="sidebar-link {% if 'mis-pedidos' in request.path %}active{% endif %}">
                             <i class="fas fa-shopping-bag"></i>
                             <span>Mis Pedidos</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{% url 'products:mis_reservas' %}" class="sidebar-link {% if 'reservas' in request.path or 'reserva' in request.path %}active{% endif %}">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Mis Reservas</span>
                         </a>
                     </li>
                 {% endif %}

@@ -21,7 +21,7 @@ import logging
 from PIL import Image
 import os
 
-from .models import Producto, Servicio, ImagenProducto, ImagenServicio, Pedido, DetallePedido
+from .models import Producto, Servicio, ImagenProducto, ImagenServicio, Pedido, DetallePedido, ReservaServicio
 from apps.accounts.services import SuscripcionService
 
 # Configurar logger para este módulo
@@ -824,4 +824,191 @@ class CatalogService:
         return {
             'productos_recientes': productos_recientes,
             'servicios_recientes': servicios_recientes,
-        } 
+        }
+
+
+class ReservaService:
+    """
+    Servicio para la gestión de reservas de servicios.
+    
+    Maneja la creación, actualización y gestión del estado de reservas,
+    incluyendo validaciones de disponibilidad y políticas de reserva.
+    """
+    
+    @staticmethod
+    @transaction.atomic
+    def create_reserva(user, servicio, fecha_reserva, telefono_contacto='', direccion_servicio='', notas=''):
+        """
+        Crea una nueva reserva de servicio.
+        
+        Args:
+            user (User): Usuario que realiza la reserva
+            servicio (Servicio): Servicio a reservar
+            fecha_reserva (datetime): Fecha y hora de la reserva
+            telefono_contacto (str): Teléfono de contacto
+            direccion_servicio (str): Dirección donde se ejecutará el servicio
+            notas (str): Notas adicionales
+            
+        Returns:
+            ReservaServicio: Reserva creada
+            
+        Raises:
+            ValueError: Si hay problemas con la disponibilidad o validaciones
+        """
+        try:
+            # Validar que el servicio esté activo
+            if not servicio.activo:
+                raise ValueError(f"El servicio '{servicio.nombre}' no está disponible para reservas.")
+            
+            # Validar que la fecha sea en el futuro
+            from django.utils import timezone
+            if fecha_reserva < timezone.now():
+                raise ValueError("La fecha y hora de la reserva debe ser en el futuro.")
+            
+            # Validar disponibilidad (verificar si hay conflictos de horario)
+            # Por ahora, permitimos múltiples reservas en el mismo horario
+            # En el futuro se puede agregar lógica más compleja
+            
+            # Crear la reserva
+            reserva = ReservaServicio.objects.create(
+                usuario=user,
+                servicio=servicio,
+                empresa=servicio.usuario,
+                fecha_reserva=fecha_reserva,
+                telefono_contacto=telefono_contacto,
+                direccion_servicio=direccion_servicio,
+                notas=notas,
+                precio_total=servicio.precio,
+                estado='pendiente'
+            )
+            
+            logger.info(f"Reserva #{reserva.id} creada exitosamente para usuario {user.username} → servicio {servicio.nombre}")
+            
+            return reserva
+            
+        except Exception as e:
+            logger.error(f"Error creando reserva para usuario {user.username}: {str(e)}")
+            raise
+    
+    @staticmethod
+    def update_reserva_status(reserva, nuevo_estado):
+        """
+        Actualiza el estado de una reserva con validaciones.
+        
+        Args:
+            reserva (ReservaServicio): Reserva a actualizar
+            nuevo_estado (str): Nuevo estado
+        """
+        estados_validos = dict(ReservaServicio.ESTADO_RESERVA).keys()
+        
+        if nuevo_estado not in estados_validos:
+            raise ValueError(f"Estado no válido: {nuevo_estado}")
+        
+        # Validaciones de transición de estado
+        if reserva.estado == 'completada' and nuevo_estado != 'completada':
+            raise ValueError("No se puede cambiar el estado de una reserva completada")
+        
+        if reserva.estado == 'cancelada' and nuevo_estado != 'cancelada':
+            raise ValueError("No se puede cambiar el estado de una reserva cancelada")
+        
+        reserva.estado = nuevo_estado
+        reserva.save()
+        
+        logger.info(f"Estado de la reserva #{reserva.id} actualizado a {nuevo_estado}")
+    
+    @staticmethod
+    def get_reservas_usuario(user, filters=None):
+        """
+        Obtiene reservas del usuario con detalles precargados.
+        
+        Args:
+            user (User): Usuario
+            filters (dict): Filtros adicionales (estado, servicio, etc.)
+            
+        Returns:
+            QuerySet: Reservas con detalles precargados
+        """
+        queryset = ReservaServicio.objects.filter(usuario=user).select_related(
+            'servicio',
+            'empresa',
+            'servicio__usuario'
+        ).prefetch_related('servicio__imagenes').order_by('-fecha_creacion')
+        
+        # Aplicar filtros
+        if filters:
+            if filters.get('estado'):
+                queryset = queryset.filter(estado=filters['estado'])
+            if filters.get('servicio_id'):
+                queryset = queryset.filter(servicio_id=filters['servicio_id'])
+        
+        return queryset
+    
+    @staticmethod
+    def get_reservas_empresa(empresa, filters=None):
+        """
+        Obtiene reservas recibidas por una empresa.
+        
+        Args:
+            empresa (User): Empresa proveedora
+            filters (dict): Filtros adicionales
+            
+        Returns:
+            QuerySet: Reservas con detalles precargados
+        """
+        queryset = ReservaServicio.objects.filter(empresa=empresa).select_related(
+            'servicio',
+            'usuario',
+            'servicio__usuario'
+        ).prefetch_related('servicio__imagenes').order_by('-fecha_creacion')
+        
+        # Aplicar filtros
+        if filters:
+            if filters.get('estado'):
+                queryset = queryset.filter(estado=filters['estado'])
+            if filters.get('servicio_id'):
+                queryset = queryset.filter(servicio_id=filters['servicio_id'])
+        
+        return queryset
+    
+    @staticmethod
+    def verificar_disponibilidad(servicio, fecha_reserva):
+        """
+        Verifica si un servicio está disponible en una fecha/hora específica.
+        
+        Args:
+            servicio (Servicio): Servicio a verificar
+            fecha_reserva (datetime): Fecha y hora a verificar
+            
+        Returns:
+            bool: True si está disponible, False si hay conflicto
+        """
+        # Verificar si hay reservas confirmadas o en proceso en ese horario
+        # Por ahora, permitimos múltiples reservas simultáneas
+        # En el futuro se puede agregar lógica más compleja según el tipo de servicio
+        
+        reservas_conflictivas = ReservaServicio.objects.filter(
+            servicio=servicio,
+            fecha_reserva=fecha_reserva,
+            estado__in=['confirmada', 'en_proceso']
+        ).exists()
+        
+        return not reservas_conflictivas
+    
+    @staticmethod
+    def cancelar_reserva(reserva, motivo=''):
+        """
+        Cancela una reserva.
+        
+        Args:
+            reserva (ReservaServicio): Reserva a cancelar
+            motivo (str): Motivo de la cancelación
+        """
+        if not reserva.puede_cancelarse:
+            raise ValueError("Esta reserva no puede ser cancelada.")
+        
+        reserva.estado = 'cancelada'
+        if motivo:
+            reserva.notas = f"{reserva.notas}\n\n[MOTIVO DE CANCELACIÓN]: {motivo}".strip()
+        reserva.save()
+        
+        logger.info(f"Reserva #{reserva.id} cancelada. Motivo: {motivo}") 

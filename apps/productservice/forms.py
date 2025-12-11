@@ -1,6 +1,8 @@
 from django import forms
-from apps.productservice.models import Producto, Servicio
+from apps.productservice.models import Producto, Servicio, ReservaServicio
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+from datetime import timedelta
 import json
 
 # Top 20 categorías estándar para productos
@@ -310,4 +312,111 @@ class PoliticasServicioForm(forms.ModelForm):
         
         if commit:
             instance.save()
+        return instance
+
+
+class ReservaServicioForm(forms.ModelForm):
+    """Formulario para crear una reserva de servicio"""
+    
+    class Meta:
+        model = ReservaServicio
+        fields = ['fecha_reserva', 'telefono_contacto', 'direccion_servicio', 'notas']
+        widgets = {
+            'fecha_reserva': forms.DateTimeInput(
+                attrs={
+                    'type': 'datetime-local',
+                    'class': 'form-control',
+                    'required': True
+                },
+                format='%Y-%m-%dT%H:%M'
+            ),
+            'telefono_contacto': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Ej: +52 123 456 7890'
+                }
+            ),
+            'direccion_servicio': forms.Textarea(
+                attrs={
+                    'class': 'form-control',
+                    'rows': 3,
+                    'placeholder': 'Dirección donde se ejecutará el servicio (opcional)'
+                }
+            ),
+            'notas': forms.Textarea(
+                attrs={
+                    'class': 'form-control',
+                    'rows': 4,
+                    'placeholder': 'Notas adicionales, instrucciones especiales o requisitos (opcional)'
+                }
+            ),
+        }
+        labels = {
+            'fecha_reserva': 'Fecha y Hora de la Reserva',
+            'telefono_contacto': 'Teléfono de Contacto',
+            'direccion_servicio': 'Dirección del Servicio',
+            'notas': 'Notas Adicionales'
+        }
+    
+    def __init__(self, *args, **kwargs):
+        self.servicio = kwargs.pop('servicio', None)
+        self.usuario = kwargs.pop('usuario', None)
+        super().__init__(*args, **kwargs)
+        
+        # Establecer fecha mínima (ahora)
+        if self.fields['fecha_reserva'].widget.attrs.get('type') == 'datetime-local':
+            ahora = timezone.now()
+            fecha_minima = ahora.strftime('%Y-%m-%dT%H:%M')
+            self.fields['fecha_reserva'].widget.attrs['min'] = fecha_minima
+    
+    def clean_fecha_reserva(self):
+        """Validar que la fecha de reserva sea en el futuro"""
+        fecha_reserva = self.cleaned_data.get('fecha_reserva')
+        
+        if fecha_reserva:
+            ahora = timezone.now()
+            if fecha_reserva < ahora:
+                raise ValidationError('La fecha y hora de la reserva debe ser en el futuro.')
+            
+            # Validar que la reserva sea con al menos 24 horas de anticipación
+            # (puede ajustarse según políticas del servicio)
+            diferencia = fecha_reserva - ahora
+            horas_anticipacion = diferencia.total_seconds() / 3600
+            
+            if horas_anticipacion < 24:
+                raise ValidationError(
+                    'La reserva debe realizarse con al menos 24 horas de anticipación. '
+                    f'Por favor, selecciona una fecha posterior a {(ahora + timezone.timedelta(hours=24)).strftime("%d/%m/%Y %H:%M")}.'
+                )
+        
+        return fecha_reserva
+    
+    def clean_telefono_contacto(self):
+        """Validar formato básico del teléfono"""
+        telefono = self.cleaned_data.get('telefono_contacto', '').strip()
+        
+        if telefono:
+            # Validación básica: debe tener al menos 10 caracteres
+            if len(telefono) < 10:
+                raise ValidationError('El teléfono debe tener al menos 10 dígitos.')
+        
+        return telefono
+    
+    def save(self, commit=True):
+        """Guardar la reserva con servicio y usuario"""
+        instance = super().save(commit=False)
+        
+        if self.servicio:
+            instance.servicio = self.servicio
+            instance.empresa = self.servicio.usuario
+            # Asegurar que precio_total esté establecido
+            if not instance.precio_total:
+                instance.precio_total = self.servicio.precio
+        
+        if self.usuario:
+            instance.usuario = self.usuario
+        
+        if commit:
+            instance.save()
+        
         return instance

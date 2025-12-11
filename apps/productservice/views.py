@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from apps.productservice.models import Producto, Servicio, Pedido, ImagenProducto, ImagenServicio, MensajePedido
-from apps.productservice.forms import ProductoForm, ServicioForm, PoliticasProductoForm, PoliticasServicioForm
+from apps.productservice.models import Producto, Servicio, Pedido, ImagenProducto, ImagenServicio, MensajePedido, ReservaServicio
+from apps.productservice.forms import ProductoForm, ServicioForm, PoliticasProductoForm, PoliticasServicioForm, ReservaServicioForm
+from apps.productservice.services import ReservaService
 from django.http import JsonResponse, Http404
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
@@ -681,3 +682,175 @@ def notificaciones_mensajes(request):
     }
     
     return render(request, 'productservice/notificaciones_mensajes.html', context)
+
+
+# =========================== VISTAS DE RESERVAS DE SERVICIOS ===========================
+
+@login_required(login_url='login')
+def crear_reserva(request, servicio_id):
+    """
+    Vista para crear una reserva de servicio.
+    Solo usuarios (no empresas) pueden crear reservas.
+    """
+    servicio = get_object_or_404(Servicio, pk=servicio_id, activo=True)
+    
+    # Verificar que el usuario no sea la empresa propietaria
+    if servicio.usuario == request.user:
+        messages.error(request, 'No puedes reservar tus propios servicios.')
+        return redirect('products:detalle_servicio', pk=servicio_id)
+    
+    # Verificar que el usuario sea tipo 'usuario' (no empresa)
+    try:
+        perfil = PerfilUsuario.objects.get(usuario=request.user)
+        if perfil.tipo_cuenta == 'empresa':
+            messages.error(request, 'Las empresas no pueden crear reservas. Debes ser un usuario consumidor.')
+            return redirect('products:detalle_servicio', pk=servicio_id)
+    except PerfilUsuario.DoesNotExist:
+        messages.error(request, 'Debes tener un perfil completo para crear reservas.')
+        return redirect('products:detalle_servicio', pk=servicio_id)
+    
+    if request.method == 'POST':
+        form = ReservaServicioForm(request.POST, servicio=servicio, usuario=request.user)
+        if form.is_valid():
+            try:
+                reserva = form.save()
+                messages.success(request, f'¡Reserva #{reserva.id} creada exitosamente! La empresa te contactará pronto.')
+                return redirect('products:mis_reservas')
+            except Exception as e:
+                messages.error(request, f'Error al crear la reserva: {str(e)}')
+        else:
+            messages.error(request, 'Por favor, corrige los errores en el formulario.')
+    else:
+        form = ReservaServicioForm(servicio=servicio, usuario=request.user)
+    
+    return render(request, 'productservice/crear_reserva.html', {
+        'form': form,
+        'servicio': servicio,
+        'perfil': perfil
+    })
+
+
+@login_required(login_url='login')
+def mis_reservas(request):
+    """
+    Vista para mostrar las reservas del usuario autenticado.
+    """
+    try:
+        perfil = PerfilUsuario.objects.get(usuario=request.user)
+    except PerfilUsuario.DoesNotExist:
+        perfil = None
+    
+    # Obtener filtros de la URL
+    estado_filter = request.GET.get('estado', '')
+    
+    filters = {}
+    if estado_filter:
+        filters['estado'] = estado_filter
+    
+    # Obtener reservas según el tipo de usuario
+    if perfil and perfil.tipo_cuenta == 'empresa':
+        reservas = ReservaService.get_reservas_empresa(request.user, filters)
+        es_empresa = True
+    else:
+        reservas = ReservaService.get_reservas_usuario(request.user, filters)
+        es_empresa = False
+    
+    # Paginación
+    from django.core.paginator import Paginator
+    paginator = Paginator(reservas, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'productservice/mis_reservas.html', {
+        'reservas': page_obj,
+        'perfil': perfil,
+        'es_empresa': es_empresa,
+        'estado_filter': estado_filter
+    })
+
+
+@login_required(login_url='login')
+def detalle_reserva(request, reserva_id):
+    """
+    Vista para ver el detalle de una reserva.
+    Solo el cliente o la empresa pueden ver la reserva.
+    """
+    reserva = get_object_or_404(ReservaServicio, pk=reserva_id)
+    
+    # Verificar permisos
+    if request.user != reserva.usuario and request.user != reserva.empresa:
+        messages.error(request, 'No tienes permiso para ver esta reserva.')
+        return redirect('products:mis_reservas')
+    
+    try:
+        perfil = PerfilUsuario.objects.get(usuario=request.user)
+    except PerfilUsuario.DoesNotExist:
+        perfil = None
+    
+    es_cliente = request.user == reserva.usuario
+    es_empresa = request.user == reserva.empresa
+    
+    return render(request, 'productservice/detalle_reserva.html', {
+        'reserva': reserva,
+        'perfil': perfil,
+        'es_cliente': es_cliente,
+        'es_empresa': es_empresa
+    })
+
+
+@login_required(login_url='login')
+@require_http_methods(["POST"])
+def actualizar_estado_reserva(request, reserva_id):
+    """
+    Vista para actualizar el estado de una reserva.
+    Solo la empresa puede actualizar el estado.
+    """
+    reserva = get_object_or_404(ReservaServicio, pk=reserva_id)
+    
+    # Verificar que el usuario sea la empresa
+    if request.user != reserva.empresa:
+        return JsonResponse({'success': False, 'error': 'No tienes permiso para actualizar esta reserva.'}, status=403)
+    
+    nuevo_estado = request.POST.get('estado', '').strip()
+    
+    if not nuevo_estado:
+        return JsonResponse({'success': False, 'error': 'Estado no especificado.'}, status=400)
+    
+    try:
+        ReservaService.update_reserva_status(reserva, nuevo_estado)
+        return JsonResponse({
+            'success': True,
+            'estado': nuevo_estado,
+            'estado_display': reserva.get_estado_display()
+        })
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'Error al actualizar: {str(e)}'}, status=500)
+
+
+@login_required(login_url='login')
+@require_http_methods(["POST"])
+def cancelar_reserva(request, reserva_id):
+    """
+    Vista para cancelar una reserva.
+    Tanto el cliente como la empresa pueden cancelar.
+    """
+    reserva = get_object_or_404(ReservaServicio, pk=reserva_id)
+    
+    # Verificar permisos
+    if request.user != reserva.usuario and request.user != reserva.empresa:
+        return JsonResponse({'success': False, 'error': 'No tienes permiso para cancelar esta reserva.'}, status=403)
+    
+    motivo = request.POST.get('motivo', '').strip()
+    
+    try:
+        ReservaService.cancelar_reserva(reserva, motivo)
+        return JsonResponse({
+            'success': True,
+            'mensaje': 'Reserva cancelada exitosamente.'
+        })
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'Error al cancelar: {str(e)}'}, status=500)
