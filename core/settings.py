@@ -82,23 +82,40 @@ else:
 # CSRF_TRUSTED_ORIGINS: Orígenes confiables para CSRF
 # Django requiere que los orígenes estén en formato completo (con https://)
 # NOTA: Django NO acepta wildcards, necesita dominios exactos
+def normalize_csrf_origin(origin):
+    """Normaliza un origen CSRF para asegurar que tenga el formato correcto."""
+    origin = origin.strip()
+    # Remover barras finales
+    origin = origin.rstrip('/')
+    # Asegurar que tenga protocolo
+    if not origin.startswith('http://') and not origin.startswith('https://'):
+        # Si no tiene protocolo, agregar https://
+        origin = f'https://{origin}'
+    # Corregir errores comunes como https:/ (una sola barra)
+    origin = origin.replace('https:/', 'https://').replace('http:/', 'http://')
+    return origin
+
 if IS_STAGING or IS_PRODUCTION:
     CSRF_TRUSTED_ORIGINS = []
     
     # Agregar dominio de Railway si está disponible (desde variable automática)
     railway_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN', '')
     if railway_domain:
-        # Asegurarse de que tenga https://
-        if not railway_domain.startswith('http'):
-            CSRF_TRUSTED_ORIGINS.append(f'https://{railway_domain}')
-        else:
-            CSRF_TRUSTED_ORIGINS.append(railway_domain)
+        # Normalizar y agregar
+        normalized = normalize_csrf_origin(railway_domain)
+        if normalized not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(normalized)
     
     # Agregar dominio desde variable de entorno personalizada si existe
     # Formato: CSRF_TRUSTED_ORIGINS=https://dominio1.com,https://dominio2.com
     custom_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
     if custom_origins:
-        CSRF_TRUSTED_ORIGINS.extend([d.strip() for d in custom_origins.split(',') if d.strip()])
+        for origin in custom_origins.split(','):
+            origin = origin.strip()
+            if origin:
+                normalized = normalize_csrf_origin(origin)
+                if normalized not in CSRF_TRUSTED_ORIGINS:
+                    CSRF_TRUSTED_ORIGINS.append(normalized)
     
     # Agregar dominio de Railway específico como fallback (siempre incluirlo)
     # Esto asegura que el dominio de Railway funcione incluso si no está en las variables
@@ -106,14 +123,29 @@ if IS_STAGING or IS_PRODUCTION:
     if railway_fallback not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(railway_fallback)
     
+    # Agregar teomanager.com si no está ya incluido
+    teomanager_origins = [
+        'https://teomanager.com',
+        'https://www.teomanager.com',
+    ]
+    for origin in teomanager_origins:
+        if origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(origin)
+    
     # Si no hay dominios configurados, usar solo el dominio de Railway
     if not CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS = [railway_fallback]
+    
+    # Validación final: asegurar que todos los orígenes tengan el formato correcto
+    CSRF_TRUSTED_ORIGINS = [normalize_csrf_origin(origin) for origin in CSRF_TRUSTED_ORIGINS]
+    # Remover duplicados manteniendo el orden
+    CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
 else:
     # En desarrollo, permitir localhost
     CSRF_TRUSTED_ORIGINS = [
         'http://localhost:8000',
         'http://127.0.0.1:8000',
+        'http://localhost:5490',
     ]
 
 
