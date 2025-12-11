@@ -16,6 +16,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 import threading
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +35,20 @@ def send_password_reset_email_async(user, request=None):
     def _send_email():
         try:
             # Verificar configuración de email antes de continuar
-            if not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD:
-                logger.error(f"❌ Configuración de email incompleta. EMAIL_HOST_USER o EMAIL_HOST_PASSWORD no están configurados.")
-                return
+            # Si usamos Resend (API REST), no necesitamos EMAIL_HOST_USER/PASSWORD
+            is_resend_api = 'ResendBackend' in str(settings.EMAIL_BACKEND)
+            
+            if not is_resend_api:
+                # Para servicios SMTP tradicionales, verificar credenciales
+                if not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD:
+                    logger.error(f"❌ Configuración de email incompleta. EMAIL_HOST_USER o EMAIL_HOST_PASSWORD no están configurados.")
+                    return
+            else:
+                # Para Resend API, verificar que la API key esté configurada
+                resend_key = os.getenv('RESEND_API_KEY', '')
+                if not resend_key:
+                    logger.error(f"❌ RESEND_API_KEY no está configurado.")
+                    return
             
             if not user.email:
                 logger.error(f"❌ Usuario {user.username} no tiene email configurado.")
@@ -91,10 +103,15 @@ def send_password_reset_email_async(user, request=None):
             
             # Log de configuración para debugging
             logger.info(f"📧 Configuración de email:")
-            logger.info(f"   Host: {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
-            logger.info(f"   User: {settings.EMAIL_HOST_USER}")
+            logger.info(f"   Backend: {settings.EMAIL_BACKEND}")
             logger.info(f"   From: {settings.DEFAULT_FROM_EMAIL}")
             logger.info(f"   To: {user.email}")
+            if hasattr(settings, 'EMAIL_HOST') and settings.EMAIL_HOST:
+                logger.info(f"   Host: {settings.EMAIL_HOST}:{getattr(settings, 'EMAIL_PORT', 'N/A')}")
+                if hasattr(settings, 'EMAIL_HOST_USER') and settings.EMAIL_HOST_USER:
+                    logger.info(f"   User: {settings.EMAIL_HOST_USER}")
+            if is_resend_api:
+                logger.info(f"   Resend API: Configurado")
             
             # Enviar email con captura de errores detallada
             try:

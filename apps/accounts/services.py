@@ -146,9 +146,20 @@ class UserService:
             bool: True si el email se envió correctamente
         """
         # Verificar configuración de email antes de continuar
-        if not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD:
-            logger.error(f"❌ Configuración de email incompleta. EMAIL_HOST_USER o EMAIL_HOST_PASSWORD no están configurados.")
-            return False
+        # Si usamos Resend (API REST), no necesitamos EMAIL_HOST_USER/PASSWORD
+        is_resend_api = 'ResendBackend' in str(settings.EMAIL_BACKEND)
+        
+        if not is_resend_api:
+            # Para servicios SMTP tradicionales, verificar credenciales
+            if not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD:
+                logger.error(f"❌ Configuración de email incompleta. EMAIL_HOST_USER o EMAIL_HOST_PASSWORD no están configurados.")
+                return False
+        else:
+            # Para Resend API, verificar que la API key esté configurada
+            resend_key = os.getenv('RESEND_API_KEY', '')
+            if not resend_key:
+                logger.error(f"❌ RESEND_API_KEY no está configurado.")
+                return False
         
         if not user.email:
             logger.error(f"❌ Usuario {user.username} no tiene email configurado.")
@@ -216,8 +227,13 @@ El equipo de TEOmanager
             # Verificar configuración de email antes de enviar
             logger.info(f"📧 Intentando enviar email de bienvenida a {user.email}")
             logger.info(f"   From: {settings.DEFAULT_FROM_EMAIL}")
-            logger.info(f"   Host: {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
-            logger.info(f"   User: {settings.EMAIL_HOST_USER}")
+            logger.info(f"   Backend: {settings.EMAIL_BACKEND}")
+            if hasattr(settings, 'EMAIL_HOST') and settings.EMAIL_HOST:
+                logger.info(f"   Host: {settings.EMAIL_HOST}:{getattr(settings, 'EMAIL_PORT', 'N/A')}")
+                if hasattr(settings, 'EMAIL_HOST_USER') and settings.EMAIL_HOST_USER:
+                    logger.info(f"   User: {settings.EMAIL_HOST_USER}")
+            if is_resend_api:
+                logger.info(f"   Resend API: Configurado")
             
             # Enviar email con HTML y texto plano
             email = EmailMultiAlternatives(
