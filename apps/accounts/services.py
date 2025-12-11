@@ -106,18 +106,28 @@ class UserService:
         # Hacerlo en un thread separado para que NO bloquee ni afecte el registro
         try:
             import threading
+            import time
+            
             def send_email_async():
                 try:
-                    UserService.send_welcome_email(user)
+                    # Pequeña espera para asegurar que el registro se complete
+                    time.sleep(0.5)
+                    result = UserService.send_welcome_email(user)
+                    if result:
+                        logger.info(f"✅ Email de bienvenida enviado exitosamente a {user.email}")
+                    else:
+                        logger.warning(f"⚠️ Email de bienvenida no se pudo enviar a {user.email}")
                 except Exception as email_error:
                     # Si falla el email, solo loguear, NO afectar el registro
-                    logger.warning(f"Error enviando email de bienvenida a {user.email}: {email_error}")
+                    logger.error(f"❌ Error enviando email de bienvenida a {user.email}: {email_error}")
             
-            email_thread = threading.Thread(target=send_email_async, daemon=True)
+            # NO usar daemon=True para que el thread pueda completar el envío
+            email_thread = threading.Thread(target=send_email_async)
             email_thread.start()
+            logger.info(f"📧 Thread de email de bienvenida iniciado para {user.email}")
         except Exception as e:
             # Si ni siquiera se puede crear el thread, solo loguear
-            logger.warning(f"No se pudo iniciar thread para email: {e}")
+            logger.error(f"❌ No se pudo iniciar thread para email: {e}")
             # NO intentar enviar de forma síncrona para evitar timeouts
         
         # Retornar el perfil creado (el email es opcional y no afecta)

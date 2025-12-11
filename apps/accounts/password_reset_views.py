@@ -20,27 +20,34 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def send_password_reset_email_async(user, request):
+def send_password_reset_email_async(user, request=None):
     """
     Envía el correo de restablecimiento de contraseña de forma asíncrona.
     
     Args:
         user: Usuario al que enviar el correo
-        request: Request object para obtener el dominio
+        request: Request object (opcional, se usa get_site_base_url si no está disponible)
     """
+    import time
+    from apps.accounts.services import UserService
+    
     def _send_email():
         try:
-            # Obtener el dominio del sitio
-            current_site = get_current_site(request)
-            site_name = current_site.name
-            domain = current_site.domain
+            # Obtener el dominio del sitio usando el método helper
+            # Esto funciona incluso si el request no está disponible en el thread
+            base_url = UserService.get_site_base_url()
             
-            # Asegurar que el dominio tenga protocolo
-            if not domain.startswith('http'):
-                protocol = 'https' if (settings.IS_PRODUCTION or settings.IS_STAGING) else 'http'
-                base_url = f'{protocol}://{domain}'
-            else:
-                base_url = domain
+            # Extraer dominio sin protocolo para el template
+            domain = base_url.replace('https://', '').replace('http://', '').rstrip('/')
+            protocol = 'https' if base_url.startswith('https') else 'http'
+            
+            # Obtener nombre del sitio
+            try:
+                from django.contrib.sites.models import Site
+                current_site = Site.objects.get_current()
+                site_name = current_site.name
+            except:
+                site_name = 'TEOmanager'
             
             # Generar token y uid
             uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -55,7 +62,7 @@ def send_password_reset_email_async(user, request):
             message = render_to_string('registration/password_reset_email.html', {
                 'user': user,
                 'domain': domain,
-                'protocol': 'https' if (settings.IS_PRODUCTION or settings.IS_STAGING) else 'http',
+                'protocol': protocol,
                 'uid': uid,
                 'token': token,
                 'site_name': site_name,
@@ -67,26 +74,29 @@ def send_password_reset_email_async(user, request):
                 message=message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
-                fail_silently=True,
+                fail_silently=False,  # Cambiar a False para ver errores
             )
             
-            logger.info(f"Email de restablecimiento de contraseña enviado a {user.email}")
+            logger.info(f"✅ Email de restablecimiento de contraseña enviado a {user.email}")
             
         except Exception as e:
-            logger.error(f"Error enviando email de restablecimiento a {user.email}: {str(e)}")
+            logger.error(f"❌ Error enviando email de restablecimiento a {user.email}: {str(e)}", exc_info=True)
     
-    # Enviar en un thread separado
+    # Pequeña espera para asegurar que la respuesta se envíe primero
+    time.sleep(0.3)
+    
+    # Enviar en un thread separado (NO daemon para que complete el envío)
     try:
         thread = threading.Thread(target=_send_email)
-        thread.daemon = True
         thread.start()
+        logger.info(f"📧 Thread de email de restablecimiento iniciado para {user.email}")
     except Exception as e:
-        logger.error(f"Error creando thread para email de restablecimiento: {str(e)}")
+        logger.error(f"❌ Error creando thread para email de restablecimiento: {str(e)}")
         # Fallback: intentar enviar de forma síncrona
         try:
             _send_email()
         except Exception as sync_error:
-            logger.error(f"Error enviando email de forma síncrona: {str(sync_error)}")
+            logger.error(f"❌ Error enviando email de forma síncrona: {str(sync_error)}", exc_info=True)
 
 
 class AsyncPasswordResetForm(PasswordResetForm):
