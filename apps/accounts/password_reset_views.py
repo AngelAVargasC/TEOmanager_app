@@ -86,27 +86,37 @@ def send_password_reset_email_async(user, request=None):
             
             # Verificar si estamos usando Gmail en Railway (no funciona)
             if settings.EMAIL_HOST == 'smtp.gmail.com' and settings.IS_RAILWAY:
-                logger.error(f"❌ Gmail SMTP no funciona en Railway. Configura SENDGRID_API_KEY en Railway.")
-                logger.error(f"   Ve a: https://signup.sendgrid.com/ y crea una API Key")
-                logger.error(f"   Luego agrega SENDGRID_API_KEY en Railway Variables")
+                logger.error(f"❌ Gmail SMTP no funciona en Railway. Configura RESEND_API_KEY o SENDGRID_API_KEY en Railway.")
                 return  # No intentar enviar si sabemos que fallará
             
-            # Enviar email
+            # Log de configuración para debugging
+            logger.info(f"📧 Configuración de email:")
+            logger.info(f"   Host: {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+            logger.info(f"   User: {settings.EMAIL_HOST_USER}")
+            logger.info(f"   From: {settings.DEFAULT_FROM_EMAIL}")
+            logger.info(f"   To: {user.email}")
+            
+            # Enviar email con captura de errores detallada
             try:
                 result = send_mail(
                     subject=subject,
                     message=message,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email],
-                    fail_silently=True,  # Cambiar a True para que no falle la app
+                    fail_silently=False,  # Cambiar a False para ver el error real
                 )
                 if result:
-                    logger.info(f"✅ Email de restablecimiento enviado exitosamente a {user.email}")
+                    logger.info(f"✅ Email de restablecimiento enviado exitosamente a {user.email} (resultado: {result})")
                 else:
-                    logger.warning(f"⚠️ Email de restablecimiento no se pudo enviar a {user.email} (fail_silently=True)")
+                    logger.warning(f"⚠️ Email de restablecimiento retornó False para {user.email}")
             except Exception as send_error:
-                logger.error(f"❌ Error en send_mail para {user.email}: {str(send_error)}")
+                logger.error(f"❌ Error enviando email de restablecimiento a {user.email}")
                 logger.error(f"   Tipo: {type(send_error).__name__}")
+                logger.error(f"   Mensaje: {str(send_error)}")
+                logger.error(f"   Host: {settings.EMAIL_HOST}, User: {settings.EMAIL_HOST_USER}")
+                # Log del error completo para debugging
+                import traceback
+                logger.error(f"   Traceback: {traceback.format_exc()}")
                 # No re-lanzar para que no falle la aplicación
             
         except Exception as e:

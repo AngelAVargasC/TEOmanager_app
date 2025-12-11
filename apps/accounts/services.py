@@ -230,24 +230,34 @@ El equipo de TEOmanager
             
             # Verificar si estamos usando Gmail en Railway (no funciona)
             if settings.EMAIL_HOST == 'smtp.gmail.com' and settings.IS_RAILWAY:
-                logger.error(f"❌ Gmail SMTP no funciona en Railway. Configura SENDGRID_API_KEY en Railway.")
-                logger.error(f"   Ve a: https://signup.sendgrid.com/ y crea una API Key")
-                logger.error(f"   Luego agrega SENDGRID_API_KEY en Railway Variables")
+                logger.error(f"❌ Gmail SMTP no funciona en Railway. Configura RESEND_API_KEY o SENDGRID_API_KEY en Railway.")
                 return False  # No intentar enviar si sabemos que fallará
+            
+            # Log de configuración para debugging
+            logger.info(f"📧 Configuración de email:")
+            logger.info(f"   Host: {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+            logger.info(f"   User: {settings.EMAIL_HOST_USER}")
+            logger.info(f"   From: {settings.DEFAULT_FROM_EMAIL}")
+            logger.info(f"   To: {user.email}")
             
             # Enviar email con manejo de errores detallado
             try:
-                result = email.send(fail_silently=True)  # Cambiar a True para que no falle la app
+                result = email.send(fail_silently=False)  # Cambiar a False para ver el error real
                 if result:
-                    logger.info(f"✅ Email de bienvenida enviado exitosamente a {user.email}")
+                    logger.info(f"✅ Email de bienvenida enviado exitosamente a {user.email} (resultado: {result})")
                     return True
                 else:
-                    logger.warning(f"⚠️ Email de bienvenida no se pudo enviar a {user.email} (fail_silently=True)")
+                    logger.warning(f"⚠️ Email de bienvenida retornó False para {user.email}")
                     return False
             except Exception as email_error:
                 # Log detallado del error
-                logger.error(f"❌ Error enviando email de bienvenida a {user.email}: {str(email_error)}")
-                logger.error(f"   Tipo de error: {type(email_error).__name__}")
+                logger.error(f"❌ Error enviando email de bienvenida a {user.email}")
+                logger.error(f"   Tipo: {type(email_error).__name__}")
+                logger.error(f"   Mensaje: {str(email_error)}")
+                logger.error(f"   Host: {settings.EMAIL_HOST}, User: {settings.EMAIL_HOST_USER}")
+                # Log del error completo para debugging
+                import traceback
+                logger.error(f"   Traceback: {traceback.format_exc()}")
                 return False
             
         except Exception as e:

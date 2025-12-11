@@ -366,8 +366,16 @@ if USE_RESEND:
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = 'resend'  # Resend siempre usa 'resend' como usuario
     EMAIL_HOST_PASSWORD = RESEND_API_KEY  # La API key de Resend
-    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TEOmanager <noreply@teomanager.com>')
+    # Resend requiere usar onboarding@resend.dev si no hay dominio verificado
+    # O el email del dominio verificado si está configurado
+    default_from = os.getenv('DEFAULT_FROM_EMAIL', '')
+    if not default_from or '@teomanager.com' not in default_from:
+        # Si no está configurado o no es del dominio verificado, usar el de Resend
+        DEFAULT_FROM_EMAIL = 'TEOmanager <onboarding@resend.dev>'
+    else:
+        DEFAULT_FROM_EMAIL = default_from
     print("✅ Configurado Resend para envío de emails")
+    print(f"   From Email: {DEFAULT_FROM_EMAIL}")
 elif USE_SENDGRID:
     # Usar SendGrid (recomendado para Railway/producción)
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
