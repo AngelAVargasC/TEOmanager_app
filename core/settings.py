@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+try:
+    import dj_database_url 
+except ImportError:
+    dj_database_url = None
 
 # Cargar variables de entorno desde .env
 load_dotenv()
@@ -98,15 +102,35 @@ def normalize_csrf_origin(origin):
 if IS_STAGING or IS_PRODUCTION:
     CSRF_TRUSTED_ORIGINS = []
     
-    # Agregar dominio de Railway si está disponible (desde variable automática)
+    # Dominios que SIEMPRE deben estar incluidos
+    required_origins = [
+        'https://web-production-8666.up.railway.app',  # Dominio de Railway por defecto
+        'https://teomanager.com',  # Dominio personalizado
+        'https://www.teomanager.com',  # Variante www
+    ]
+    
+    # Agregar dominios requeridos primero
+    for origin in required_origins:
+        normalized = normalize_csrf_origin(origin)
+        if normalized not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(normalized)
+    
+    # Agregar dominio de Railway desde variable automática si está disponible
     railway_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN', '')
     if railway_domain:
-        # Normalizar y agregar
         normalized = normalize_csrf_origin(railway_domain)
         if normalized not in CSRF_TRUSTED_ORIGINS:
             CSRF_TRUSTED_ORIGINS.append(normalized)
     
-    # Agregar dominio desde variable de entorno personalizada si existe
+    # Agregar dominio de Railway desde RAILWAY_DOMAIN si está disponible
+    railway_specific = os.getenv('RAILWAY_DOMAIN', '')
+    if railway_specific:
+        # Construir URL completa
+        railway_url = normalize_csrf_origin(f'https://{railway_specific}')
+        if railway_url not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(railway_url)
+    
+    # Agregar dominios desde variable de entorno personalizada si existe
     # Formato: CSRF_TRUSTED_ORIGINS=https://dominio1.com,https://dominio2.com
     custom_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
     if custom_origins:
@@ -117,29 +141,14 @@ if IS_STAGING or IS_PRODUCTION:
                 if normalized not in CSRF_TRUSTED_ORIGINS:
                     CSRF_TRUSTED_ORIGINS.append(normalized)
     
-    # Agregar dominio de Railway específico como fallback (siempre incluirlo)
-    # Esto asegura que el dominio de Railway funcione incluso si no está en las variables
-    railway_fallback = 'https://web-production-8666.up.railway.app'
-    if railway_fallback not in CSRF_TRUSTED_ORIGINS:
-        CSRF_TRUSTED_ORIGINS.append(railway_fallback)
-    
-    # Agregar teomanager.com si no está ya incluido
-    teomanager_origins = [
-        'https://teomanager.com',
-        'https://www.teomanager.com',
-    ]
-    for origin in teomanager_origins:
-        if origin not in CSRF_TRUSTED_ORIGINS:
-            CSRF_TRUSTED_ORIGINS.append(origin)
-    
-    # Si no hay dominios configurados, usar solo el dominio de Railway
-    if not CSRF_TRUSTED_ORIGINS:
-        CSRF_TRUSTED_ORIGINS = [railway_fallback]
-    
     # Validación final: asegurar que todos los orígenes tengan el formato correcto
     CSRF_TRUSTED_ORIGINS = [normalize_csrf_origin(origin) for origin in CSRF_TRUSTED_ORIGINS]
     # Remover duplicados manteniendo el orden
     CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
+    
+    # Debug: imprimir orígenes configurados (solo en staging para debugging)
+    if IS_STAGING:
+        print(f"🔒 CSRF_TRUSTED_ORIGINS configurados: {CSRF_TRUSTED_ORIGINS}")
 else:
     # En desarrollo, permitir localhost
     CSRF_TRUSTED_ORIGINS = [
@@ -225,7 +234,8 @@ else:
     
     if DATABASE_URL:
         # Railway proporciona DATABASE_URL automáticamente cuando conectas PostgreSQL
-        import dj_database_url
+        if dj_database_url is None:
+            raise ImportError("dj-database-url no está instalado. Ejecuta: pip install dj-database-url")
         DATABASES = {
             'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
         }
